@@ -80,7 +80,7 @@ export default function ExpertSearchSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Enhanced Header */}
         <div className="text-center mb-10">
-          <h2 className={`${typography.h1.base} text-gray-800 font-bold`}>
+          <h2 className={`${typography.h1.base} text-gray-800`}>
             SEARCH BY <span className="text-[#7394c7]">{activeTab.toUpperCase()}</span>
           </h2>
           

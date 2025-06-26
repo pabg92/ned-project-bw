@@ -39,7 +39,7 @@ export default function FeaturedExpertsSection() {
             <p className={`${typography.label.large} mb-3 relative z-10 text-white/80 uppercase tracking-wide`}>
               Get a <span className="font-bold">FREE</span> consultation now
             </p>
-            <h2 className={`${typography.h2.base} mb-4 relative z-10 font-bold`}>
+            <h2 className={`${typography.h2.base} mb-4 relative z-10`}>
               The Board of Champions is the only place you ever need look for your next EXPERT appointment.
             </h2>
 
@@ -75,7 +75,7 @@ export default function FeaturedExpertsSection() {
         <div className="bg-gradient-to-br from-[#9595d5] to-[#8585c5] text-white p-8 md:p-10 relative overflow-hidden md:col-span-3">
           {/* Decorative elements */}
           <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          <h2 className={`${typography.h2.base} mb-6 text-center relative z-10 font-bold`}>THIS MONTH'S FEATURED EXPERTS</h2>
+          <h2 className={`${typography.h2.base} mb-6 text-center relative z-10`}>THIS MONTH'S FEATURED EXPERTS</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8 relative z-10">
             {featuredExperts.map((expert) => (

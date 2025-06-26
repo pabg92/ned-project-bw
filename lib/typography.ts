@@ -4,14 +4,14 @@
 export const typography = {
   // Main headings (H1) - Used for hero sections and main page titles
   h1: {
-    base: "font-aktiv-grotesk font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight",
-    compact: "font-aktiv-grotesk font-bold text-2xl sm:text-3xl md:text-4xl leading-tight"
+    base: "font-bebas-neue font-normal text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight tracking-wide",
+    compact: "font-bebas-neue font-normal text-3xl sm:text-4xl md:text-5xl leading-tight tracking-wide"
   },
   
   // Section headings (H2) - Used for major section titles
   h2: {
-    base: "font-aktiv-grotesk font-bold text-2xl sm:text-3xl md:text-4xl leading-tight",
-    compact: "font-aktiv-grotesk font-bold text-xl sm:text-2xl md:text-3xl leading-tight"
+    base: "font-bebas-neue font-normal text-3xl sm:text-4xl md:text-5xl leading-tight tracking-wide",
+    compact: "font-bebas-neue font-normal text-2xl sm:text-3xl md:text-4xl leading-tight tracking-wide"
   },
   
   // Subsection headings (H3) - Used for card titles, smaller sections

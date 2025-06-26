@@ -71,7 +71,7 @@ export default function IntegratedCTAProcessSection() {
         {/* Process Section */}
         <div className="text-center mb-12">
           <h3 className={`${typography.h2.base} text-gray-700`}>
-            <span className="font-bold">The Process</span> of finding the best expert for your needs:
+            <span>The Process</span> of finding the best expert for your needs:
           </h3>
         </div>
 
