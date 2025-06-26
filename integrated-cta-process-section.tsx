@@ -44,13 +44,13 @@ export default function IntegratedCTAProcessSection() {
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-          <Button className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-3 min-w-[260px] sm:min-w-[280px] group")}>
-            I need an <span className="font-bold">expert</span>
+          <Button className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 min-w-[260px] sm:min-w-[280px] group")}>
+            <span>I need an <span className="font-bold">expert</span></span>
             <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
 
-          <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "flex items-center gap-3 min-w-[260px] sm:min-w-[280px] group")}>
-            I'm <span className="font-bold">available</span> to hire
+          <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "flex items-center justify-center gap-2 min-w-[260px] sm:min-w-[280px] group")}>
+            <span>I'm <span className="font-bold">available</span> to <span className="font-bold">hire</span></span>
             <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
         </div>
