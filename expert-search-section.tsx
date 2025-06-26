@@ -48,7 +48,7 @@ const roles = [
   "Trustee"
 ]
 
-type TabType = "specialism" | "sector" | "organisation" | "role"
+type TabType = "specialism" | "sector" | "organisation type" | "role"
 
 export default function ExpertSearchSection() {
   const [activeTab, setActiveTab] = useState<TabType>("specialism")
@@ -61,7 +61,7 @@ export default function ExpertSearchSection() {
           return specialisms
         case "sector":
           return sectors
-        case "organisation":
+        case "organisation type":
           return organisationTypes
         case "role":
           return roles
@@ -75,33 +75,37 @@ export default function ExpertSearchSection() {
   }
 
   return (
-    <section className="py-10 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#7394c7] rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#9090cc] rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
-      </div>
+    <section className="pt-0 pb-16 bg-white relative overflow-hidden">
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Compact Header */}
-        <div className="text-center mb-8">
-          <h2 className={`${typography.h2.base} text-gray-800`}>
-            SEARCH BY <span className="text-[#7394c7]">SPECIALISM</span>
+        {/* CTA Section */}
+        <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 mt-14 mb-14 text-center shadow-xl">
+          <h3 className={`${typography.h3.base} mb-2`}>Get a FREE consultation now</h3>
+          <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
+            I'M IN!
+            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+          </Button>
+        </div>
+        
+        {/* Enhanced Header */}
+        <div className="text-center mb-10">
+          <h2 className={`${typography.h1.base} text-gray-800 font-bold`}>
+            SEARCH BY <span className="text-[#7394c7]">{activeTab.toUpperCase()}</span>
           </h2>
           
           {/* Dotted line decoration */}
-          <div className="flex justify-center mt-4">
-            <div className="w-full max-w-md border-b-2 border-dotted border-gray-400 opacity-50"></div>
+          <div className="flex justify-center mt-6">
+            <div className="w-full max-w-lg border-b-3 border-dotted border-[#7394c7] opacity-40"></div>
           </div>
         </div>
 
-        {/* Compact Tab Navigation */}
-        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
+        {/* Enhanced Tab Navigation */}
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-8 relative">
           <button
             onClick={() => setActiveTab("specialism")}
-            className={`relative px-4 py-2 ${typography.button.base} transition-all duration-300 rounded-full ${
+            className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
               activeTab === "specialism"
-                ? "bg-[#7394c7] text-white shadow-md"
+                ? "bg-[#7394c7] text-white shadow-lg scale-105"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
             }`}
           >
@@ -109,19 +113,19 @@ export default function ExpertSearchSection() {
           </button>
           <button
             onClick={() => setActiveTab("sector")}
-            className={`relative px-4 py-2 ${typography.button.base} transition-all duration-300 rounded-full ${
+            className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
               activeTab === "sector"
-                ? "bg-[#7394c7] text-white shadow-md"
+                ? "bg-[#7394c7] text-white shadow-lg scale-105"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
             }`}
           >
             BY SECTOR
           </button>
           <button
-            onClick={() => setActiveTab("organisation")}
-            className={`relative px-4 py-2 ${typography.button.base} transition-all duration-300 rounded-full ${
-              activeTab === "organisation"
-                ? "bg-[#7394c7] text-white shadow-md"
+            onClick={() => setActiveTab("organisation type")}
+            className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
+              activeTab === "organisation type"
+                ? "bg-[#7394c7] text-white shadow-lg scale-105"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
             }`}
           >
@@ -129,9 +133,9 @@ export default function ExpertSearchSection() {
           </button>
           <button
             onClick={() => setActiveTab("role")}
-            className={`relative px-4 py-2 ${typography.button.base} transition-all duration-300 rounded-full ${
+            className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
               activeTab === "role"
-                ? "bg-[#7394c7] text-white shadow-md"
+                ? "bg-[#7394c7] text-white shadow-lg scale-105"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
             }`}
           >
@@ -139,22 +143,22 @@ export default function ExpertSearchSection() {
           </button>
         </div>
 
-        {/* Compact Filter Pills */}
-        <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto mb-6">
+        {/* Enhanced Filter Pills Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto mb-8 px-4">
           {getActiveContent().map((item, index) => (
             <Button
               key={index}
-              className={cn("bg-gradient-to-r from-[#9090cc] to-[#a0a0dc] hover:from-[#8080bb] hover:to-[#9090cc] text-white", buttonStyles.size.base, typography.button.base, "rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-1.5 group")}
+              className={cn("bg-gradient-to-r from-[#8595d5] to-[#9595e5] hover:from-[#7585c5] hover:to-[#8585d5] text-white", buttonStyles.size.base, typography.button.base, "rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group min-w-0 px-4 py-2.5")}
             >
-              {item}
-              <ChevronRight className="h-3 w-3 group-hover:translate-x-1 transition-transform duration-300" />
+              <span className="truncate">{item}</span>
+              <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
             </Button>
           ))}
         </div>
         
         {/* View All Filters Button */}
         {((activeTab === "sector" && sectors.length > 6) || 
-          (activeTab === "organisation" && organisationTypes.length > 6)) && (
+          (activeTab === "organisation type" && organisationTypes.length > 6)) && (
           <div className="text-center">
             <button
               onClick={() => setShowAllFilters(!showAllFilters)}

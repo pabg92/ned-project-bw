@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { typography, buttonStyles, cn } from "@/lib/typography"
 
@@ -40,7 +40,7 @@ const processSteps = [
 
 export default function IntegratedCTAProcessSection() {
   return (
-    <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+    <section className="pt-16 pb-12 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
@@ -76,41 +76,43 @@ export default function IntegratedCTAProcessSection() {
         </div>
 
         {/* Process Steps */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-16">
-          {processSteps.map((step) => (
-            <div key={step.id} className="flex flex-col">
-              {/* Card */}
-              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group relative">
-                {/* Step Number */}
-                <div className="absolute top-2 right-2 w-5 h-5 bg-[#7394c7] text-white rounded-full flex items-center justify-center font-bold text-[10px] shadow-sm z-10">
-                  {step.id}
-                </div>
-                {/* Header */}
-                <div className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white px-4 py-4 group-hover:from-[#5a5a5a] group-hover:to-[#6a6a6a] transition-all duration-300">
-                  <h4 className={`${typography.label.base} text-center text-white`}>{step.title}</h4>
-                </div>
+        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mb-16 max-w-7xl mx-auto px-4">
+          {processSteps.map((step, index) => (
+            <>
+              <div key={step.id} className="flex flex-col h-full">
+                {/* Card */}
+                <div className="bg-gradient-to-br from-white to-gray-50/50 border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative w-36 sm:w-40 lg:w-44 h-full">
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white px-2 py-2.5 group-hover:from-[#5a5a5a] group-hover:to-[#6a6a6a] transition-all duration-300 min-h-[48px] flex items-center justify-center">
+                    <h4 className={`text-[11px] font-semibold tracking-tight text-center text-white leading-tight`}>{step.title}</h4>
+                  </div>
 
-                {/* Icon Section */}
-                <div className="p-8 flex items-center justify-center min-h-[140px]">
-                  <div className="w-20 h-20 flex items-center justify-center bg-gray-50 rounded-full group-hover:bg-[#7394c7]/10 transition-all duration-300">
-                    <Image
-                      src={step.icon || "/placeholder.svg"}
-                      alt={step.iconAlt}
-                      width={60}
-                      height={60}
-                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                    />
+                  {/* Icon Section */}
+                  <div className="p-4 flex items-center justify-center">
+                    <div className="w-14 h-14 flex items-center justify-center bg-[#7394c7]/5 rounded-full group-hover:bg-[#7394c7]/20 transition-all duration-300 ring-1 ring-[#7394c7]/10 group-hover:ring-[#7394c7]/30">
+                      <Image
+                        src={step.icon || "/placeholder.svg"}
+                        alt={step.iconAlt}
+                        width={35}
+                        height={35}
+                        className="object-contain group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+              {/* Arrow between cards */}
+              {index < processSteps.length - 1 && (
+                <ArrowRight className="h-6 w-6 text-[#7394c7] animate-pulse hidden lg:block" />
+              )}
+            </>
           ))}
         </div>
 
         {/* No Fees Statement */}
         <div className="text-center">
           <p className={`${typography.h2.base} text-gray-800 bg-gradient-to-r from-gray-100 to-gray-50 py-6 px-8 rounded-2xl inline-block shadow-inner`}>
-            <span className="text-[#7394c7]">NO FEES</span> <span className="text-gray-600 font-medium">until you hire your expert.</span>
+            <span className="text-[#7394c7] font-bold tracking-wider">NO FEES</span> <span className="text-gray-600 font-medium">until you hire your expert.</span>
           </p>
         </div>
       </div>
