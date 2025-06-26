@@ -110,10 +110,21 @@ export default function IntegratedCTAProcessSection() {
         </div>
 
         {/* No Fees Statement */}
-        <div className="text-center">
+        <div className="text-center mb-16">
           <p className={`${typography.h2.base} text-gray-800 bg-gradient-to-r from-gray-100 to-gray-50 py-6 px-8 rounded-2xl inline-block shadow-inner`}>
             <span className="text-[#7394c7] font-bold tracking-wider">NO FEES</span> <span className="text-gray-600 font-medium">until you hire your expert.</span>
           </p>
+        </div>
+
+        {/* CTA Section - Moved from expert search */}
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 text-center shadow-xl">
+            <h3 className={`${typography.h3.base} mb-2`}>Get a FREE consultation now</h3>
+            <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
+              I'M IN!
+              <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </Button>
+          </div>
         </div>
       </div>
     </section>

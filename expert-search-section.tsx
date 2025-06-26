@@ -75,18 +75,9 @@ export default function ExpertSearchSection() {
   }
 
   return (
-    <section className="pt-0 pb-16 bg-white relative overflow-hidden">
+    <section className="pt-16 pb-16 bg-white relative overflow-hidden">
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* CTA Section */}
-        <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 mt-10 mb-16 text-center shadow-xl">
-          <h3 className={`${typography.h3.base} mb-2`}>Get a FREE consultation now</h3>
-          <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
-            I'M IN!
-            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-          </Button>
-        </div>
-        
         {/* Enhanced Header */}
         <div className="text-center mb-10">
           <h2 className={`${typography.h1.base} text-gray-800 font-bold`}>
