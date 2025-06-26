@@ -9,37 +9,37 @@ const awards = [
   {
     id: 1,
     name: "1000 Companies to Inspire Britain",
-    image: "/board-champions-assets/Champions%20Awards/1000-companies.webp",
+    image: "/board-champions-assets/champions-awards/1000-companies.webp",
     alt: "1000 Companies to Inspire Britain Award",
   },
   {
     id: 2,
     name: "Accelerate",
-    image: "/board-champions-assets/Champions%20Awards/Accelerate%20.png",
+    image: "/board-champions-assets/champions-awards/accelerate.png",
     alt: "Accelerate Award",
   },
   {
     id: 3,
     name: "Breakthrough 50 Awards",
-    image: "/board-champions-assets/Champions%20Awards/breakthrough-50-awards.webp",
+    image: "/board-champions-assets/champions-awards/breakthrough-50-awards.webp",
     alt: "Breakthrough 50 Awards",
   },
   {
     id: 4,
     name: "Fast Track",
-    image: "/board-champions-assets/Champions%20Awards/fast-track.webp",
+    image: "/board-champions-assets/champions-awards/fast-track.webp",
     alt: "Fast Track Award",
   },
   {
     id: 5,
     name: "Telegraph 1000 Brightest Businesses",
-    image: "/board-champions-assets/Champions%20Awards/telegraph-1000-brightest-businesses.webp",
+    image: "/board-champions-assets/champions-awards/telegraph-1000-brightest-businesses.webp",
     alt: "Telegraph 1000 Brightest Businesses Award",
   },
   {
     id: 6,
     name: "UK Fast Growth Index",
-    image: "/board-champions-assets/Champions%20Awards/uk_fast_growth_index_supported_by_ubs.webp",
+    image: "/board-champions-assets/champions-awards/uk_fast_growth_index_supported_by_ubs.webp",
     alt: "UK Fast Growth Index Supported by UBS",
   },
 ]
