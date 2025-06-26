@@ -16,34 +16,6 @@ const testimonials = [
     company: "Coca Cola",
     highlight: "THE RESPONSIVENESS ON VERY SHORT NOTICE WAS INCREDIBLE.",
   },
-  {
-    id: 2,
-    image: "/placeholder.svg?height=400&width=600",
-    text: "Voluptate iusto quidem rerum sit dolorem. Quia non sequi est voluptatem quia. Quibusdam neque aperiam dolor. Molestiae aut occaecati dolorem sed et enim qui incidunt. Qui autem et est perferendis.\n\nEt aut aut qui est et. Nihil quis consequatur quis ea. Quam quisquam qui beatae ut qui consequatur qui. Consequatur et eum enim beatae.",
-    logo: "/placeholder.svg?height=60&width=200",
-    logoAlt: "Microsoft",
-  },
-  {
-    id: 3,
-    image: "/placeholder.svg?height=400&width=600",
-    text: "Eum et est aperiam et dolor repellendus. Tempore aut iure vel. Laborum et voluptatem ut sit est dolor. Dolorem asperiores ut occaecati.\n\nEt aut aut qui est et. Nihil quis consequatur quis ea. Quam quisquam qui beatae ut qui consequatur qui. Consequatur et eum enim beatae.",
-    logo: "/placeholder.svg?height=60&width=200",
-    logoAlt: "Amazon",
-  },
-  {
-    id: 4,
-    image: "/placeholder.svg?height=400&width=600",
-    text: "Voluptatem quia provident tempora. Voluptatibus molestiae qui sit. Recusandae est aut aut. Libero ut accusantium voluptatem aliquid.\n\nEt aut aut qui est et. Nihil quis consequatur quis ea. Quam quisquam qui beatae ut qui consequatur qui. Consequatur et eum enim beatae.",
-    logo: "/placeholder.svg?height=60&width=200",
-    logoAlt: "Google",
-  },
-  {
-    id: 5,
-    image: "/placeholder.svg?height=400&width=600",
-    text: "Aut et voluptatem ut sit est dolor. Dolorem asperiores ut occaecati. Eum et est aperiam et dolor repellendus. Tempore aut iure vel. Laborum et voluptatem.\n\nEt aut aut qui est et. Nihil quis consequatur quis ea. Quam quisquam qui beatae ut qui consequatur qui. Consequatur et eum enim beatae.",
-    logo: "/placeholder.svg?height=60&width=200",
-    logoAlt: "Apple",
-  },
 ]
 
 export default function TestimonialCarousel() {
@@ -92,48 +64,55 @@ export default function TestimonialCarousel() {
             >
               {testimonials.map((testimonial) => (
                 <div key={testimonial.id} className="w-full flex-shrink-0">
-                  <div className={`grid grid-cols-1 md:grid-cols-2 ${spacing.grid.base} max-w-5xl mx-auto`}>
-                    {/* Image */}
-                    <div className="rounded-xl overflow-hidden shadow-2xl">
+                  <div className={`grid grid-cols-1 md:grid-cols-2 ${spacing.grid.base} max-w-6xl mx-auto items-center`}>
+                    {/* Image on Left */}
+                    <div className="rounded-xl overflow-hidden shadow-2xl order-1">
                       <Image
                         src={testimonial.image || "/placeholder.svg"}
                         alt="Client testimonial"
                         width={600}
                         height={400}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover"
                       />
                     </div>
 
-                    {/* Testimonial Content */}
-                    <div className="bg-white text-gray-800 p-6 md:p-8 rounded-xl flex flex-col shadow-2xl hover:shadow-3xl transition-shadow duration-300">
+                    {/* Testimonial Content on Right */}
+                    <div className="bg-white text-gray-800 p-8 md:p-10 rounded-xl flex flex-col shadow-2xl order-2">
                       <div className="flex-grow">
+                        {/* Logo at top */}
+                        <div className="mb-8">
+                          <Image
+                            src={testimonial.logo || "/placeholder.svg"}
+                            alt={testimonial.logoAlt}
+                            width={180}
+                            height={60}
+                            className="h-14 w-auto object-contain"
+                          />
+                        </div>
+                        
+                        {/* Highlight */}
                         {testimonial.highlight && (
-                          <h3 className={`${typography.h3.base} mb-4 text-gray-800`}>
+                          <h3 className={`${typography.h3.base} mb-6 text-gray-800 font-bold`}>
                             {testimonial.highlight}
                           </h3>
                         )}
-                        <p className={`${typography.body.base} mb-6 text-gray-700`}>
+                        
+                        {/* Quote */}
+                        <p className={`${typography.body.large} mb-8 text-gray-700 italic`}>
                           "{testimonial.text}"
                         </p>
+                        
+                        {/* Author */}
                         {testimonial.author && (
-                          <div className="mb-6">
-                            <p className={`${typography.body.base} font-semibold text-gray-800`}>
+                          <div>
+                            <p className={`${typography.body.base} font-bold text-gray-800`}>
                               {testimonial.author}
                             </p>
-                            <p className={`${typography.body.small} text-gray-600`}>
+                            <p className={`${typography.body.base} text-gray-600`}>
                               {testimonial.company}
                             </p>
                           </div>
                         )}
-                      </div>
-                      <div className="mt-auto">
-                        <Image
-                          src={testimonial.logo || "/placeholder.svg"}
-                          alt={testimonial.logoAlt}
-                          width={200}
-                          height={60}
-                          className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
-                        />
                       </div>
                     </div>
                   </div>
