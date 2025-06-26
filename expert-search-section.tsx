@@ -79,7 +79,7 @@ export default function ExpertSearchSection() {
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 mt-14 mb-14 text-center shadow-xl">
+        <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 mt-10 mb-16 text-center shadow-xl">
           <h3 className={`${typography.h3.base} mb-2`}>Get a FREE consultation now</h3>
           <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
             I'M IN!
