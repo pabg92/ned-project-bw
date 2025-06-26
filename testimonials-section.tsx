@@ -5,92 +5,52 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import { typography, spacing } from "@/lib/typography"
 
-const awardSlides = [
-  [
-    {
-      id: 1,
-      name: "London Stock Exchange 1000",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "1000 Companies to Inspire Britain",
-    },
-    {
-      id: 2,
-      name: "Sunday Times Tech Track 100",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "The Sunday Times Tech Track 100",
-    },
-    {
-      id: 3,
-      name: "Google Partner",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "Google Partner",
-    },
-    {
-      id: 4,
-      name: "Accelerate 250",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "Accelerate 250",
-    },
-    {
-      id: 5,
-      name: "Award Badge",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "Award Badge",
-    },
-  ],
-  [
-    {
-      id: 6,
-      name: "Certification 1",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "Business Certification",
-    },
-    {
-      id: 7,
-      name: "Certification 2",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "Professional Accreditation",
-    },
-    {
-      id: 8,
-      name: "Industry Award",
-      image: "/placeholder.svg?height=120&width=200",
-      alt: "Industry Excellence Award",
-    },
-  ],
-]
-
-const statistics = [
+const awards = [
   {
     id: 1,
-    iconPath: "/board-champions-assets/2000 Experts.svg",
-    number: "OVER 2,000",
-    text: "EXPERTS APPOINTED",
-    color: "text-[#7394c7]",
+    name: "1000 Companies to Inspire Britain",
+    image: "/board-champions-assets/Champions%20Awards/1000-companies.webp",
+    alt: "1000 Companies to Inspire Britain Award",
   },
   {
     id: 2,
-    iconPath: "/board-champions-assets/70Awards.svg",
-    number: "RECEIVED OVER",
-    subNumber: "70 AWARDS",
-    text: "",
-    color: "text-[#7394c7]",
+    name: "Accelerate",
+    image: "/board-champions-assets/Champions%20Awards/Accelerate%20.png",
+    alt: "Accelerate Award",
   },
   {
     id: 3,
-    iconPath: "/board-champions-assets/23Years.svg",
-    number: "23 YEARS",
-    text: "OF EXPERIENCE",
-    color: "text-[#7394c7]",
+    name: "Breakthrough 50 Awards",
+    image: "/board-champions-assets/Champions%20Awards/breakthrough-50-awards.webp",
+    alt: "Breakthrough 50 Awards",
   },
   {
     id: 4,
-    iconPath: "/board-champions-assets/80Team.svg",
-    number: "80+ STRONG TEAM",
-    text: "OF EXPERTS",
-    color: "text-[#7394c7]",
+    name: "Fast Track",
+    image: "/board-champions-assets/Champions%20Awards/fast-track.webp",
+    alt: "Fast Track Award",
+  },
+  {
+    id: 5,
+    name: "Telegraph 1000 Brightest Businesses",
+    image: "/board-champions-assets/Champions%20Awards/telegraph-1000-brightest-businesses.webp",
+    alt: "Telegraph 1000 Brightest Businesses Award",
+  },
+  {
+    id: 6,
+    name: "UK Fast Growth Index",
+    image: "/board-champions-assets/Champions%20Awards/uk_fast_growth_index_supported_by_ubs.webp",
+    alt: "UK Fast Growth Index Supported by UBS",
   },
 ]
+
+// Create slides dynamically based on awards per slide
+const awardsPerSlide = 3
+const awardSlides = []
+for (let i = 0; i < awards.length; i += awardsPerSlide) {
+  awardSlides.push(awards.slice(i, i + awardsPerSlide))
+}
+
 
 export default function TestimonialsSection() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -143,16 +103,20 @@ export default function TestimonialsSection() {
               >
                 {awardSlides.map((slide, slideIndex) => (
                   <div key={slideIndex} className="w-full flex-shrink-0">
-                    <div className={`flex justify-center items-center ${spacing.grid.carousel} px-8`}>
+                    <div className="flex justify-center items-center gap-6 md:gap-10 lg:gap-12 px-4">
                       {slide.map((award) => (
-                        <div key={award.id} className="flex-shrink-0">
-                          <Image
-                            src={award.image || "/placeholder.svg"}
-                            alt={award.alt}
-                            width={180}
-                            height={120}
-                            className="h-28 md:h-32 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
-                          />
+                        <div key={award.id} className="flex flex-col items-center">
+                          <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                            <Image
+                              src={award.image}
+                              alt={award.alt}
+                              width={240}
+                              height={160}
+                              className="h-20 md:h-24 lg:h-28 w-auto object-contain mx-auto"
+                              priority={slideIndex === 0}
+                            />
+                          </div>
+                          <p className="mt-3 text-sm text-gray-600 text-center max-w-[200px]">{award.name}</p>
                         </div>
                       ))}
                     </div>
@@ -191,32 +155,6 @@ export default function TestimonialsSection() {
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
-          </div>
-        </div>
-
-        {/* Statistics Section */}
-        <div className="bg-white rounded-2xl shadow-lg py-12 px-6 mt-16">
-          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 ${spacing.grid.base} max-w-6xl mx-auto`}>
-            {statistics.map((stat) => {
-              return (
-                <div key={stat.id} className="text-center group hover:scale-105 transition-transform duration-300">
-                  <div className="flex justify-center mb-4">
-                    <Image
-                      src={stat.iconPath}
-                      alt={stat.text || stat.number}
-                      width={60}
-                      height={60}
-                      className="object-contain"
-                    />
-                  </div>
-                  <div className={`font-akrive-grotesk font-bold text-xl md:text-2xl mb-2 ${stat.color}`}>
-                    {stat.number}
-                    {stat.subNumber && <div className="text-lg md:text-xl mt-1">{stat.subNumber}</div>}
-                  </div>
-                  {stat.text && <div className="font-medium text-sm md:text-base text-gray-700">{stat.text}</div>}
-                </div>
-              )
-            })}
           </div>
         </div>
       </div>
