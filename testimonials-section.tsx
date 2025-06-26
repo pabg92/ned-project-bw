@@ -85,7 +85,7 @@ export default function TestimonialsSection() {
   }
 
   return (
-    <section className={`${spacing.section.base} bg-gradient-to-b from-white to-gray-50`}>
+    <section className="py-12 bg-gradient-to-b from-white to-gray-50">
       <div className={spacing.container}>
         {/* Awards Section */}
         <div className="text-center mb-16">
