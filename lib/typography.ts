@@ -4,20 +4,20 @@
 export const typography = {
   // Main headings (H1) - Used for hero sections and main page titles
   h1: {
-    base: "font-akrive-grotesk font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight",
-    compact: "font-akrive-grotesk font-bold text-2xl sm:text-3xl md:text-4xl leading-tight"
+    base: "font-aktiv-grotesk font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight",
+    compact: "font-aktiv-grotesk font-bold text-2xl sm:text-3xl md:text-4xl leading-tight"
   },
   
   // Section headings (H2) - Used for major section titles
   h2: {
-    base: "font-akrive-grotesk font-bold text-2xl sm:text-3xl md:text-4xl leading-tight",
-    compact: "font-akrive-grotesk font-bold text-xl sm:text-2xl md:text-3xl leading-tight"
+    base: "font-aktiv-grotesk font-bold text-2xl sm:text-3xl md:text-4xl leading-tight",
+    compact: "font-aktiv-grotesk font-bold text-xl sm:text-2xl md:text-3xl leading-tight"
   },
   
   // Subsection headings (H3) - Used for card titles, smaller sections
   h3: {
-    base: "font-akrive-grotesk font-semibold text-lg sm:text-xl md:text-2xl leading-snug",
-    compact: "font-akrive-grotesk font-semibold text-base sm:text-lg md:text-xl leading-snug"
+    base: "font-aktiv-grotesk font-semibold text-lg sm:text-xl md:text-2xl leading-snug",
+    compact: "font-aktiv-grotesk font-semibold text-base sm:text-lg md:text-xl leading-snug"
   },
   
   // Body text - Standardized for better readability
@@ -37,7 +37,7 @@ export const typography = {
   // Navigation - Special case for navbar
   nav: {
     primary: "font-bebas-neue text-base tracking-wider",
-    secondary: "font-akrive-grotesk text-sm font-medium"
+    secondary: "font-aktiv-grotesk text-sm font-medium"
   },
   
   // Labels and captions

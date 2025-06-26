@@ -10,12 +10,12 @@ export default function CTASection() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <Button className="bg-[#454547] hover:bg-[#3a3a3c] text-white px-8 py-4 rounded-lg text-lg font-medium flex items-center gap-3 min-w-[280px] h-[60px]">
-            I need an expert
+            I need an <span className="font-bold">expert</span>
             <ChevronRight className="h-5 w-5" />
           </Button>
 
           <Button className="bg-[#7394c7] hover:bg-[#6284b6] text-white px-8 py-4 rounded-lg text-lg font-medium flex items-center gap-3 min-w-[280px] h-[60px]">
-            I'm available to hire
+            I'm <span className="font-bold">available</span> to hire
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>

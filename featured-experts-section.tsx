@@ -29,56 +29,75 @@ const featuredExperts = [
 export default function FeaturedExpertsSection() {
   return (
     <section className="w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2">
-        {/* Left Column - Blue Background */}
-        <div className="bg-gradient-to-br from-[#7394c7] to-[#6284b6] text-white p-6 md:p-8 flex flex-col justify-center relative overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-5">
+        {/* Left Column - Blue Background - 40% width */}
+        <div className="bg-gradient-to-br from-[#7394c7] to-[#6284b6] text-white p-8 md:p-10 lg:p-12 flex flex-col justify-center relative overflow-hidden md:col-span-2">
           {/* Decorative circle */}
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute top-1/2 -left-32 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
           <div className="max-w-xl">
-            <h2 className={`${typography.h3.base} mb-2 relative z-10`}>
-              The Board of Champions is the only place you ever<br className="hidden lg:block" /> need look for your next EXPERT appointment.
+            <p className={`${typography.label.large} mb-3 relative z-10 text-white/80 uppercase tracking-wide`}>
+              Get a <span className="font-bold">FREE</span> consultation now
+            </p>
+            <h2 className={`${typography.h2.base} mb-4 relative z-10 font-bold`}>
+              The Board of Champions is the only place you ever need look for your next EXPERT appointment.
             </h2>
 
-            <p className={`${typography.body.base} mb-4 relative z-10 text-white/90`}>
-              CMO's, CFO's, COO's – we have them all. Industry leading experts with significant career successes.{" "}
-              <span className="font-semibold">CV's to be enviable of.</span>
-            </p>
+            <ul className={`${typography.body.base} mb-6 relative z-10 text-white/90 space-y-2`}>
+              <li className="flex items-start">
+                <span className="text-[#ffd700] mr-2">✓</span>
+                <span>CMO's, CFO's, COO's – Industry leading experts</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#ffd700] mr-2">✓</span>
+                <span>Significant career successes & proven track records</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-[#ffd700] mr-2">✓</span>
+                <span className="font-semibold">CV's to be enviable of</span>
+              </li>
+            </ul>
 
-            <Button className={cn(buttonStyles.secondary, buttonStyles.size.small, typography.button.small, "inline-flex items-center gap-2 group relative z-10")}>
-              SEARCH NOW
-              <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </Button>
+            <div className="flex gap-4">
+              <Button className={cn(buttonStyles.secondary, buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 group relative z-10 shadow-lg hover:shadow-xl")}>
+                SEARCH NOW
+                <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+              </Button>
+              <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 group relative z-10 shadow-lg hover:shadow-xl font-bold")}>
+                I'M IN!
+                <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Right Column - Purple Background */}
-        <div className="bg-gradient-to-br from-[#a0a0dc] to-[#9090cc] text-white p-6 md:p-8 relative overflow-hidden">
+        {/* Right Column - Purple Background - 60% width */}
+        <div className="bg-gradient-to-br from-[#9595d5] to-[#8585c5] text-white p-8 md:p-10 relative overflow-hidden md:col-span-3">
           {/* Decorative elements */}
           <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          <h2 className={`${typography.h3.base} mb-4 text-center relative z-10`}>THIS MONTH'S FEATURED EXPERTS</h2>
+          <h2 className={`${typography.h2.base} mb-6 text-center relative z-10 font-bold`}>THIS MONTH'S FEATURED EXPERTS</h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8 relative z-10">
             {featuredExperts.map((expert) => (
-              <div key={expert.id} className="flex flex-col items-center group">
-                <div className="mb-2 w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 overflow-hidden rounded-lg shadow-sm bg-white group-hover:shadow-md transition-all duration-300">
+              <div key={expert.id} className="flex flex-col items-center group bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all duration-300">
+                <div className="mb-3 w-28 h-36 md:w-32 md:h-40 lg:w-36 lg:h-44 overflow-hidden rounded-lg shadow-lg bg-white group-hover:shadow-xl transition-all duration-300 ring-2 ring-white/30">
                   <Image
                     src={expert.image || "/placeholder.svg"}
                     alt={expert.name}
-                    width={128}
-                    height={128}
+                    width={144}
+                    height={176}
                     quality={95}
-                    className="object-cover object-top w-full h-full transition-transform duration-500 group-hover:scale-110"
+                    className="object-cover object-top w-full h-full transition-transform duration-500 group-hover:scale-105"
                     priority
                   />
                 </div>
 
-                <h3 className={`${typography.h3.compact} mb-1 text-center`}>{expert.name}</h3>
-                <p className={`${typography.body.small} mb-2 text-center px-1 opacity-90`}>{expert.title}</p>
+                <h3 className={`${typography.h3.compact} mb-2 text-center font-bold`}>{expert.name}</h3>
+                <p className={`${typography.body.small} mb-3 text-center px-2 opacity-90 line-clamp-2`}>{expert.title}</p>
 
-                <Button className={cn(buttonStyles.secondary, buttonStyles.size.small, typography.button.small, "inline-flex items-center gap-1 min-w-[80px] group/btn")}>
+                <Button className={cn(buttonStyles.secondary, buttonStyles.size.base, typography.button.base, "inline-flex items-center gap-2 min-w-[100px] group/btn mt-auto")}>
                   ENQUIRE
-                  <ChevronRight className="h-3 w-3 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                  <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
                 </Button>
               </div>
             ))}

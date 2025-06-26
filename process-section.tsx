@@ -42,7 +42,7 @@ export default function ProcessSection() {
         {/* Section Title */}
         <div className="text-center mb-8">
           <h2 className="text-xl md:text-2xl font-normal text-gray-700 mb-8">
-            <span className="font-akrive-grotesk font-semibold">The process</span> of finding the best expert for your needs:
+            <span className="font-akrive-grotesk font-bold">The Process</span> of finding the best expert for your needs:
           </h2>
         </div>
 

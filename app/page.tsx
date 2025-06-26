@@ -8,6 +8,7 @@ import FeaturedExpertsSection from "../featured-experts-section"
 import TestimonialsSection from "../testimonials-section"
 import StatsSection from "../stats-section"
 import TestimonialCarousel from "../testimonial-carousel"
+import BusinessStatsSection from "../business-stats-section"
 import ClientLogoCarousel from "../client-logo-carousel"
 import Footer from "../footer"
 
@@ -18,8 +19,8 @@ export default function Page() {
       <HeroSection />
       <IntegratedCTAProcessSection />
       <ExpertSearchSection />
-      <StatsSection />
       <FeaturedExpertsSection />
+      <BusinessStatsSection />
       <ClientLogoCarousel />
       <TestimonialsSection />
       <TestimonialCarousel />

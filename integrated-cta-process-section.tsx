@@ -45,12 +45,12 @@ export default function IntegratedCTAProcessSection() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
           <Button className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-3 min-w-[260px] sm:min-w-[280px] group")}>
-            I need an expert
+            I need an <span className="font-bold">expert</span>
             <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
 
           <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "flex items-center gap-3 min-w-[260px] sm:min-w-[280px] group")}>
-            I'm available to hire
+            I'm <span className="font-bold">available</span> to hire
             <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
         </div>
@@ -71,7 +71,7 @@ export default function IntegratedCTAProcessSection() {
         {/* Process Section */}
         <div className="text-center mb-12">
           <h3 className={`${typography.h2.base} text-gray-700`}>
-            <span>The process</span> of finding the best expert for your needs:
+            <span className="font-bold">The Process</span> of finding the best expert for your needs:
           </h3>
         </div>
 
@@ -119,7 +119,7 @@ export default function IntegratedCTAProcessSection() {
         {/* CTA Section - Moved from expert search */}
         <div className="max-w-6xl mx-auto">
           <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 text-center shadow-xl">
-            <h3 className={`${typography.h3.base} mb-2`}>Get a FREE consultation now</h3>
+            <h3 className={`${typography.h3.base} mb-2`}>Get a <span className="font-bold">FREE</span> consultation now</h3>
             <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
               I'M IN!
               <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
