@@ -8,10 +8,13 @@ import { typography, spacing } from "@/lib/typography"
 const testimonials = [
   {
     id: 1,
-    image: "/placeholder.svg?height=400&width=600",
-    text: "Hit faccae eaque consequae sit eum fugia desestem et dipsundae. Pis a es sit, si odi andem ipsandem nossin re, occae volupta esciae natur aliqui que acieturerum auda peliqui ratinus cone nimaios illore ipsandae rerciam vitatquam, quiditatem. Itat most fugitatqui ium volum facerciet reri dolesed et res volenis explit officim faccum ex ea dolupta tatemporum aut dolupit abore, si nihil et quis conseque magnis ant, vellest ibusda nis aliquatus.\n\nIl et qui voluptatur? Xeruptas et min rest, es minverum quunt",
-    logo: "/placeholder.svg?height=60&width=200",
-    logoAlt: "Coca-Cola Europacific Partners",
+    image: "/testimonials/testomonial.png",
+    text: "Champions – you were amazing. And, the responsiveness on very short notice was incredible. Having worked with many agencies over the years, I can say from experience, Champions are a step above.",
+    logo: "/testimonials/coke.png",
+    logoAlt: "Coca-Cola",
+    author: "Keith Sanders",
+    company: "Coca Cola",
+    highlight: "THE RESPONSIVENESS ON VERY SHORT NOTICE WAS INCREDIBLE.",
   },
   {
     id: 2,
@@ -104,19 +107,24 @@ export default function TestimonialCarousel() {
                     {/* Testimonial Content */}
                     <div className="bg-white text-gray-800 p-6 md:p-8 rounded-xl flex flex-col shadow-2xl hover:shadow-3xl transition-shadow duration-300">
                       <div className="flex-grow">
+                        {testimonial.highlight && (
+                          <h3 className={`${typography.h3.base} mb-4 text-gray-800`}>
+                            {testimonial.highlight}
+                          </h3>
+                        )}
                         <p className={`${typography.body.base} mb-6 text-gray-700`}>
-                          {testimonial.text.split("\n\n").map((paragraph, idx) => (
-                            <span key={idx}>
-                              {paragraph}
-                              {idx < testimonial.text.split("\n\n").length - 1 && (
-                                <>
-                                  <br />
-                                  <br />
-                                </>
-                              )}
-                            </span>
-                          ))}
+                          "{testimonial.text}"
                         </p>
+                        {testimonial.author && (
+                          <div className="mb-6">
+                            <p className={`${typography.body.base} font-semibold text-gray-800`}>
+                              {testimonial.author}
+                            </p>
+                            <p className={`${typography.body.small} text-gray-600`}>
+                              {testimonial.company}
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <div className="mt-auto">
                         <Image
