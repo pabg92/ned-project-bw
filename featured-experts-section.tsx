@@ -29,9 +29,9 @@ const featuredExperts = [
 export default function FeaturedExpertsSection() {
   return (
     <section className="w-full">
-      <div className="grid grid-cols-1 md:grid-cols-5">
-        {/* Left Column - Blue Background - 40% width */}
-        <div className="bg-gradient-to-br from-[#7394c7] to-[#6284b6] text-white p-8 md:p-10 lg:p-12 flex flex-col justify-center relative overflow-hidden md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        {/* Left Column - Blue Background - 50% width */}
+        <div className="bg-gradient-to-br from-[#9eb4d8] to-[#8ea4c8] text-white p-8 md:p-10 lg:p-12 flex flex-col justify-center relative overflow-hidden">
           {/* Decorative circle */}
           <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <div className="absolute top-1/2 -left-32 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
@@ -63,16 +63,16 @@ export default function FeaturedExpertsSection() {
                 SEARCH NOW
                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
-              <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 group relative z-10 shadow-lg hover:shadow-xl font-bold")}>
-                I'M IN!
+              <Button className={cn("bg-white text-[#9eb4d8] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 group relative z-10 shadow-lg hover:shadow-xl font-bold")}>
+                JOIN AS TALENT
                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </div>
           </div>
         </div>
 
-        {/* Right Column - Purple Background - 60% width */}
-        <div className="bg-gradient-to-br from-[#9595d5] to-[#8585c5] text-white p-8 md:p-10 relative overflow-hidden md:col-span-3">
+        {/* Right Column - Purple Background - 50% width */}
+        <div className="bg-gradient-to-br from-[#9595d5] to-[#8585c5] text-white p-8 md:p-10 relative overflow-hidden">
           {/* Decorative elements */}
           <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
           <h2 className={`${typography.h2.base} mb-6 text-center relative z-10`}>THIS MONTH'S FEATURED EXPERTS</h2>

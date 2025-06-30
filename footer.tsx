@@ -18,25 +18,25 @@ export default function Footer() {
             <div className="flex space-x-4">
               <Link
                 href="#"
-                className="w-10 h-10 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd] hover:scale-110 transition-all duration-300 shadow-lg"
+                className="w-10 h-10 bg-[#9eb4d8] rounded-full flex items-center justify-center hover:bg-[#8ea4c8] hover:scale-110 transition-all duration-300 shadow-lg"
               >
                 <Facebook className="h-4 w-4" />
               </Link>
               <Link
                 href="#"
-                className="w-10 h-10 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd] hover:scale-110 transition-all duration-300 shadow-lg"
+                className="w-10 h-10 bg-[#9eb4d8] rounded-full flex items-center justify-center hover:bg-[#8ea4c8] hover:scale-110 transition-all duration-300 shadow-lg"
               >
                 <Twitter className="h-4 w-4" />
               </Link>
               <Link
                 href="#"
-                className="w-10 h-10 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd] hover:scale-110 transition-all duration-300 shadow-lg"
+                className="w-10 h-10 bg-[#9eb4d8] rounded-full flex items-center justify-center hover:bg-[#8ea4c8] hover:scale-110 transition-all duration-300 shadow-lg"
               >
                 <Linkedin className="h-4 w-4" />
               </Link>
               <Link
                 href="#"
-                className="w-10 h-10 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd] hover:scale-110 transition-all duration-300 shadow-lg"
+                className="w-10 h-10 bg-[#9eb4d8] rounded-full flex items-center justify-center hover:bg-[#8ea4c8] hover:scale-110 transition-all duration-300 shadow-lg"
               >
                 <Youtube className="h-4 w-4" />
               </Link>
@@ -45,7 +45,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-akrive-grotesk font-bold text-xl mb-8 text-[#7394c7] uppercase tracking-wider">Quick Links</h3>
+            <h3 className="font-akrive-grotesk font-bold text-xl mb-8 text-[#9eb4d8] uppercase tracking-wider">Quick Links</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2 inline-block text-sm">
@@ -77,7 +77,7 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="font-akrive-grotesk font-bold text-xl mb-8 text-[#7394c7] uppercase tracking-wider">Resources</h3>
+            <h3 className="font-akrive-grotesk font-bold text-xl mb-8 text-[#9eb4d8] uppercase tracking-wider">Resources</h3>
             <ul className="space-y-4">
               <li>
                 <Link href="#" className="text-gray-300 hover:text-white transition-all duration-300 hover:translate-x-2 inline-block text-sm">
@@ -109,20 +109,20 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-akrive-grotesk font-bold text-xl mb-8 text-[#7394c7] uppercase tracking-wider">Contact Us</h3>
+            <h3 className="font-akrive-grotesk font-bold text-xl mb-8 text-[#9eb4d8] uppercase tracking-wider">Contact Us</h3>
             <ul className="space-y-5">
               <li className="flex items-start">
-                <MapPin className="h-5 w-5 mr-3 text-[#7394c7] flex-shrink-0 mt-0.5" />
+                <MapPin className="h-5 w-5 mr-3 text-[#9eb4d8] flex-shrink-0 mt-0.5" />
                 <span className="text-gray-300 text-sm">123 Business Avenue, London, UK</span>
               </li>
               <li className="flex items-center">
-                <Phone className="h-5 w-5 mr-3 text-[#7394c7] flex-shrink-0" />
+                <Phone className="h-5 w-5 mr-3 text-[#9eb4d8] flex-shrink-0" />
                 <Link href="tel:+441234567890" className="text-gray-300 hover:text-white transition-colors">
                   +44 (0) 123 456 7890
                 </Link>
               </li>
               <li className="flex items-center">
-                <Mail className="h-5 w-5 mr-3 text-[#7394c7] flex-shrink-0" />
+                <Mail className="h-5 w-5 mr-3 text-[#9eb4d8] flex-shrink-0" />
                 <Link
                   href="mailto:info@boardchampions.com"
                   className="text-gray-300 hover:text-white transition-colors"

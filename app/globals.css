@@ -27,6 +27,18 @@ html, body {
   font-family: var(--font-aktiv-grotesk), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   max-width: 100%;
+  position: relative;
+}
+
+/* Prevent layout shift when dropdowns open */
+body {
+  width: 100%;
+  overflow-x: hidden !important;
+}
+
+/* Ensure dropdown menus don't cause horizontal scroll */
+.radix-dropdown-menu-content {
+  max-width: calc(100vw - 2rem);
 }
 
 .font-bebas-neue {

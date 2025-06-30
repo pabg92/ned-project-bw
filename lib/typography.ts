@@ -69,7 +69,7 @@ export const spacing = {
 // Standardized button styles
 export const buttonStyles = {
   // Primary button (filled)
-  primary: "bg-[#7394c7] hover:bg-[#6284b6] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105",
+  primary: "bg-[#9eb4d8] hover:bg-[#8ea4c8] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105",
   // Secondary button (outlined)
   secondary: "bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105",
   // Button sizes with consistent padding

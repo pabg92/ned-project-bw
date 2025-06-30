@@ -58,7 +58,7 @@ export default function IntegratedCTAProcessSection() {
         {/* Main Heading */}
         <div className="text-center mb-12">
           <h2 className={`${typography.h1.base} mb-6`}>
-            <span className="text-[#7394c7]">Winning Expert Talent</span>{" "}
+            <span className="text-[#9eb4d8]">Winning Expert Talent</span>{" "}
             <span className="text-gray-800">appointments.</span>
           </h2>
 
@@ -89,7 +89,7 @@ export default function IntegratedCTAProcessSection() {
 
                   {/* Icon Section */}
                   <div className="p-4 flex items-center justify-center">
-                    <div className="w-14 h-14 flex items-center justify-center bg-[#7394c7]/5 rounded-full group-hover:bg-[#7394c7]/20 transition-all duration-300 ring-1 ring-[#7394c7]/10 group-hover:ring-[#7394c7]/30">
+                    <div className="w-14 h-14 flex items-center justify-center bg-[#9eb4d8]/5 rounded-full group-hover:bg-[#9eb4d8]/20 transition-all duration-300 ring-1 ring-[#9eb4d8]/10 group-hover:ring-[#9eb4d8]/30">
                       <Image
                         src={step.icon || "/placeholder.svg"}
                         alt={step.iconAlt}
@@ -103,7 +103,7 @@ export default function IntegratedCTAProcessSection() {
               </div>
               {/* Arrow between cards */}
               {index < processSteps.length - 1 && (
-                <ArrowRight className="h-6 w-6 text-[#7394c7] animate-pulse hidden lg:block" />
+                <ArrowRight className="h-6 w-6 text-[#9eb4d8] animate-pulse hidden lg:block" />
               )}
             </>
           ))}
@@ -112,15 +112,15 @@ export default function IntegratedCTAProcessSection() {
         {/* No Fees Statement */}
         <div className="text-center mb-16">
           <p className={`${typography.h2.base} text-gray-800 bg-gradient-to-r from-gray-100 to-gray-50 py-6 px-8 rounded-2xl inline-block shadow-inner`}>
-            <span className="text-[#7394c7] font-bold tracking-wider">NO FEES</span> <span className="text-gray-600 font-medium">until you hire your expert.</span>
+            <span className="text-[#9eb4d8] font-bold tracking-wider">NO FEES</span> <span className="text-gray-600 font-medium">until you hire your expert.</span>
           </p>
         </div>
 
         {/* CTA Section - Moved from expert search */}
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 text-center shadow-xl">
+          <div className="bg-gradient-to-r from-[#9eb4d8] to-[#8595d5] text-white rounded-2xl p-6 text-center shadow-xl">
             <h3 className={`${typography.h3.base} mb-2`}>Get a <span className="font-bold">FREE</span> consultation now</h3>
-            <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
+            <Button className={cn("bg-white text-[#9eb4d8] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
               I'M IN!
               <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
