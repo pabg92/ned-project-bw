@@ -8,14 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Signup form component with comprehensive validation using React Hook Form and Zod
-- Signup page flow with success confirmation page
-- Initial search portal implementation with filter functionality
-- Search header component with dynamic filter tags
-- Navigation link to search portal in navbar
-- Inter font support in Tailwind configuration
-- Form validation for email, password strength, and user data
-- Dependencies: react-hook-form, @hookform/resolvers, zod
+- Multi-step signup form with progress indicators and form persistence
+- Signup success page with confetti animation
+- Comprehensive search portal with credits system
+- Search filters sidebar with multiple filter categories
+- Profile cards with locked/unlocked states
+- Individual profile detail pages with full executive information
+- Search results component with grid/list view toggle
+- Credits display and management in search header
+- Drag-and-drop file upload functionality
+- Mobile-responsive search interface
+- Dependencies: react-hook-form, @hookform/resolvers, zod, canvas-confetti
 
 ### Changed
 - Updated CTA sections to link to new signup flow
