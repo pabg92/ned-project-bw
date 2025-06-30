@@ -20,18 +20,18 @@ const carouselSlides = [
     type: "video",
     video: "/Piers-Talk.mp4",
     poster: "/placeholder.svg?height=600&width=1200",
-    title: "Sir Clive Woodward",
-    subtitle: "Board excellence delivered.",
-    description: "Strategic leadership for your most important decisions.",
+    title: "Piers Linney",
+    subtitle: "AI and Technology Expert",
+    description: "Transforming businesses through cutting-edge innovation and digital strategy.",
   },
   {
     id: 3,
     type: "video",
     video: "/Matt-Talk.mp4",
     poster: "/placeholder.svg?height=600&width=1200",
-    title: "Sir Clive Woodward",
-    subtitle: "Board excellence delivered.",
-    description: "Strategic leadership for your most important decisions.",
+    title: "Matthew Hayes",
+    subtitle: "Strategic Marketing Leader",
+    description: "Driving brand excellence through innovative marketing strategies and digital transformation.",
   },
 ]
 
@@ -44,7 +44,7 @@ export default function HeroSection() {
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)
-    }, 5000)
+    }, 8000)
 
     return () => clearInterval(interval)
   }, [isAutoPlaying])
@@ -129,17 +129,21 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 flex items-center h-full">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl">
-            {/* Enhanced semi-transparent background for all slides */}
-            <div className="bg-black/40 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-2xl max-w-full md:max-w-xl shadow-2xl border border-white/10">
-              <h1 className={`${typography.h1.compact} mb-3 text-white`}>
-                <span className="block">{carouselSlides[currentSlide]?.title}</span>
-                <span className={`block ${typography.h2.compact} text-gray-200 mt-2`}>{carouselSlides[currentSlide]?.subtitle}</span>
+          <div className="flex justify-start items-center h-full">
+            {/* Text box positioned on the left with proper spacing to avoid arrow overlap */}
+            <div className="bg-black/60 backdrop-blur-sm p-6 sm:p-8 md:p-10 lg:p-12 rounded-lg w-full max-w-md lg:max-w-lg shadow-2xl border border-white/20 ml-12 sm:ml-16 lg:ml-20">
+              <h1 className={`${typography.h1.compact} mb-3 text-white uppercase tracking-wide leading-tight`}>
+                {carouselSlides[currentSlide]?.title}
               </h1>
-              <p className={`${typography.body.large} mb-4 sm:mb-6 text-gray-100`}>{carouselSlides[currentSlide]?.description}</p>
+              <h2 className={`${typography.h2.compact} mb-4 text-white/90 leading-tight`}>
+                {carouselSlides[currentSlide]?.subtitle}
+              </h2>
+              <p className={`${typography.body.large} mb-6 sm:mb-8 text-white/80 leading-relaxed`}>
+                {carouselSlides[currentSlide]?.description}
+              </p>
 
               {/* Modernized CTA Button */}
-              <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-3 group")}>
+              <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-3 group whitespace-nowrap")}>
                 SEARCH NOW
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
