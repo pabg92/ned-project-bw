@@ -87,11 +87,27 @@ const config: Config = {
   				to: {
   					height: '0'
   				}
+  			},
+  			'bounce-slow': {
+  				'0%, 100%': {
+  					transform: 'translateY(-5%)',
+  					animationTimingFunction: 'cubic-bezier(0.8, 0, 1, 1)'
+  				},
+  				'50%': {
+  					transform: 'translateY(0)',
+  					animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)'
+  				}
+  			},
+  			fadeIn: {
+  				'0%': { opacity: '0', transform: 'translateY(10px)' },
+  				'100%': { opacity: '1', transform: 'translateY(0)' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'bounce-slow': 'bounce-slow 3s infinite',
+  			'fadeIn': 'fadeIn 0.5s ease-out'
   		}
   	}
   },

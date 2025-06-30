@@ -3,225 +3,216 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navigationItems = [
-    { 
-      name: "BOARD", 
-      hasDropdown: true,
-      dropdownItems: [
-        { label: "Board Appointments", href: "#" },
-        { label: "Board Assessment", href: "#" },
-        { label: "Board Development", href: "#" },
-        { label: "Board Diversity", href: "#" },
-        { label: "Board Evaluation", href: "#" },
-        { label: "Board Recruitment", href: "#" },
-        { label: "Board Search", href: "#" },
-        { label: "Board Strategy", href: "#" }
-      ]
-    },
-    { 
-      name: "FRACTIONAL", 
-      hasDropdown: true,
-      dropdownItems: [
-        { label: "Fractional CEO", href: "#" },
-        { label: "Fractional CFO", href: "#" },
-        { label: "Fractional CMO", href: "#" },
-        { label: "Fractional COO", href: "#" },
-        { label: "Fractional CTO", href: "#" },
-        { label: "Fractional CHRO", href: "#" },
-        { label: "Fractional CIO", href: "#" },
-        { label: "Fractional CPO", href: "#" }
-      ]
-    },
-    { 
-      name: "NED", 
-      hasDropdown: true,
-      dropdownItems: [
-        { label: "Non-Executive Director", href: "#" },
-        { label: "Independent Director", href: "#" },
-        { label: "Advisory Board", href: "#" },
-        { label: "Board Advisor", href: "#" },
-        { label: "Senior Advisor", href: "#" },
-        { label: "Strategic Advisor", href: "#" }
-      ]
-    },
-    { 
-      name: "SECTORS", 
-      hasDropdown: true, 
-      isActive: true,
-      dropdownItems: [
-        { label: "Technology", href: "#" },
-        { label: "Financial Services", href: "#" },
-        { label: "Healthcare", href: "#" },
-        { label: "Retail & Consumer", href: "#" },
-        { label: "Manufacturing", href: "#" },
-        { label: "Energy & Utilities", href: "#" },
-        { label: "Real Estate", href: "#" },
-        { label: "Professional Services", href: "#" },
-        { label: "Media & Entertainment", href: "#" },
-        { label: "Education", href: "#" },
-        { label: "Non-Profit", href: "#" },
-        { label: "Government", href: "#" }
-      ]
-    },
-    { 
-      name: "PROJECT/CONTRACT", 
-      hasDropdown: true,
-      dropdownItems: [
-        { label: "Interim Management", href: "#" },
-        { label: "Project Leadership", href: "#" },
-        { label: "Transformation", href: "#" },
-        { label: "Turnaround", href: "#" },
-        { label: "Change Management", href: "#" },
-        { label: "Digital Transformation", href: "#" },
-        { label: "M&A Integration", href: "#" },
-        { label: "Crisis Management", href: "#" }
-      ]
-    },
-    { 
-      name: "ABOUT US", 
-      hasDropdown: true,
-      dropdownItems: [
-        { label: "Our Story", href: "#" },
-        { label: "Our Team", href: "#" },
-        { label: "Our Values", href: "#" },
-        { label: "Our Process", href: "#" },
-        { label: "Testimonials", href: "#" },
-        { label: "Case Studies", href: "#" },
-        { label: "News & Insights", href: "#" },
-        { label: "Careers", href: "#" }
-      ]
-    },
-    { 
-      name: "CONTACT US", 
-      hasDropdown: true,
-      dropdownItems: [
-        { label: "Get In Touch", href: "#" },
-        { label: "Book Consultation", href: "#" },
-        { label: "Office Locations", href: "#" },
-        { label: "Support", href: "#" }
-      ]
-    },
+    { name: "BOARD", hasDropdown: true },
+    { name: "FRACTIONAL", hasDropdown: true },
+    { name: "NED", hasDropdown: true },
+    { name: "SECTORS", hasDropdown: true, isActive: true },
+    { name: "PROJECT/CONTRACT", hasDropdown: true },
+    { name: "ABOUT US", hasDropdown: true },
+    { name: "CONTACT US", hasDropdown: true },
   ]
 
   return (
-    <nav className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white w-full shadow-lg overflow-x-hidden">
-      <div className="w-full overflow-x-hidden">
-        <div className="container max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-          <div className="flex items-center h-20 gap-4">
-          {/* Logo */}
-          <div className="flex-shrink-0 min-w-0">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/logo.svg"
-                alt="BoardChampions - Winning Expert Talent"
-                width={200}
-                height={40}
-                className="h-10 sm:h-12 w-auto max-w-[160px] sm:max-w-[200px] lg:max-w-[240px] object-contain"
-              />
-            </Link>
-          </div>
-
-          {/* Navigation Menu - Desktop Only */}
-          <div className="hidden xl:flex items-center flex-1 justify-end">
-            <div className="flex items-center justify-center flex-1 max-w-4xl mx-auto space-x-1">
-              {navigationItems.map((item) => (
-                <div key={item.name} className="relative">
-                  {item.hasDropdown ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className={`text-white hover:bg-white/20 hover:scale-105 px-3 py-2 text-base font-bebas-neue tracking-wider flex items-center gap-2 min-w-[100px] justify-center transition-all duration-300 rounded-md ${
-                            item.isActive ? "bg-[#9eb4d8] hover:bg-[#8ea4c8] shadow-lg" : ""
-                          }`}
-                        >
-                          {item.name}
-                          <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent 
-                        className="bg-white border-none shadow-2xl rounded-lg mt-2 p-6"
-                        style={{ 
-                          minWidth: item.name === "SECTORS" ? "600px" : "280px",
-                          maxWidth: item.name === "SECTORS" ? "800px" : "400px"
-                        }}
-                      >
-                        <div className={item.name === "SECTORS" ? "grid grid-cols-3 gap-4" : "space-y-1"}>
-                          {item.dropdownItems?.map((dropdownItem, index) => (
-                            <Link 
-                              key={index} 
-                              href={dropdownItem.href} 
-                              className="block px-3 py-2 text-gray-700 hover:bg-[#9eb4d8]/10 hover:text-[#9eb4d8] rounded-md transition-all duration-200 font-medium"
-                            >
-                              {dropdownItem.label}
-                            </Link>
-                          ))}
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : (
-                    <Link
-                      href="#"
-                      className={`text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bebas-neue tracking-wider ${
-                        item.isActive ? "bg-[#6b93ce]" : ""
-                      }`}
-                    >
-                      {item.name}
-                    </Link>
-                  )}
-                </div>
-              ))}
+    <>
+      <nav className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white w-full shadow-lg">
+        <div className="w-full">
+          <div className="container max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
+            <div className="flex items-center h-20 gap-4">
+            {/* Logo */}
+            <div className="flex-shrink-0 min-w-0">
+              <Link href="/" className="flex items-center">
+                <Image
+                  src="/logo.svg"
+                  alt="BoardChampions - Winning Expert Talent"
+                  width={260}
+                  height={52}
+                  className="h-12 sm:h-14 lg:h-16 w-auto max-w-[200px] sm:max-w-[240px] lg:max-w-[280px] object-contain"
+                />
+              </Link>
             </div>
 
-            {/* Right Side - Social Icons and Button */}
-            <div className="flex items-center space-x-2 ml-auto">
-              {/* Social Media Icons */}
-              <div className="flex items-center space-x-2">
-                <Link
-                  href="#"
-                  className="w-10 h-10 flex items-center justify-center hover:scale-110 transition-all duration-300"
-                >
-                  <Image src="/linkedin-icon.svg" alt="LinkedIn" width={40} height={40} className="w-10 h-10" />
-                </Link>
-                <Link
-                  href="#"
-                  className="w-10 h-10 flex items-center justify-center hover:scale-110 transition-all duration-300"
-                >
-                  <Image src="/x-icon.svg" alt="X (formerly Twitter)" width={40} height={40} className="w-10 h-10" />
-                </Link>
-                <Link
-                  href="#"
-                  className="w-10 h-10 flex items-center justify-center hover:scale-110 transition-all duration-300"
-                >
-                  <Image src="/youtube-icon.svg" alt="YouTube" width={40} height={40} className="w-10 h-10" />
-                </Link>
+            {/* Navigation Menu - Desktop Only */}
+            <div className="hidden xl:flex items-center flex-1 justify-end">
+              <div className="flex items-center justify-center flex-1 max-w-4xl mx-auto space-x-1">
+                {navigationItems.map((item) => (
+                  <div key={item.name} className="relative">
+                    {item.hasDropdown ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className={`text-white hover:bg-white/20 hover:scale-105 px-3 py-2 text-base font-bebas-neue tracking-wider flex items-center gap-2 min-w-[100px] justify-center transition-all duration-300 rounded-md ${
+                              item.isActive ? "bg-[#6b93ce] hover:bg-[#5a82bd] shadow-lg" : ""
+                            }`}
+                          >
+                            {item.name}
+                            <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="bg-gradient-to-b from-[#6b93ce] to-[#5a82bd] border-none shadow-xl rounded-lg mt-2">
+                          <DropdownMenuItem className="text-white hover:bg-white/20 font-medium px-4 py-3 transition-all duration-300">{item.name}</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <Link
+                        href="#"
+                        className={`text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-bebas-neue tracking-wider ${
+                          item.isActive ? "bg-[#6b93ce]" : ""
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {/* MY EXPERTS Button */}
-              <Button className="bg-[#9eb4d8] hover:bg-[#8ea4c8] text-white px-8 py-3 text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 rounded-full">
-                MY EXPERTS
+              {/* Right Side - Social Icons and Button */}
+              <div className="flex items-center space-x-2 ml-auto">
+                {/* Social Media Icons */}
+                <div className="flex items-center space-x-2">
+                  <Link
+                    href="#"
+                    className="w-10 h-10 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd] hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Image src="/linkedin-icon.svg" alt="LinkedIn" width={16} height={16} className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="#"
+                    className="w-10 h-10 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd] hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Image src="/x-icon.svg" alt="X (formerly Twitter)" width={16} height={16} className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="#"
+                    className="w-10 h-10 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd] hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Image src="/youtube-icon.svg" alt="YouTube" width={16} height={16} className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                {/* MY EXPERTS Button */}
+                <Link href="/signup">
+                  <Button className="bg-gradient-to-r from-[#6b93ce] to-[#5a82bd] hover:from-[#5a82bd] hover:to-[#4a72ad] text-white px-8 py-3 text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 rounded-full">
+                    MY EXPERTS
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Mobile menu button - Accessible 48x48px touch target */}
+            <div className="xl:hidden flex-shrink-0 ml-auto">
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-white/20 p-3 rounded-lg transition-all duration-300 min-w-[48px] min-h-[48px]" 
+                size="icon"
+                aria-label={isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
               </Button>
             </div>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="xl:hidden flex-shrink-0 ml-auto">
-            <Button variant="ghost" className="text-white hover:bg-white/20 p-3 rounded-lg transition-all duration-300" size="sm">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </Button>
-          </div>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 xl:hidden">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Menu Panel */}
+          <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-gradient-to-b from-[#4a4a4a] to-[#5a5a5a] shadow-xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <Image
+                src="/logo.svg"
+                alt="BoardChampions"
+                width={180}
+                height={36}
+                className="h-10 w-auto"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-white hover:bg-white/20"
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
+            
+            {/* Navigation Items */}
+            <nav className="p-4 space-y-2">
+              {navigationItems.map((item) => (
+                <div key={item.name}>
+                  <Button
+                    variant="ghost"
+                    className={`w-full text-left text-white hover:bg-white/10 px-4 py-3 text-lg font-bebas-neue tracking-wider justify-between ${
+                      item.isActive ? "bg-[#6b93ce]" : ""
+                    }`}
+                    onClick={() => {
+                      if (!item.hasDropdown) {
+                        setIsMobileMenuOpen(false)
+                      }
+                    }}
+                  >
+                    {item.name}
+                    {item.hasDropdown && <ChevronDown className="h-5 w-5" />}
+                  </Button>
+                </div>
+              ))}
+              
+              {/* MY EXPERTS Button */}
+              <Link href="/signup" className="block mt-6" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full bg-gradient-to-r from-[#6b93ce] to-[#5a82bd] hover:from-[#5a82bd] hover:to-[#4a72ad] text-white px-8 py-3 text-lg font-bold shadow-lg">
+                  MY EXPERTS
+                </Button>
+              </Link>
+              
+              {/* Social Icons */}
+              <div className="flex items-center justify-center space-x-4 mt-8">
+                <Link
+                  href="#"
+                  className="w-12 h-12 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd]"
+                >
+                  <Image src="/linkedin-icon.svg" alt="LinkedIn" width={20} height={20} />
+                </Link>
+                <Link
+                  href="#"
+                  className="w-12 h-12 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd]"
+                >
+                  <Image src="/x-icon.svg" alt="X" width={20} height={20} />
+                </Link>
+                <Link
+                  href="#"
+                  className="w-12 h-12 bg-[#6b93ce] rounded-full flex items-center justify-center hover:bg-[#5a82bd]"
+                >
+                  <Image src="/youtube-icon.svg" alt="YouTube" width={20} height={20} />
+                </Link>
+              </div>
+            </nav>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

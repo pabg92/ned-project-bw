@@ -1,9 +1,10 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { ChevronRight, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { typography, buttonStyles, cn } from "@/lib/typography"
+import { typography, buttonStyles, cn, spacing } from "@/lib/typography"
 
 const processSteps = [
   {
@@ -40,25 +41,27 @@ const processSteps = [
 
 export default function IntegratedCTAProcessSection() {
   return (
-    <section className="pt-16 pb-12 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
-          <Button className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 min-w-[260px] sm:min-w-[280px] group")}>
+    <section className={`${spacing.section.base} bg-gradient-to-b from-gray-50 to-white`}>
+      <div className={spacing.container}>
+        {/* CTA Buttons - Mobile optimized with proper touch targets */}
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center mb-12">
+          <Button className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto min-w-0 sm:min-w-[280px] group")}>
             <span>I need an <span className="font-bold">expert</span></span>
             <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
 
-          <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "flex items-center justify-center gap-2 min-w-[260px] sm:min-w-[280px] group")}>
-            <span>I'm <span className="font-bold">available</span> to <span className="font-bold">hire</span></span>
-            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-          </Button>
+          <Link href="/signup" className="w-full sm:w-auto">
+            <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "flex items-center justify-center gap-2 w-full min-w-0 sm:min-w-[280px] group")}>
+              <span>I'm <span className="font-bold">available</span> to <span className="font-bold">hire</span></span>
+              <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+            </Button>
+          </Link>
         </div>
 
         {/* Main Heading */}
         <div className="text-center mb-12">
           <h2 className={`${typography.h1.base} mb-6`}>
-            <span className="text-[#9eb4d8]">Winning Expert Talent</span>{" "}
+            <span className="text-[#7394c7]">Winning Expert Talent</span>{" "}
             <span className="text-gray-800">appointments.</span>
           </h2>
 
@@ -71,25 +74,24 @@ export default function IntegratedCTAProcessSection() {
         {/* Process Section */}
         <div className="text-center mb-12">
           <h3 className={`${typography.h2.base} text-gray-700`}>
-            <span>The Process</span> of finding the best expert for your needs:
+            The process of finding the best expert for your needs:
           </h3>
         </div>
 
-        {/* Process Steps */}
-        <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-4 mb-16 max-w-7xl mx-auto px-4">
+        {/* Process Steps - Mobile stack layout */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 mb-16 max-w-7xl mx-auto">
           {processSteps.map((step, index) => (
-            <>
               <div key={step.id} className="flex flex-col h-full">
                 {/* Card */}
-                <div className="bg-gradient-to-br from-white to-gray-50/50 border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative w-36 sm:w-40 lg:w-44 h-full">
-                  {/* Header */}
-                  <div className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white px-2 py-2.5 group-hover:from-[#5a5a5a] group-hover:to-[#6a6a6a] transition-all duration-300 min-h-[48px] flex items-center justify-center">
-                    <h4 className={`text-[11px] font-semibold tracking-tight text-center text-white leading-tight`}>{step.title}</h4>
+                <div className="bg-gradient-to-br from-white to-gray-50/50 border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative w-full h-full">
+                  {/* Header - Increased height for mobile */}
+                  <div className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white px-3 py-3 group-hover:from-[#5a5a5a] group-hover:to-[#6a6a6a] transition-all duration-300 min-h-[52px] flex items-center justify-center">
+                    <h4 className="text-xs sm:text-sm font-semibold tracking-tight text-center text-white leading-tight">{step.title}</h4>
                   </div>
 
-                  {/* Icon Section */}
-                  <div className="p-4 flex items-center justify-center">
-                    <div className="w-14 h-14 flex items-center justify-center bg-[#9eb4d8]/5 rounded-full group-hover:bg-[#9eb4d8]/20 transition-all duration-300 ring-1 ring-[#9eb4d8]/10 group-hover:ring-[#9eb4d8]/30">
+                  {/* Icon Section - Larger touch area */}
+                  <div className="p-5 sm:p-4 flex items-center justify-center">
+                    <div className="w-16 h-16 sm:w-14 sm:h-14 flex items-center justify-center bg-[#7394c7]/5 rounded-full group-hover:bg-[#7394c7]/20 transition-all duration-300 ring-1 ring-[#7394c7]/10 group-hover:ring-[#7394c7]/30">
                       <Image
                         src={step.icon || "/placeholder.svg"}
                         alt={step.iconAlt}
@@ -101,26 +103,21 @@ export default function IntegratedCTAProcessSection() {
                   </div>
                 </div>
               </div>
-              {/* Arrow between cards */}
-              {index < processSteps.length - 1 && (
-                <ArrowRight className="h-6 w-6 text-[#9eb4d8] animate-pulse hidden lg:block" />
-              )}
-            </>
           ))}
         </div>
 
         {/* No Fees Statement */}
         <div className="text-center mb-16">
           <p className={`${typography.h2.base} text-gray-800 bg-gradient-to-r from-gray-100 to-gray-50 py-6 px-8 rounded-2xl inline-block shadow-inner`}>
-            <span className="text-[#9eb4d8] font-bold tracking-wider">NO FEES</span> <span className="text-gray-600 font-medium">until you hire your expert.</span>
+            <span className="text-[#7394c7]">NO FEES</span> <span className="text-gray-600 font-normal">until you hire your expert.</span>
           </p>
         </div>
 
         {/* CTA Section - Moved from expert search */}
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-r from-[#9eb4d8] to-[#8595d5] text-white rounded-2xl p-6 text-center shadow-xl">
-            <h3 className={`${typography.h3.base} mb-2`}>Get a <span className="font-bold">FREE</span> consultation now</h3>
-            <Button className={cn("bg-white text-[#9eb4d8] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold")}>
+          <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 sm:p-8 text-center shadow-xl">
+            <h3 className={`${typography.body.ctaBanner} mb-4`}>Get a <span className="font-bold">FREE</span> consultation now</h3>
+            <Button className={cn("bg-white text-[#7394c7] hover:bg-gray-100", buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-2 shadow-lg hover:shadow-xl font-bold group")}>
               I'M IN!
               <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
