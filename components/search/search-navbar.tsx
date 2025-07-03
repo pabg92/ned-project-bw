@@ -36,7 +36,7 @@ export default function SearchNavbar({
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white sticky top-0 z-50 shadow-lg">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left side - Logo and Navigation */}
@@ -56,18 +56,18 @@ export default function SearchNavbar({
               <nav className="hidden lg:flex items-center gap-6">
                 <Link 
                   href="/search" 
-                  className="text-[#6b93ce] font-medium border-b-2 border-[#6b93ce] pb-1"
+                  className="text-white font-medium border-b-2 border-white pb-1"
                 >
                   Search
                 </Link>
                 
                 <Link 
                   href="/search/shortlist" 
-                  className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2"
+                  className="text-white/80 hover:text-white font-medium flex items-center gap-2 transition-colors"
                 >
                   My Shortlist
                   {shortlistCount > 0 && (
-                    <Badge className="bg-[#6b93ce] text-white text-xs px-1.5 py-0 h-5">
+                    <Badge className="bg-white text-[#4a4a4a] text-xs px-1.5 py-0 h-5">
                       {shortlistCount}
                     </Badge>
                   )}
@@ -75,11 +75,11 @@ export default function SearchNavbar({
                 
                 <Link 
                   href="/search/saved" 
-                  className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2"
+                  className="text-white/80 hover:text-white font-medium flex items-center gap-2 transition-colors"
                 >
                   Saved Searches
                   {savedSearchCount > 0 && (
-                    <Badge variant="outline" className="text-xs px-1.5 py-0 h-5">
+                    <Badge className="bg-white/20 text-white border-white/30 text-xs px-1.5 py-0 h-5">
                       {savedSearchCount}
                     </Badge>
                   )}
@@ -87,7 +87,7 @@ export default function SearchNavbar({
                 
                 <Link 
                   href="/search/alerts" 
-                  className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-1"
+                  className="text-white/80 hover:text-white font-medium flex items-center gap-1 transition-colors"
                 >
                   <Bell className="h-4 w-4" />
                   Alerts
@@ -100,19 +100,19 @@ export default function SearchNavbar({
               {/* Credits Display - More prominent */}
               <div className={cn(
                 "flex items-center gap-3 px-4 py-2 rounded-full",
-                isLowCredits ? "bg-red-50 border border-red-200" : "bg-gray-50"
+                isLowCredits ? "bg-red-500/20 border border-red-300/50" : "bg-white/10 border border-white/20"
               )}>
                 {isLowCredits && (
-                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                  <AlertTriangle className="h-4 w-4 text-red-300" />
                 )}
                 <div className="flex items-center gap-2">
                   <CreditCard className={cn(
                     "h-4 w-4",
-                    isLowCredits ? "text-red-500" : "text-[#6b93ce]"
+                    isLowCredits ? "text-red-300" : "text-white"
                   )} />
                   <span className={cn(
                     "font-semibold",
-                    isLowCredits ? "text-red-700" : "text-gray-700"
+                    isLowCredits ? "text-red-100" : "text-white"
                   )}>
                     {credits} Credits
                   </span>
@@ -195,7 +195,7 @@ export default function SearchNavbar({
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
+                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-white/10">
                     <User className="h-5 w-5" />
                     <span className="hidden sm:inline">My Account</span>
                     <ChevronDown className="h-4 w-4" />
@@ -231,7 +231,7 @@ export default function SearchNavbar({
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden text-white hover:bg-white/10"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? (
@@ -252,17 +252,17 @@ export default function SearchNavbar({
             className="fixed inset-0 bg-black/30" 
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <nav className="fixed right-0 top-16 h-full w-full max-w-sm bg-white shadow-xl">
+          <nav className="fixed right-0 top-16 h-full w-full max-w-sm bg-gradient-to-b from-[#4a4a4a] to-[#5a5a5a] shadow-xl">
             <div className="p-6 space-y-6">
               {/* Mobile Credits Display */}
               <div className={cn(
                 "p-4 rounded-lg text-center",
-                isLowCredits ? "bg-red-50 border border-red-200" : "bg-gray-50"
+                isLowCredits ? "bg-red-500/20 border border-red-300/50" : "bg-white/10 border border-white/20"
               )}>
-                <p className="text-sm text-gray-600 mb-1">Available Credits</p>
+                <p className="text-sm text-white/80 mb-1">Available Credits</p>
                 <p className={cn(
                   "text-2xl font-bold mb-3",
-                  isLowCredits ? "text-red-600" : "text-gray-900"
+                  isLowCredits ? "text-red-300" : "text-white"
                 )}>
                   {credits}
                 </p>
