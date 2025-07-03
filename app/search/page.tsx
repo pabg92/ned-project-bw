@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import Navbar from "@/navbar"
+import SearchNavbar from "@/components/search/search-navbar"
 import Footer from "@/footer"
 import SearchFilters from "@/components/search/search-filters"
 import SearchResults from "@/components/search/search-results"
-import SearchHeader from "@/components/search/search-header"
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
+import EnhancedSearchBar from "@/components/search/enhanced-search-bar"
+import SearchCTABanner from "@/components/search/search-cta-banner"
+import { useShortlist } from "@/hooks/use-shortlist"
 
 export interface SearchFilters {
   query: string
@@ -35,33 +35,40 @@ export default function SearchPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("relevance")
   const [showFilters, setShowFilters] = useState(true)
+  const [credits, setCredits] = useState(10) // Mock credits
+  const [savedSearches, setSavedSearches] = useState<string[]>([])
+  
+  // Mock shortlist hook - will be replaced with real implementation
+  const shortlistCount = 3
 
   const updateFilter = (key: keyof SearchFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
+  const handleSaveSearch = () => {
+    const searchString = JSON.stringify(filters)
+    setSavedSearches(prev => [...prev, searchString])
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <SearchNavbar 
+        credits={credits}
+        shortlistCount={shortlistCount}
+        savedSearchCount={savedSearches.length}
+      />
       
-      {/* Search Header with Credits Display */}
-      <SearchHeader />
+      {/* CTA Banner */}
+      <SearchCTABanner credits={credits} />
       
       {/* Main Search Section */}
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Bar */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <Input
-              type="text"
-              placeholder="Search by name, role, skills, or company..."
-              value={filters.query}
-              onChange={(e) => updateFilter("query", e.target.value)}
-              className="pl-12 pr-4 py-4 text-lg rounded-full border-gray-200 shadow-sm focus:ring-2 focus:ring-[#6b93ce] focus:border-transparent"
-            />
-          </div>
-        </div>
+        {/* Enhanced Search Bar */}
+        <EnhancedSearchBar 
+          value={filters.query}
+          onChange={(value) => updateFilter("query", value)}
+          onSaveSearch={handleSaveSearch}
+        />
         
         {/* Main Content Area */}
         <div className="flex gap-8">

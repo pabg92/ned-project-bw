@@ -1,0 +1,305 @@
+"use client"
+
+import { useState, useRef, useEffect } from "react"
+import { 
+  Search, Mic, X, Clock, TrendingUp, Sparkles, 
+  ChevronDown, Filter, Save, Command
+} from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+
+interface Props {
+  value: string
+  onChange: (value: string) => void
+  onSaveSearch: () => void
+}
+
+const recentSearches = [
+  "CFO Financial Services London",
+  "Digital Transformation Expert",
+  "Board Chair Technology",
+  "Risk Management FTSE 100",
+  "ESG Specialist"
+]
+
+const searchSuggestions = [
+  { type: "role", value: "Chief Financial Officer" },
+  { type: "skill", value: "Digital Transformation" },
+  { type: "sector", value: "Financial Services" },
+  { type: "location", value: "London" },
+  { type: "company", value: "FTSE 100" }
+]
+
+const searchTemplates = [
+  { 
+    name: "Digital CFO", 
+    query: "CFO AND (Digital OR Technology) AND Financial Services",
+    icon: "💰"
+  },
+  { 
+    name: "ESG Board Expert", 
+    query: "Board AND (ESG OR Sustainability) AND Experience:20+",
+    icon: "🌱"
+  },
+  { 
+    name: "Tech Scale-up Advisor", 
+    query: "Advisor AND Technology AND (Startup OR Scale-up)",
+    icon: "🚀"
+  },
+  { 
+    name: "Healthcare NED", 
+    query: "Non-Executive Director AND Healthcare AND (NHS OR Private)",
+    icon: "🏥"
+  }
+]
+
+export default function EnhancedSearchBar({ value, onChange, onSaveSearch }: Props) {
+  const [isFocused, setIsFocused] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Filter suggestions based on input
+  const filteredSuggestions = value.length > 2 
+    ? searchSuggestions.filter(s => 
+        s.value.toLowerCase().includes(value.toLowerCase())
+      )
+    : []
+
+  const handleSuggestionClick = (suggestion: string) => {
+    onChange(suggestion)
+    setShowSuggestions(false)
+    inputRef.current?.focus()
+  }
+
+  const handleTemplateClick = (template: typeof searchTemplates[0]) => {
+    onChange(template.query)
+    setShowSuggestions(false)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "/" && e.metaKey) {
+      e.preventDefault()
+      inputRef.current?.focus()
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown as any)
+    return () => document.removeEventListener("keydown", handleKeyDown as any)
+  }, [])
+
+  return (
+    <div className="max-w-4xl mx-auto mb-8">
+      <div className="relative">
+        {/* Main Search Input */}
+        <div className={cn(
+          "relative rounded-2xl transition-all duration-300",
+          isFocused && "ring-2 ring-[#6b93ce] ring-offset-2"
+        )}>
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          
+          <Input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onFocus={() => {
+              setIsFocused(true)
+              setShowSuggestions(true)
+            }}
+            onBlur={() => {
+              setTimeout(() => {
+                setIsFocused(false)
+                setShowSuggestions(false)
+              }, 200)
+            }}
+            placeholder="Search by name, role, skills, company, or try 'CFO in London with M&A experience'"
+            className="pl-12 pr-48 py-5 text-lg rounded-2xl border-gray-200 shadow-sm focus:ring-0 focus:border-transparent"
+          />
+
+          {/* Right side actions */}
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+            {value && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onChange("")}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+            
+            <div className="h-6 w-px bg-gray-300" />
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              <Filter className="h-4 w-4 mr-1" />
+              Advanced
+              <ChevronDown className={cn(
+                "h-3 w-3 ml-1 transition-transform",
+                showAdvanced && "rotate-180"
+              )} />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              title="Voice Search"
+            >
+              <Mic className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              onClick={onSaveSearch}
+              disabled={!value}
+              className="bg-gradient-to-r from-[#6b93ce] to-[#5a82bd] hover:from-[#5a82bd] hover:to-[#4a72ad] text-white"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+          </div>
+        </div>
+
+        {/* Keyboard shortcut hint */}
+        <div className="absolute -right-2 -top-2">
+          <Badge variant="secondary" className="text-xs bg-gray-100">
+            <Command className="h-3 w-3 mr-1" />
+            /
+          </Badge>
+        </div>
+
+        {/* Suggestions Dropdown */}
+        {showSuggestions && (value || isFocused) && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+            {/* Search Templates */}
+            {!value && (
+              <div className="p-4 border-b border-gray-100">
+                <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Quick Search Templates
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {searchTemplates.map((template) => (
+                    <button
+                      key={template.name}
+                      onClick={() => handleTemplateClick(template)}
+                      className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 text-left transition-colors"
+                    >
+                      <span className="text-xl">{template.icon}</span>
+                      <div>
+                        <p className="font-medium text-sm">{template.name}</p>
+                        <p className="text-xs text-gray-500 line-clamp-1">{template.query}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Searches */}
+            {!value && (
+              <div className="p-4 border-b border-gray-100">
+                <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Recent Searches
+                </h3>
+                <div className="space-y-1">
+                  {recentSearches.slice(0, 3).map((search) => (
+                    <button
+                      key={search}
+                      onClick={() => handleSuggestionClick(search)}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors"
+                    >
+                      {search}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Filtered Suggestions */}
+            {filteredSuggestions.length > 0 && (
+              <div className="p-4">
+                <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Suggestions
+                </h3>
+                <div className="space-y-1">
+                  {filteredSuggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestionClick(suggestion.value)}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                    >
+                      <Badge variant="outline" className="text-xs">
+                        {suggestion.type}
+                      </Badge>
+                      <span className="text-sm text-gray-700">{suggestion.value}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Advanced Search Panel */}
+        {showAdvanced && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 z-40 p-6">
+            <h3 className="font-medium text-gray-900 mb-4">Advanced Search</h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Use these operators to refine your search:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <code className="text-sm font-mono text-[#6b93ce]">AND</code>
+                    <p className="text-xs text-gray-600 mt-1">Both terms must be present</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <code className="text-sm font-mono text-[#6b93ce]">OR</code>
+                    <p className="text-xs text-gray-600 mt-1">Either term can be present</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <code className="text-sm font-mono text-[#6b93ce]">NOT</code>
+                    <p className="text-xs text-gray-600 mt-1">Exclude terms</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <code className="text-sm font-mono text-[#6b93ce]">"quotes"</code>
+                    <p className="text-xs text-gray-600 mt-1">Exact phrase match</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Field-specific searches:</p>
+                <div className="space-y-2 text-sm">
+                  <p><code className="font-mono bg-gray-100 px-2 py-1 rounded">role:CFO</code> - Search by specific role</p>
+                  <p><code className="font-mono bg-gray-100 px-2 py-1 rounded">sector:"Financial Services"</code> - Search by sector</p>
+                  <p><code className="font-mono bg-gray-100 px-2 py-1 rounded">location:London</code> - Search by location</p>
+                  <p><code className="font-mono bg-gray-100 px-2 py-1 rounded">experience:20+</code> - Search by years of experience</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

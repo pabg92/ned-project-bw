@@ -1,11 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { Grid, List, SlidersHorizontal, ChevronDown } from "lucide-react"
+import { useState, useEffect } from "react"
+import { 
+  Grid, List, SlidersHorizontal, ChevronDown, CheckSquare, 
+  Square, Unlock, Download, Heart, ArrowUp, Loader2
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import ProfileCard, { Profile } from "./profile-card"
 import { SearchFilters } from "@/app/search/page"
+import { useShortlist } from "@/hooks/use-shortlist"
+import { cn } from "@/lib/utils"
 
 // Mock data - will be replaced with Supabase data
 const mockProfiles: Profile[] = [
@@ -124,7 +130,21 @@ export default function SearchResults({
 }: Props) {
   const [profiles, setProfiles] = useState(mockProfiles)
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedProfiles, setSelectedProfiles] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [showScrollTop, setShowScrollTop] = useState(false)
   const itemsPerPage = 12
+  
+  const { addProfile, removeProfile, isInShortlist } = useShortlist()
+
+  // Track scroll position for "Back to Top" button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleUnlock = (id: string) => {
     // In real app, this would deduct a credit and update the backend
@@ -133,9 +153,50 @@ export default function SearchResults({
     )
   }
 
+  const handleBulkUnlock = () => {
+    if (selectedProfiles.length === 0) return
+    
+    setIsLoading(true)
+    // Simulate API call
+    setTimeout(() => {
+      setProfiles(prev =>
+        prev.map(p => selectedProfiles.includes(p.id) ? { ...p, isUnlocked: true } : p)
+      )
+      setSelectedProfiles([])
+      setIsLoading(false)
+    }, 1000)
+  }
+
   const handleSave = (id: string) => {
-    // Handle saving to shortlist
-    console.log("Saving profile:", id)
+    const profile = profiles.find(p => p.id === id)
+    if (!profile) return
+
+    if (isInShortlist(id)) {
+      removeProfile(id)
+    } else {
+      addProfile({
+        id: profile.id,
+        name: profile.name,
+        title: profile.title
+      })
+    }
+  }
+
+  const handleSelectProfile = (id: string) => {
+    setSelectedProfiles(prev =>
+      prev.includes(id) 
+        ? prev.filter(p => p !== id)
+        : [...prev, id]
+    )
+  }
+
+  const handleSelectAll = () => {
+    const visibleProfileIds = displayedProfiles.map(p => p.id)
+    if (selectedProfiles.length === visibleProfileIds.length) {
+      setSelectedProfiles([])
+    } else {
+      setSelectedProfiles(visibleProfileIds)
+    }
   }
 
   // Filter profiles based on search criteria
@@ -162,12 +223,89 @@ export default function SearchResults({
   const startIndex = (currentPage - 1) * itemsPerPage
   const displayedProfiles = filteredProfiles.slice(startIndex, startIndex + itemsPerPage)
 
+  const lockedProfiles = filteredProfiles.filter(p => !p.isUnlocked)
+  const selectedLockedCount = selectedProfiles.filter(id => 
+    lockedProfiles.some(p => p.id === id)
+  ).length
+  
   return (
     <div>
+      {/* Bulk Actions Bar */}
+      {selectedProfiles.length > 0 && (
+        <div className="bg-[#6b93ce] text-white rounded-lg p-4 mb-4 animate-fadeIn">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedProfiles([])}
+                className="text-white hover:bg-white/20"
+              >
+                <Square className="h-4 w-4 mr-2" />
+                {selectedProfiles.length} selected
+              </Button>
+              
+              <div className="h-6 w-px bg-white/30" />
+              
+              <Button
+                onClick={handleBulkUnlock}
+                disabled={selectedLockedCount === 0 || isLoading}
+                className="bg-white text-[#6b93ce] hover:bg-gray-100"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Unlock className="h-4 w-4 mr-2" />
+                )}
+                Unlock {selectedLockedCount} Profiles ({selectedLockedCount} Credits)
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20"
+              >
+                <Heart className="h-4 w-4 mr-2" />
+                Add to Shortlist
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
+            
+            <Badge className="bg-white/20 text-white">
+              Save {Math.round(selectedLockedCount * 0.2)} credits with bulk unlock
+            </Badge>
+          </div>
+        </div>
+      )}
+      
       {/* Results Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
+            {viewMode === "grid" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSelectAll}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                {selectedProfiles.length === displayedProfiles.length ? (
+                  <CheckSquare className="h-4 w-4 mr-2" />
+                ) : (
+                  <Square className="h-4 w-4 mr-2" />
+                )}
+                Select All
+              </Button>
+            )}
+            
             <Button
               variant="outline"
               size="sm"
@@ -177,6 +315,7 @@ export default function SearchResults({
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               Filters
             </Button>
+            
             <p className="text-gray-600">
               <span className="font-semibold text-gray-900">{filteredProfiles.length}</span> executives found
             </p>

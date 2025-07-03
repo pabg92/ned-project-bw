@@ -1,0 +1,173 @@
+# NED Advisor Platform Backend - Product Requirements Document (PRD)
+
+## Overview
+
+The NED Advisor Platform connects Non-Executive Directors (NEDs) with companies seeking their expertise. This PRD outlines the requirements for the backend system, which will support candidate profile management, administrative enrichment, secure data storage, advanced search capabilities, and integration with the wider Champions Group ecosystem. This backend will ensure secure, scalable, and performant data handling for all platform users including candidates, internal administrators, and companies.
+
+## Core Features
+
+### Candidate Registration & Profile Management
+
+* **What it does:** Allows candidates to register and manage their profiles.
+* **Why it's important:** Enables user-generated content and profile visibility.
+* **How it works:** Candidates submit structured data via frontend forms. Backend handles upserts based on email or external ID with Zod validation.
+
+### Admin Profile Enrichment
+
+* **What it does:** Enables internal admins to enrich candidate profiles with private metadata.
+* **Why it's important:** Enhances internal decision-making and candidate presentation.
+* **How it works:** Admin-only endpoints protected by Clerk roles enable secure updates and document handling.
+
+### Secure Candidate Search
+
+* **What it does:** Allows companies to search for anonymized candidate profiles.
+* **Why it's important:** Enables discovery while maintaining candidate confidentiality.
+* **How it works:** Indexed PostgreSQL queries for advanced filters. Profiles are anonymized until payment verification.
+
+### Paywall & De-anonymization
+
+* **What it does:** Controls access to full profile data.
+* **Why it's important:** Supports monetization model.
+* **How it works:** Stripe webhooks trigger access updates via Supabase Edge Functions.
+
+### Authentication & Role-based Access Control
+
+* **What it does:** Authenticates users and enforces permissions.
+* **Why it's important:** Secures data access.
+* **How it works:** Uses Clerk and Supabase Row-Level Security (RLS).
+
+### Data Ingestion from Champions Ecosystem
+
+* **What it does:** Ingests leads and profiles from affiliated platforms.
+* **Why it's important:** Bootstraps platform with known contacts.
+* **How it works:** Scheduled jobs or APIs use upsert logic for deduplication.
+
+### Notifications & Tags (Optional but Valuable)
+
+* **What it does:** Admin alerts and profile tagging.
+* **Why it's important:** Streamlines admin workflow.
+* **How it works:** Notifications via Resend; tags use normalized data model.
+
+## User Experience
+
+### User Personas
+
+* **Candidate:** Registers, maintains profile.
+* **Admin:** Manages platform, enriches data.
+* **Company:** Searches, unlocks candidate data.
+
+### Key User Flows
+
+* Candidate registers, completes profile.
+* Admin reviews, enriches, uploads documents.
+* Company searches, pays, views detailed profile.
+
+### UI/UX Considerations
+
+* Clear status indicators (pending, approved).
+* Anonymized vs full profile toggles.
+* Search filters and shortlists for companies.
+
+## Technical Architecture
+
+### System Components
+
+* **Backend Framework:** Next.js API Routes or Supabase Edge Functions
+* **Auth:** Clerk
+* **Data Store:** Supabase (PostgreSQL + Storage)
+* **Validation:** Zod schemas
+
+### Data Models
+
+* **CandidateProfile**: Includes personal and professional data
+* **UserAuthDetails**: Maps Clerk IDs to internal UUIDs
+* **Tags & CandidateTags**: Normalized skill/experience tagging
+* **Companies**: Stores subscription and Stripe data
+
+### APIs and Integrations
+
+* **Auth:** `/api/auth/*`
+* **Admin:** `/api/admin/*`
+* **Public/Versioned:** `/api/v1/*`
+* **Webhooks:** `/api/webhooks/*`
+* **System Integration:** `/api/system/*`
+
+### Infrastructure Requirements
+
+* Vercel for hosting API routes and cron jobs
+* Supabase for storage and RLS-enforced PostgreSQL
+* Stripe for subscription and payment
+* Resend for admin email notifications
+
+## Development Roadmap
+
+### Phase 1 (MVP)
+
+* Candidate registration, retrieval, and update
+* Admin enrichment and document uploads
+* Basic company search with anonymized data
+* Paywall + Stripe integration
+* Authentication via Clerk with RLS policies
+* Ingestion via scheduled job or endpoint
+
+### Phase 2 (Post-MVP Enhancements)
+
+* Tagging system and filtering
+* Admin analytics endpoints
+* Admin notifications
+* Shortlisting and company dashboard backend
+
+### Phase 3 (Future Enhancements)
+
+* AI-driven candidate recommendations
+* Advanced reporting and analytics
+* Direct company-candidate communication
+* Audit trails and change logs
+
+## Logical Dependency Chain
+
+1. **Auth Foundation:** Clerk integration, RLS policies, user sync
+2. **Data Foundation:** Schema creation, validation logic, Supabase setup
+3. **Candidate Core:** Registration, profile update/retrieval
+4. **Admin Tools:** Enrichment APIs, document uploads
+5. **Company Interface:** Search, paywall, Stripe flow
+6. **Integrations:** Lead ingestion from Champions
+7. **Enhancements:** Notifications, tagging, dashboards
+8. **Future AI/Analytics:** Optional once core usage is validated
+
+## Risks and Mitigations
+
+### Technical Challenges
+
+* **Risk:** Indexing and search performance with large datasets
+* **Mitigation:** Predefine GIN/BTREE indexes, consider materialized views
+
+### MVP Scope Creep
+
+* **Risk:** Expanding features before core is stable
+* **Mitigation:** Strict separation between MVP and enhancements
+
+### Resource Constraints
+
+* **Risk:** Limited dev time for building/iterating
+* **Mitigation:** Lean MVP, build atomic features that compound
+
+## Appendix
+
+### Research Findings
+
+* Supabase provides a viable alternative to Firebase with first-class Postgres and native Edge Functions.
+* Clerk offers more seamless RBAC than Auth0 for modern Jamstack projects.
+
+### Technical Specifications
+
+* **Validation Library:** Zod
+* **ORM (if used):** Drizzle ORM (schema-first)
+* **Migration Tooling:** Supabase CLI + Drizzle Kit
+* **Observability:** OpenTelemetry traces, logs to Logflare or Grafana Loki
+* **Performance Target:** API response < 500ms
+
+---
+
+Version: 2.0
+Last Updated: May 29, 2025
