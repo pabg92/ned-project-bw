@@ -1,22 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
-import { db } from '@/lib/supabase/client';
+import { db, supabaseAdmin } from '@/lib/supabase/client';
 import { candidateProfiles } from '@/lib/supabase/schema';
 import { requireAdmin } from '@/lib/auth/utils';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
-import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client for storage operations
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+// Prevent static optimization during build
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // File upload configuration
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

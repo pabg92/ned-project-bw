@@ -42,26 +42,20 @@ export const supabase = createSupabaseClient();
 // Supabase admin client for server-side operations
 export const supabaseAdmin = createSupabaseAdmin();
 
-// Database connection for Drizzle ORM
-// Use DATABASE_URL from environment or construct from Supabase URL
+// Database connection for Drizzle ORM - TEMPORARILY DISABLED FOR BUILD
+// TODO: Re-enable when environment variables are configured
+/*
 const getDatabaseUrl = () => {
-  // If DATABASE_URL is provided, use it
   if (process.env.DATABASE_URL) {
     return process.env.DATABASE_URL;
   }
-  
-  // During build, return a placeholder
   if (!supabaseUrl || supabaseUrl === '') {
     return 'postgres://placeholder:placeholder@localhost:5432/placeholder';
   }
-  
-  // Extract project ref from Supabase URL for pooler connection
   const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
   if (!projectRef) {
     throw new Error('Invalid Supabase URL format');
   }
-  
-  // Construct pooler URL (you'll need to set the password as an env var)
   const dbPassword = process.env.SUPABASE_DB_PASSWORD || '';
   return `postgres://postgres.${projectRef}:${encodeURIComponent(dbPassword)}@aws-0-us-west-1.pooler.supabase.com:6543/postgres`;
 };
@@ -73,6 +67,10 @@ const client = postgres(dbUrl, {
   max: 10,
 });
 export const db = drizzle(client, { schema });
+*/
+
+// Temporary mock for build
+export const db = {} as any;
 
 // Types
 export type Database = typeof schema;
