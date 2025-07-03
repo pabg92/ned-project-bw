@@ -42,35 +42,54 @@ export const supabase = createSupabaseClient();
 // Supabase admin client for server-side operations
 export const supabaseAdmin = createSupabaseAdmin();
 
-// Database connection for Drizzle ORM - TEMPORARILY DISABLED FOR BUILD
-// TODO: Re-enable when environment variables are configured
-/*
+// Database connection for Drizzle ORM
 const getDatabaseUrl = () => {
+  // Use DATABASE_URL if provided
   if (process.env.DATABASE_URL) {
     return process.env.DATABASE_URL;
   }
-  if (!supabaseUrl || supabaseUrl === '') {
+  
+  // During build or when no URL is set, return a placeholder
+  if (!supabaseUrl || supabaseUrl === '' || supabaseUrl.includes('placeholder')) {
+    console.log('Using placeholder database URL for build');
     return 'postgres://placeholder:placeholder@localhost:5432/placeholder';
   }
-  const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
-  if (!projectRef) {
-    throw new Error('Invalid Supabase URL format');
-  }
-  const dbPassword = process.env.SUPABASE_DB_PASSWORD || '';
-  return `postgres://postgres.${projectRef}:${encodeURIComponent(dbPassword)}@aws-0-us-west-1.pooler.supabase.com:6543/postgres`;
+  
+  // This should not be reached in production - DATABASE_URL should always be set
+  throw new Error('DATABASE_URL environment variable is required');
 };
 
-const dbUrl = getDatabaseUrl();
-const client = postgres(dbUrl, { 
-  ssl: dbUrl.includes('localhost') ? undefined : 'require',
-  prepare: false,
-  max: 10,
-});
-export const db = drizzle(client, { schema });
-*/
+// Create database client conditionally
+let db: any;
 
-// Temporary mock for build
-export const db = {} as any;
+try {
+  const dbUrl = getDatabaseUrl();
+  if (!dbUrl.includes('placeholder')) {
+    const client = postgres(dbUrl, { 
+      ssl: 'require',
+      prepare: false,
+      max: 10,
+    });
+    db = drizzle(client, { schema });
+  } else {
+    // Mock for build time
+    db = new Proxy({}, {
+      get: () => {
+        throw new Error('Database not initialized. Please configure DATABASE_URL.');
+      }
+    });
+  }
+} catch (error) {
+  console.warn('Database initialization skipped:', error);
+  // Provide a mock that throws helpful errors
+  db = new Proxy({}, {
+    get: () => {
+      throw new Error('Database not initialized. Please configure DATABASE_URL.');
+    }
+  });
+}
+
+export { db };
 
 // Types
 export type Database = typeof schema;
