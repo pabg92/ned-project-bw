@@ -8,38 +8,48 @@ import SearchResults from "@/components/search/search-results"
 import EnhancedSearchBar from "@/components/search/enhanced-search-bar"
 import SearchCTABanner from "@/components/search/search-cta-banner"
 import { useShortlist } from "@/hooks/use-shortlist"
+import { useCredits } from "@/hooks/use-credits"
 
 export interface SearchFilters {
   query: string
   role: string[]
-  sector: string[]
+  sectors: string[]
   skills: string[]
   experience: string
-  location: string[]
+  location: string
   availability: string
   boardExperience: string[]
+  remotePreference?: string
+  salaryMin?: number
+  salaryMax?: number
 }
 
 export default function SearchPage() {
   const [filters, setFilters] = useState<SearchFilters>({
     query: "",
     role: [],
-    sector: [],
+    sectors: [],
     skills: [],
     experience: "",
-    location: [],
+    location: "",
     availability: "",
-    boardExperience: []
+    boardExperience: [],
+    remotePreference: "",
+    salaryMin: undefined,
+    salaryMax: undefined
   })
   
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("relevance")
   const [showFilters, setShowFilters] = useState(true)
-  const [credits, setCredits] = useState(10) // Mock credits
   const [savedSearches, setSavedSearches] = useState<string[]>([])
   
-  // Mock shortlist hook - will be replaced with real implementation
-  const shortlistCount = 3
+  // Use real credits from Clerk
+  const { credits } = useCredits()
+  
+  // Use real shortlist
+  const { profiles: shortlistProfiles } = useShortlist()
+  const shortlistCount = shortlistProfiles.length
 
   const updateFilter = (key: keyof SearchFilters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }))

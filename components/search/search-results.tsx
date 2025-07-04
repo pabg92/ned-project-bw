@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { 
   Grid, List, SlidersHorizontal, ChevronDown, CheckSquare, 
   Square, Unlock, Download, Heart, ArrowUp, Loader2
@@ -13,101 +14,7 @@ import { SearchFilters } from "@/app/search/page"
 import { useShortlist } from "@/hooks/use-shortlist"
 import { cn } from "@/lib/utils"
 
-// Mock data - will be replaced with Supabase data
-const mockProfiles: Profile[] = [
-  {
-    id: "1",
-    name: "Sarah Thompson",
-    title: "Former CFO - FTSE 100",
-    location: "London",
-    experience: "25+ years",
-    sectors: ["Financial Services", "Technology", "Healthcare"],
-    skills: ["Financial Strategy", "M&A", "Risk Management", "Digital Transformation", "ESG"],
-    bio: "Experienced CFO with 25+ years in financial leadership roles across FTSE 100 companies. Specialized in digital transformation and sustainable finance strategies.",
-    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400",
-    isUnlocked: false,
-    boardPositions: 3,
-    availability: "Immediate",
-    rating: 4.8,
-    profileViews: 234
-  },
-  {
-    id: "2",
-    name: "Executive Profile",
-    title: "CEO - Technology Sector",
-    location: "Manchester",
-    experience: "20+ years",
-    sectors: ["Technology", "SaaS", "Fintech"],
-    skills: ["Strategy", "Growth", "Leadership", "Innovation", "Digital"],
-    bio: "Technology sector CEO with proven track record of scaling businesses from startup to IPO. Expert in digital transformation and innovation strategy.",
-    isUnlocked: false,
-    boardPositions: 2,
-    availability: "3 months",
-    rating: 4.9,
-    profileViews: 189
-  },
-  {
-    id: "3",
-    name: "Dr. Michael Chen",
-    title: "Independent Director - Healthcare",
-    location: "Cambridge",
-    experience: "15+ years",
-    sectors: ["Healthcare", "Biotech", "Pharmaceuticals"],
-    skills: ["Clinical Governance", "R&D Strategy", "Regulatory", "Innovation"],
-    bio: "Healthcare industry veteran with deep expertise in clinical governance and pharmaceutical R&D. Board experience includes listed biotechs and NHS trusts.",
-    imageUrl: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400",
-    isUnlocked: true,
-    boardPositions: 4,
-    availability: "1 month",
-    rating: 4.7,
-    profileViews: 156
-  },
-  {
-    id: "4",
-    name: "Executive Profile",
-    title: "CMO - Retail & Consumer",
-    location: "Birmingham",
-    experience: "18+ years",
-    sectors: ["Retail", "E-commerce", "Consumer Goods"],
-    skills: ["Brand Strategy", "Digital Marketing", "Customer Experience", "Data Analytics"],
-    bio: "Award-winning CMO with extensive experience in retail transformation and omnichannel strategy. Led marketing for several major UK retail brands.",
-    isUnlocked: false,
-    boardPositions: 1,
-    availability: "Immediate",
-    rating: 4.6,
-    profileViews: 145
-  },
-  {
-    id: "5",
-    name: "Executive Profile",
-    title: "CHRO - Financial Services",
-    location: "Edinburgh",
-    experience: "22+ years",
-    sectors: ["Financial Services", "Insurance", "Banking"],
-    skills: ["HR Strategy", "Culture Change", "D&I", "Talent Management", "Organizational Design"],
-    bio: "Transformational HR leader with expertise in culture change and diversity initiatives. Proven track record in highly regulated financial services environments.",
-    isUnlocked: false,
-    boardPositions: 2,
-    availability: "6 months",
-    rating: 4.8,
-    profileViews: 178
-  },
-  {
-    id: "6",
-    name: "Executive Profile",
-    title: "COO - Manufacturing",
-    location: "Leeds",
-    experience: "30+ years",
-    sectors: ["Manufacturing", "Supply Chain", "Automotive"],
-    skills: ["Operations", "Lean Six Sigma", "Supply Chain", "Sustainability", "Cost Optimization"],
-    bio: "Operations excellence expert with three decades of experience in global manufacturing. Specialist in sustainable operations and supply chain resilience.",
-    isUnlocked: false,
-    boardPositions: 5,
-    availability: "3 months",
-    rating: 4.9,
-    profileViews: 267
-  }
-]
+// NO MOCK DATA - Only show real database profiles
 
 interface Props {
   filters: SearchFilters
@@ -128,12 +35,15 @@ export default function SearchResults({
   onToggleFilters,
   showFilters
 }: Props) {
-  const [profiles, setProfiles] = useState(mockProfiles)
+  const [profiles, setProfiles] = useState<Profile[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedProfiles, setSelectedProfiles] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const itemsPerPage = 12
+  const router = useRouter()
   
   const { addProfile, removeProfile, isInShortlist } = useShortlist()
 
@@ -146,11 +56,64 @@ export default function SearchResults({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Fetch profiles from API
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      setIsLoading(true)
+      try {
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: itemsPerPage.toString(),
+          sortBy: sortBy,
+        })
+
+        // Add filters to params
+        if (filters.query) params.append('query', filters.query)
+        if (filters.experience) params.append('experience', filters.experience)
+        if (filters.location) params.append('location', filters.location)
+        if (filters.availability) params.append('availability', filters.availability)
+        if (filters.remotePreference) params.append('remotePreference', filters.remotePreference)
+        if (filters.salaryMin) params.append('salaryMin', filters.salaryMin.toString())
+        if (filters.salaryMax) params.append('salaryMax', filters.salaryMax.toString())
+        if (filters.sectors && filters.sectors.length > 0) {
+          params.append('sectors', filters.sectors.join(','))
+        }
+        if (filters.skills && filters.skills.length > 0) {
+          params.append('skills', filters.skills.join(','))
+        }
+
+        // Use the main search endpoint that filters for active and completed profiles
+        const response = await fetch(`/api/search/candidates?${params}`)
+        const data = await response.json()
+
+        if (data.success && data.data.profiles.length > 0) {
+          setProfiles(data.data.profiles)
+          setTotalCount(data.data.pagination.total)
+          setTotalPages(data.data.pagination.totalPages)
+        } else {
+          console.error('No profiles found or API error:', data.error || 'No profiles')
+          // NO MOCK DATA - Show empty state
+          setProfiles([])
+          setTotalCount(0)
+          setTotalPages(0)
+        }
+      } catch (error) {
+        console.error('Error fetching profiles:', error)
+        // NO MOCK DATA - Show empty state
+        setProfiles([])
+        setTotalCount(0)
+        setTotalPages(0)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProfiles()
+  }, [filters, currentPage, sortBy])
+
   const handleUnlock = (id: string) => {
-    // In real app, this would deduct a credit and update the backend
-    setProfiles(prev =>
-      prev.map(p => p.id === id ? { ...p, isUnlocked: true } : p)
-    )
+    // Navigate to the profile page when unlock is clicked
+    router.push(`/search/${id}`)
   }
 
   const handleBulkUnlock = () => {
@@ -199,31 +162,10 @@ export default function SearchResults({
     }
   }
 
-  // Filter profiles based on search criteria
-  const filteredProfiles = profiles.filter(profile => {
-    // In real app, this would be done server-side
-    if (filters.query) {
-      const query = filters.query.toLowerCase()
-      const searchableText = [
-        profile.name,
-        profile.title,
-        ...profile.sectors,
-        ...profile.skills,
-        profile.bio
-      ].join(" ").toLowerCase()
-      
-      if (!searchableText.includes(query)) return false
-    }
-    
-    // Add more filter logic here
-    return true
-  })
+  // No need to filter client-side as API handles it
+  const displayedProfiles = profiles
 
-  const totalPages = Math.ceil(filteredProfiles.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const displayedProfiles = filteredProfiles.slice(startIndex, startIndex + itemsPerPage)
-
-  const lockedProfiles = filteredProfiles.filter(p => !p.isUnlocked)
+  const lockedProfiles = profiles.filter(p => !p.isUnlocked)
   const selectedLockedCount = selectedProfiles.filter(id => 
     lockedProfiles.some(p => p.id === id)
   ).length
@@ -317,7 +259,7 @@ export default function SearchResults({
             </Button>
             
             <p className="text-gray-600">
-              <span className="font-semibold text-gray-900">{filteredProfiles.length}</span> executives found
+              <span className="font-semibold text-gray-900">{totalCount}</span> executives found
             </p>
           </div>
           
@@ -360,20 +302,31 @@ export default function SearchResults({
       </div>
 
       {/* Results Grid/List */}
-      <div className={viewMode === "grid" 
-        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
-        : "space-y-4"
-      }>
-        {displayedProfiles.map(profile => (
-          <ProfileCard
-            key={profile.id}
-            profile={profile}
-            viewMode={viewMode}
-            onUnlock={handleUnlock}
-            onSave={handleSave}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-[#6b93ce]" />
+        </div>
+      ) : displayedProfiles.length === 0 ? (
+        <div className="text-center py-20">
+          <p className="text-gray-600 text-lg mb-2">No approved profiles available</p>
+          <p className="text-gray-500">Please check back later or contact admin for profile approval</p>
+        </div>
+      ) : (
+        <div className={viewMode === "grid" 
+          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+          : "space-y-4"
+        }>
+          {displayedProfiles.map(profile => (
+            <ProfileCard
+              key={profile.id}
+              profile={profile}
+              viewMode={viewMode}
+              onUnlock={handleUnlock}
+              onSave={handleSave}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

@@ -3,10 +3,12 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useUser, useClerk } from "@clerk/nextjs"
 import { 
   Search, CreditCard, Heart, Bell, User, ChevronDown, 
   Package, TrendingUp, AlertTriangle, Menu, X, History,
-  BookmarkCheck, Zap
+  BookmarkCheck, Zap, LogOut, Settings
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -31,8 +33,19 @@ export default function SearchNavbar({
   shortlistCount = 0,
   savedSearchCount = 0 
 }: SearchNavbarProps) {
+  const router = useRouter()
+  const { user, isSignedIn, isLoaded } = useUser()
+  const { signOut } = useClerk()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const isLowCredits = credits < 5
+  
+  // Get credits from user metadata or use default
+  const userCredits = user?.publicMetadata?.credits as number || credits
+  const isLowCredits = userCredits < 5
+  
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/")
+  }
 
   return (
     <>
@@ -114,7 +127,7 @@ export default function SearchNavbar({
                     "font-semibold",
                     isLowCredits ? "text-red-100" : "text-white"
                   )}>
-                    {credits} Credits
+                    {userCredits} Credits
                   </span>
                 </div>
                 
@@ -193,39 +206,80 @@ export default function SearchNavbar({
               </div>
 
               {/* User Menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-white/10">
-                    <User className="h-5 w-5" />
-                    <span className="hidden sm:inline">My Account</span>
-                    <ChevronDown className="h-4 w-4" />
+              {isLoaded && isSignedIn ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2 text-white hover:bg-white/10">
+                      {user.imageUrl ? (
+                        <img 
+                          src={user.imageUrl} 
+                          alt={user.firstName || "User"} 
+                          className="h-5 w-5 rounded-full"
+                        />
+                      ) : (
+                        <User className="h-5 w-5" />
+                      )}
+                      <span className="hidden sm:inline">
+                        {user.firstName || "My Account"}
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {user.firstName} {user.lastName}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {user.primaryEmailAddress?.emailAddress}
+                        </span>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push("/profile/edit")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      Profile Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/billing")}>
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Billing & Credits
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/search/history")}>
+                      <History className="mr-2 h-4 w-4" />
+                      Search History
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push("/search/saved")}>
+                      <BookmarkCheck className="mr-2 h-4 w-4" />
+                      Saved Profiles
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="text-red-600 cursor-pointer"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:bg-white/10"
+                    onClick={() => router.push("/sign-in?redirect=/search")}
+                  >
+                    Sign in
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>john.doe@example.com</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    Profile Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Billing & Credits
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <History className="mr-2 h-4 w-4" />
-                    Search History
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <BookmarkCheck className="mr-2 h-4 w-4" />
-                    Saved Profiles
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <Button
+                    className="bg-gradient-to-r from-[#6b93ce] to-[#5a82bd] hover:from-[#5a82bd] hover:to-[#4a72ad] text-white"
+                    onClick={() => router.push("/sign-up?redirect=/search")}
+                  >
+                    Get Started
+                  </Button>
+                </div>
+              )}
 
               {/* Mobile menu button */}
               <Button
@@ -264,7 +318,7 @@ export default function SearchNavbar({
                   "text-2xl font-bold mb-3",
                   isLowCredits ? "text-red-300" : "text-white"
                 )}>
-                  {credits}
+                  {userCredits}
                 </p>
                 <Button className="w-full bg-gradient-to-r from-[#6b93ce] to-[#5a82bd] hover:from-[#5a82bd] hover:to-[#4a72ad] text-white">
                   <Package className="h-4 w-4 mr-2" />
@@ -327,20 +381,57 @@ export default function SearchNavbar({
 
               {/* Mobile User Actions */}
               <div className="border-t pt-6 space-y-3">
-                <Link
-                  href="/account"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <User className="h-5 w-5 text-gray-400" />
-                  Account Settings
-                </Link>
-                <button
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-red-600 w-full text-left"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Log out
-                </button>
+                {isSignedIn ? (
+                  <>
+                    <div className="p-3 bg-white/10 rounded-lg text-white">
+                      <p className="text-sm font-medium">
+                        {user?.firstName} {user?.lastName}
+                      </p>
+                      <p className="text-xs text-white/70">
+                        {user?.primaryEmailAddress?.emailAddress}
+                      </p>
+                    </div>
+                    <Link
+                      href="/profile/edit"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 text-white"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Settings className="h-5 w-5" />
+                      Profile Settings
+                    </Link>
+                    <button
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 text-red-300 w-full text-left"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false)
+                        handleSignOut()
+                      }}
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <Button
+                      className="w-full bg-white/10 hover:bg-white/20 text-white"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false)
+                        router.push("/sign-in?redirect=/search")
+                      }}
+                    >
+                      Sign in
+                    </Button>
+                    <Button
+                      className="w-full bg-gradient-to-r from-[#6b93ce] to-[#5a82bd] hover:from-[#5a82bd] hover:to-[#4a72ad] text-white"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false)
+                        router.push("/sign-up?redirect=/search")
+                      }}
+                    >
+                      Get Started
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </nav>
