@@ -52,7 +52,7 @@ export default function SearchResults({
   const [unlockedProfiles, setUnlockedProfiles] = useState<string[]>([])
   const itemsPerPage = 12
   const router = useRouter()
-  const { isSignedIn } = useUser()
+  const { user } = useUser()
   const { credits, deductCredits, hasEnoughCredits } = useCredits()
   
   const { addProfile, removeProfile, isInShortlist } = useShortlist()
