@@ -28,13 +28,17 @@ const isPublicRoute = createRouteMatcher([
 
 // Define company-only routes (companies and admins can access)
 const isCompanyRoute = createRouteMatcher([
-  "/search(.*)",                     // Browse candidates
   "/billing(.*)",                    // Credit purchase
   "/credits(.*)",                    // Credit management
   "/shortlist(.*)",                  // Saved candidates
-  "/api/search(.*)",                 // Search API
   "/api/profiles/(.*)/unlock",       // Profile unlock API
   "/api/user/credits(.*)",           // Credits API
+]);
+
+// Define routes that require authentication (any logged-in user)
+const isAuthenticatedRoute = createRouteMatcher([
+  "/search(.*)",                     // Browse candidates (available to all authenticated users)
+  "/api/search(.*)",                 // Search API
 ]);
 
 // Define admin-only routes
@@ -64,6 +68,17 @@ export default clerkMiddleware(async (auth, req) => {
   // Allow development routes in development mode only
   if (isDevelopmentRoute(req) && process.env.NODE_ENV !== 'development') {
     return NextResponse.redirect(new URL('/', req.url));
+  }
+  
+  // Check authenticated routes (available to all logged-in users)
+  if (isAuthenticatedRoute(req)) {
+    if (!userId) {
+      // Not authenticated, redirect to sign in
+      const signInUrl = new URL('/sign-in', req.url);
+      signInUrl.searchParams.set('redirect_url', req.url);
+      return NextResponse.redirect(signInUrl);
+    }
+    // User is authenticated, allow access regardless of role
   }
   
   // Check company routes
