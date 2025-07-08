@@ -15,9 +15,18 @@ interface ProfileCardProps {
   viewMode?: "grid" | "list"
   onUnlock?: (id: string) => void
   onSave?: (id: string) => void
+  isSignedIn?: boolean
+  isCompanyUser?: boolean
 }
 
-export default function ProfileCard({ profile, viewMode = "grid", onUnlock, onSave }: ProfileCardProps) {
+export default function ProfileCard({ 
+  profile, 
+  viewMode = "grid", 
+  onUnlock, 
+  onSave,
+  isSignedIn = false,
+  isCompanyUser = false
+}: ProfileCardProps) {
   const router = useRouter()
   const [isSaved, setIsSaved] = useState(false)
   const isLocked = profile.isAnonymized && !profile.isUnlocked
@@ -45,18 +54,20 @@ export default function ProfileCard({ profile, viewMode = "grid", onUnlock, onSa
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow relative">
-      {/* Save button */}
-      <button
-        onClick={handleSave}
-        className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
-      >
-        <Heart 
-          className={cn(
-            "h-5 w-5 transition-colors",
-            isSaved ? "fill-red-500 text-red-500" : "text-gray-400"
-          )} 
-        />
-      </button>
+      {/* Save button - only for authenticated users */}
+      {isSignedIn && (
+        <button
+          onClick={handleSave}
+          className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
+        >
+          <Heart 
+            className={cn(
+              "h-5 w-5 transition-colors",
+              isSaved ? "fill-red-500 text-red-500" : "text-gray-400"
+            )} 
+          />
+        </button>
+      )}
 
       {/* Blue header background */}
       <div className="h-32 bg-gradient-to-br from-[#6b93ce] to-[#8bb4e8]" />
@@ -127,13 +138,31 @@ export default function ProfileCard({ profile, viewMode = "grid", onUnlock, onSa
 
           {/* Action buttons */}
           {isLocked ? (
-            <Button 
-              onClick={handleUnlock}
-              className="mt-6 w-full max-w-xs bg-[#6b93ce] hover:bg-[#5a82bd] text-white"
-            >
-              <Lock className="h-4 w-4 mr-2" />
-              Unlock (1 Credit)
-            </Button>
+            <>
+              {!isSignedIn ? (
+                <Button 
+                  onClick={() => router.push('/sign-in?redirect_url=/search')}
+                  className="mt-6 w-full max-w-xs bg-[#7394c7] hover:bg-[#6b93ce] text-white"
+                >
+                  Sign in to Unlock
+                </Button>
+              ) : !isCompanyUser ? (
+                <Button 
+                  onClick={() => router.push('/companies')}
+                  className="mt-6 w-full max-w-xs bg-[#6b93ce] hover:bg-[#5a82bd] text-white"
+                >
+                  Upgrade to Unlock
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleUnlock}
+                  className="mt-6 w-full max-w-xs bg-[#6b93ce] hover:bg-[#5a82bd] text-white"
+                >
+                  <Lock className="h-4 w-4 mr-2" />
+                  Unlock (1 Credit)
+                </Button>
+              )}
+            </>
           ) : (
             <div className="mt-6 w-full max-w-xs space-y-2">
               <Button 
@@ -143,27 +172,29 @@ export default function ProfileCard({ profile, viewMode = "grid", onUnlock, onSa
               >
                 View Profile
               </Button>
-              <a 
-                href={profile.resumeUrl || '#'} 
-                download
-                className="block"
-                onClick={(e) => {
-                  if (!profile.resumeUrl) {
-                    e.preventDefault()
-                  }
-                }}
-              >
-                <Button 
-                  className="w-full"
-                  variant="secondary"
-                  disabled={!profile.resumeUrl}
+              {isCompanyUser && (
+                <a 
+                  href={profile.resumeUrl || '#'} 
+                  download
+                  className="block"
+                  onClick={(e) => {
+                    if (!profile.resumeUrl) {
+                      e.preventDefault()
+                    }
+                  }}
                 >
-                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  CV
-                </Button>
-              </a>
+                  <Button 
+                    className="w-full"
+                    variant="secondary"
+                    disabled={!profile.resumeUrl}
+                  >
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    CV
+                  </Button>
+                </a>
+              )}
             </div>
           )}
         </div>

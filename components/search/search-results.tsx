@@ -27,6 +27,8 @@ interface Props {
   onSortChange: (sort: string) => void
   onToggleFilters: () => void
   showFilters: boolean
+  isSignedIn?: boolean
+  isCompanyUser?: boolean
 }
 
 export default function SearchResults({
@@ -36,7 +38,9 @@ export default function SearchResults({
   onViewModeChange,
   onSortChange,
   onToggleFilters,
-  showFilters
+  showFilters,
+  isSignedIn = false,
+  isCompanyUser = false
 }: Props) {
   const [profiles, setProfiles] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -256,8 +260,8 @@ export default function SearchResults({
   
   return (
     <div>
-      {/* Bulk Actions Bar */}
-      {selectedProfiles.length > 0 && (
+      {/* Bulk Actions Bar - Only for company users */}
+      {isCompanyUser && selectedProfiles.length > 0 && (
         <div className="bg-[#6b93ce] text-white rounded-lg p-4 mb-4 animate-fadeIn">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -316,7 +320,7 @@ export default function SearchResults({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
-            {viewMode === "grid" && (
+            {viewMode === "grid" && isCompanyUser && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -407,6 +411,8 @@ export default function SearchResults({
               viewMode={viewMode}
               onUnlock={handleUnlock}
               onSave={handleSave}
+              isSignedIn={isSignedIn}
+              isCompanyUser={isCompanyUser}
             />
           ))}
         </div>

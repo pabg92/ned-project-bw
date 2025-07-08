@@ -30,15 +30,21 @@ export interface SearchFilters {
 }
 
 /**
- * Search Page - Company Users Only
+ * Search Page - Public Access
  * 
- * This page allows company users to search and browse board member candidates.
- * Access is restricted to users with 'company' or 'admin' role.
+ * This page allows anyone to search and browse board member candidates.
+ * Different features are available based on user status:
  * 
- * Features:
+ * Public (not logged in):
  * - Browse anonymized candidate profiles
  * - Filter by various criteria
- * - Unlock profiles using credits
+ * - See limited profile information
+ * 
+ * Authenticated (not company):
+ * - Same as public + prompts to upgrade
+ * 
+ * Company/Admin users:
+ * - Full access including profile unlocking
  * - Save profiles to shortlist
  * - Save search criteria
  */
@@ -46,23 +52,7 @@ export default function SearchPage() {
   const { isLoaded, isSignedIn, user } = useUser()
   const router = useRouter()
   const userRole = user?.publicMetadata?.role as string
-  
-  // Check access on mount
-  useEffect(() => {
-    if (isLoaded) {
-      console.log('[Search] Access check:', {
-        isSignedIn,
-        userRole,
-        publicMetadata: user?.publicMetadata,
-        shouldRedirect: !isSignedIn || (userRole !== 'company' && userRole !== 'admin')
-      })
-      
-      if (!isSignedIn || (userRole !== 'company' && userRole !== 'admin')) {
-        console.log('[Search] Access denied, redirecting to /companies')
-        router.push('/companies')
-      }
-    }
-  }, [isLoaded, isSignedIn, userRole, router, user])
+  const isCompanyUser = userRole === 'company' || userRole === 'admin'
   
   const [filters, setFilters] = useState<SearchFilters>({
     query: "",
@@ -83,15 +73,15 @@ export default function SearchPage() {
   const [showFilters, setShowFilters] = useState(true)
   const [savedSearches, setSavedSearches] = useState<string[]>([])
   
-  // Use real credits from Clerk
+  // Use real credits from Clerk (only for company users)
   const { credits, loading: creditsLoading } = useCredits()
   
-  // Use real shortlist
+  // Use real shortlist (only for authenticated users)
   const { profiles: shortlistProfiles } = useShortlist()
-  const shortlistCount = shortlistProfiles.length
+  const shortlistCount = isSignedIn ? shortlistProfiles.length : 0
   
-  // Show loading state while checking auth
-  if (!isLoaded || creditsLoading) {
+  // Show loading state while checking auth (only show for authenticated users)
+  if (!isLoaded || (isSignedIn && creditsLoading)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -107,6 +97,10 @@ export default function SearchPage() {
   }
 
   const handleSaveSearch = () => {
+    if (!isSignedIn) {
+      router.push('/sign-in?redirect_url=/search')
+      return
+    }
     const searchString = JSON.stringify(filters)
     setSavedSearches(prev => [...prev, searchString])
   }
@@ -119,8 +113,51 @@ export default function SearchPage() {
         savedSearchCount={savedSearches.length}
       />
       
-      {/* Welcome Banner for Company Users */}
-      {userRole === 'company' && credits === 0 && (
+      {/* Welcome Banners based on user status */}
+      {!isSignedIn && (
+        <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white px-4 py-3">
+          <div className="max-w-[1920px] mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Info className="h-5 w-5" />
+              <p className="text-sm font-medium">
+                You're browsing as a guest. Sign up to unlock profiles and save searches.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Link href="/sign-in?redirect_url=/search">
+                <Button size="sm" variant="secondary" className="bg-white text-[#7394c7] hover:bg-gray-100">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/sign-up?role=company">
+                <Button size="sm" className="bg-white/20 text-white border border-white/30 hover:bg-white/30">
+                  Sign Up as Company
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {isSignedIn && !isCompanyUser && (
+        <div className="bg-[#6b93ce] text-white px-4 py-3">
+          <div className="max-w-[1920px] mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Info className="h-5 w-5" />
+              <p className="text-sm">
+                Upgrade to a company account to unlock full profiles and contact candidates.
+              </p>
+            </div>
+            <Link href="/companies">
+              <Button size="sm" variant="secondary" className="bg-white text-[#6b93ce] hover:bg-gray-100">
+                Upgrade Account
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+      
+      {isCompanyUser && credits === 0 && (
         <div className="bg-[#6b93ce] text-white px-4 py-3">
           <div className="max-w-[1920px] mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -174,6 +211,8 @@ export default function SearchPage() {
               onSortChange={setSortBy}
               onToggleFilters={() => setShowFilters(!showFilters)}
               showFilters={showFilters}
+              isSignedIn={isSignedIn}
+              isCompanyUser={isCompanyUser}
             />
           </div>
         </div>

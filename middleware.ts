@@ -21,7 +21,9 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",              // Clerk sign in
   "/sign-up(.*)",              // Clerk sign up
   "/signup(.*)",               // Candidate application form
+  "/search(.*)",               // Browse candidates (public access)
   "/api/v1/candidates/signup", // Public signup API
+  "/api/search(.*)",           // Search API (read-only public access)
   "/api/webhooks(.*)",         // Webhook endpoints
   "/api/health",               // Health check
 ]);
@@ -37,8 +39,7 @@ const isCompanyRoute = createRouteMatcher([
 
 // Define routes that require authentication (any logged-in user)
 const isAuthenticatedRoute = createRouteMatcher([
-  "/search(.*)",                     // Browse candidates (available to all authenticated users)
-  "/api/search(.*)",                 // Search API
+  // Currently no routes require just authentication without specific roles
 ]);
 
 // Define admin-only routes
