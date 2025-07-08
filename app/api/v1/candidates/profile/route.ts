@@ -20,17 +20,21 @@ export async function GET(request: NextRequest) {
       return createErrorResponse('Authentication required', 401);
     }
 
-    // Verify user exists and has candidate role
+    // Verify user exists by clerk_id and has candidate role
     const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .select('*')
-      .eq('id', userId)
+      .eq('clerk_id', userId)
       .eq('role', 'candidate')
       .eq('is_active', true)
       .single();
 
     if (userError || !user) {
       console.error('User verification error:', userError);
+      // If user doesn't exist with clerk_id, they might not have been synced yet
+      if (userError?.code === 'PGRST116') {
+        return createErrorResponse('User profile not found. Please ensure your account is properly synced.', 404);
+      }
       return createErrorResponse('User not found or not authorized as candidate', 403);
     }
 
@@ -74,7 +78,7 @@ export async function GET(request: NextRequest) {
           order
         )
       `)
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .single();
 
     if (profileError) {
@@ -175,17 +179,21 @@ export const PUT = withValidation(
         return createErrorResponse('Authentication required', 401);
       }
 
-      // Verify user exists and has candidate role
+      // Verify user exists by clerk_id and has candidate role
       const { data: user, error: userError } = await supabaseAdmin
         .from('users')
         .select('*')
-        .eq('id', userId)
+        .eq('clerk_id', userId)
         .eq('role', 'candidate')
         .eq('is_active', true)
         .single();
 
       if (userError || !user) {
         console.error('User verification error:', userError);
+        // If user doesn't exist with clerk_id, they might not have been synced yet
+        if (userError?.code === 'PGRST116') {
+          return createErrorResponse('User profile not found. Please ensure your account is properly synced.', 404);
+        }
         return createErrorResponse('User not found or not authorized as candidate', 403);
       }
 
@@ -193,7 +201,7 @@ export const PUT = withValidation(
       const { data: existingProfile, error: profileCheckError } = await supabaseAdmin
         .from('candidate_profiles')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .single();
 
       if (profileCheckError) {
@@ -227,7 +235,7 @@ export const PUT = withValidation(
       const { data: updatedProfile, error: updateError } = await supabaseAdmin
         .from('candidate_profiles')
         .update(updateData)
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .select()
         .single();
 

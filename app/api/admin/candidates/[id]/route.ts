@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
-import { requireAdmin } from '@/lib/auth/utils';
+import { requireAdmin } from '@/lib/auth/admin-check';
 import { withValidation, createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { z } from 'zod';
 
@@ -52,13 +52,16 @@ export async function GET(
     }
 
     const candidateId = params.id;
+    
+    console.log('GET /api/admin/candidates/[id] - Fetching candidate:', candidateId);
 
     // Get complete candidate profile with user data
+    // Use left join instead of inner join to handle cases where user might be missing
     const { data: candidate, error: candidateError } = await supabaseAdmin
       .from('candidate_profiles')
       .select(`
         *,
-        users!inner(
+        users(
           id,
           email,
           first_name,
@@ -75,7 +78,29 @@ export async function GET(
       .single();
 
     if (candidateError || !candidate) {
-      console.error('Candidate fetch error:', candidateError);
+      console.error('Candidate fetch error:', {
+        candidateId,
+        error: candidateError,
+        message: candidateError?.message,
+        details: candidateError?.details,
+        hint: candidateError?.hint
+      });
+      
+      // Check if it's a join error
+      if (candidateError?.message?.includes('users')) {
+        // Try fetching without the join to see if the candidate exists
+        const { data: candidateOnly } = await supabaseAdmin
+          .from('candidate_profiles')
+          .select('*')
+          .eq('id', candidateId)
+          .single();
+          
+        if (candidateOnly) {
+          console.error('Candidate exists but user join failed. User ID:', candidateOnly.user_id);
+          return createErrorResponse('Candidate found but user data missing', 500);
+        }
+      }
+      
       return createErrorResponse('Candidate not found', 404);
     }
 
@@ -190,6 +215,12 @@ export async function GET(
         description: edu.description,
         order: edu.order,
       })),
+      
+      // Profile URLs (for edit page compatibility)
+      profile: {
+        linkedinUrl: candidate.linkedin_url,
+        githubUrl: candidate.github_url,
+      },
       
       // Files and documents
       documents: {

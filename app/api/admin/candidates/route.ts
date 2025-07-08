@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/lib/supabase/client';
 import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth/utils';
+import { requireAdmin } from '@/lib/auth/admin-check';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
+import { processProfileOnApproval } from '@/lib/services/admin-profile-processor';
 
 // Validation schema for query parameters
 const getCandidatesQuerySchema = z.object({
@@ -44,7 +45,8 @@ const createCandidateSchema = z.object({
   resumeUrl: z.string().url().optional().or(z.literal('')),
   isActive: z.boolean().default(true),
   isAnonymized: z.boolean().default(true),
-  adminNotes: z.string().max(5000).optional(),
+  adminNotes: z.string().max(50000).optional(), // Increased to handle JSON data
+  processImmediately: z.boolean().optional(), // Flag to trigger immediate processing
 });
 
 type GetCandidatesQuery = z.infer<typeof getCandidatesQuerySchema>;
@@ -656,12 +658,46 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Failed to create candidate profile', 500);
     }
 
+    // Process profile immediately if flag is set (for admin-created profiles)
+    if (validatedData.processImmediately) {
+      try {
+        console.log('Processing profile immediately for:', newCandidate.id);
+        const processingResult = await processProfileOnApproval(newCandidate.id, adminUser.id);
+        
+        if (processingResult.success) {
+          console.log('Profile processed successfully:', newCandidate.id);
+          
+          // Update profile to active and completed
+          await supabaseAdmin
+            .from('candidate_profiles')
+            .update({
+              is_active: true,
+              profile_completed: true,
+              private_metadata: {
+                ...newCandidate.private_metadata,
+                approvalStatus: 'approved',
+                approvedBy: adminUser.id,
+                approvedAt: new Date().toISOString(),
+              }
+            })
+            .eq('id', newCandidate.id);
+        } else {
+          console.error('Failed to process profile:', processingResult.error);
+          // Continue anyway - profile is created but needs manual processing
+        }
+      } catch (processError) {
+        console.error('Error processing profile:', processError);
+        // Don't fail the creation - just log the error
+      }
+    }
+
     // Log admin action (skip in dev mode to avoid further DB issues)
     if (!isDevMode && !isTestMode) {
       try {
         await logAdminAction(adminUser.id, 'candidate_create', newCandidate.id, {
           userId,
           createdFields: Object.keys(validatedData),
+          processedImmediately: validatedData.processImmediately || false,
         });
       } catch (logError) {
         console.warn('Failed to log admin action:', logError);
@@ -671,10 +707,11 @@ export async function POST(request: NextRequest) {
 
     return createSuccessResponse({
       candidateId: newCandidate.id,
-      userId: newCandidate.userId,
+      userId: newCandidate.user_id,
       adminData: {
-        verificationStatus: 'unverified',
+        verificationStatus: validatedData.processImmediately ? 'verified' : 'unverified',
         createdBy: adminUser.id,
+        processedImmediately: validatedData.processImmediately || false,
       },
     }, isDevMode ? 'Candidate profile created successfully (dev mode)' : isTestMode ? 'Candidate profile created successfully (test mode)' : 'Candidate profile created successfully', 201);
 

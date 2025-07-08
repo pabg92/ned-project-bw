@@ -5,7 +5,7 @@ import { db } from '@/lib/supabase/client';
 import { 
   candidateProfiles
 } from '@/lib/supabase/schema';
-import { requireAdmin } from '@/lib/auth/utils';
+import { requireAdmin } from '@/lib/auth/admin-check';
 import { withValidation, createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { createAdminEnrichmentSchema, updateAdminEnrichmentSchema } from '@/lib/validations/admin';
 import { pgTable, uuid, text, jsonb, timestamp } from 'drizzle-orm/pg-core';

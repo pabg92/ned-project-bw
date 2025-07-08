@@ -78,18 +78,19 @@ export async function GET(
         tags (
           id,
           name,
-          category
+          category,
+          type
         )
       `)
       .eq('candidate_id', profileId);
 
     // Transform tags into skills and sectors
     const skills = candidateTags
-      ?.filter(ct => ct.tags?.category === 'skill')
+      ?.filter(ct => ct.tags?.type === 'skill' || ct.tags?.category === 'skill')
       ?.map(ct => ct.tags?.name) || [];
     
     const sectors = candidateTags
-      ?.filter(ct => ct.tags?.category === 'sector' || ct.tags?.category === 'industry')
+      ?.filter(ct => ct.tags?.type === 'industry' || ct.tags?.category === 'sector' || ct.tags?.category === 'industry')
       ?.map(ct => ct.tags?.name) || [];
 
     // Format availability
@@ -126,11 +127,24 @@ export async function GET(
     let githubUrl: string | undefined;
     let portfolioUrl: string | undefined;
     
+    // Check if the user has unlocked this profile
+    let hasUnlockedProfile = false;
+    if (userId) {
+      try {
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+        const unlockedProfiles = user.publicMetadata?.unlockedProfiles as string[] || [];
+        hasUnlockedProfile = unlockedProfiles.includes(profileId);
+      } catch (error) {
+        console.error('Error checking unlocked profiles:', error);
+      }
+    }
+    
     // Show full details if:
     // 1. It's the user's own profile
     // 2. The profile is not anonymized
-    // 3. TODO: The viewer has unlocked this profile (requires credit system implementation)
-    const showFullDetails = isOwnProfile || !profile.is_anonymized;
+    // 3. The viewer has unlocked this profile
+    const showFullDetails = isOwnProfile || !profile.is_anonymized || hasUnlockedProfile;
     
     if (showFullDetails && profile.users) {
       const firstName = profile.users.first_name || '';
@@ -144,6 +158,20 @@ export async function GET(
       githubUrl = profile.github_url || undefined;
       portfolioUrl = profile.portfolio_url || undefined;
     }
+
+    // Get work experiences
+    const { data: workExperiences } = await supabaseAdmin
+      .from('work_experiences')
+      .select('*')
+      .eq('candidate_id', profileId)
+      .order('start_date', { ascending: false });
+
+    // Get education
+    const { data: education } = await supabaseAdmin
+      .from('education')
+      .select('*')
+      .eq('candidate_id', profileId)
+      .order('graduation_year', { ascending: false });
 
     // Prepare response data
     const responseData = {
@@ -171,6 +199,10 @@ export async function GET(
       isActive: profile.is_active,
       profileCompleted: profile.profile_completed,
       isAnonymized: profile.is_anonymized,
+      isUnlocked: hasUnlockedProfile,
+      boardPositions: 0, // TODO: Calculate from work experiences
+      workExperiences: showFullDetails ? workExperiences : [],
+      education: showFullDetails ? education : [],
       // Salary information - only show to authenticated users or own profile
       salary: (userId || isOwnProfile) ? {
         min: profile.salary_min ? parseFloat(profile.salary_min) : null,

@@ -15,7 +15,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user from Clerk
-    const user = await clerkClient.users.getUser(userId);
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
     
     // Get credits from public metadata (visible to frontend)
     const credits = user.publicMetadata?.credits as number || 0;
@@ -47,7 +48,8 @@ export async function POST(request: NextRequest) {
     const { amount = 1, profileId, reason = 'profile_unlock' } = await request.json();
 
     // Get current user
-    const user = await clerkClient.users.getUser(userId);
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
     const currentCredits = user.publicMetadata?.credits as number || 0;
 
     // Check if user has enough credits
@@ -59,10 +61,14 @@ export async function POST(request: NextRequest) {
     const newCredits = currentCredits - amount;
     
     // Update user metadata
-    await clerkClient.users.updateUserMetadata(userId, {
+    await client.users.updateUserMetadata(userId, {
       publicMetadata: {
         ...user.publicMetadata,
         credits: newCredits,
+        unlockedProfiles: [
+          ...(user.publicMetadata?.unlockedProfiles as string[] || []),
+          ...(profileId && reason === 'profile_unlock' ? [profileId] : [])
+        ]
       },
       privateMetadata: {
         ...user.privateMetadata,

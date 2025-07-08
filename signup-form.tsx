@@ -1,16 +1,35 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, Upload, Check, FileText, User, Briefcase, Users, PenTool, CheckCircle } from "lucide-react"
+import { ChevronLeft, ChevronRight, Upload, Check, FileText, User, Briefcase, Users, PenTool, CheckCircle, Plus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+
+interface WorkExperience {
+  companyName: string
+  title: string
+  location: string
+  startDate: string
+  endDate: string
+  isCurrent: boolean
+  description: string
+  isBoardPosition: boolean
+}
+
+interface Education {
+  institution: string
+  degree: string
+  fieldOfStudy: string
+  graduationDate: string
+}
 
 interface FormData {
   // Step 1: Personal Information
@@ -18,23 +37,38 @@ interface FormData {
   lastName: string
   email: string
   phone: string
+  location: string
+  linkedinUrl: string
   
   // Step 2: Professional Background
   currentRole: string
   company: string
   industry: string
   yearsOfExperience: string
+  summary: string
   
   // Step 3: Board Experience
-  boardExperience: string
+  boardExperience: boolean
+  boardPositions: number
+  boardDetails: string
   
-  // Step 4: Skills & Expertise
-  keySkills: string
-  professionalBio: string
+  // Step 4: Work Experience
+  workExperiences: WorkExperience[]
   
-  // Step 5: Documents & Consent
+  // Step 5: Education & Skills
+  education: Education[]
+  keySkills: string[]
+  functionalExpertise: string[]
+  industryExpertise: string[]
+  
+  // Step 6: Availability & Documents
+  activelySeeking: boolean
+  availability: string // immediately, 2weeks, 1month, 3months, 6months
+  remotePreference: string // remote, hybrid, onsite, flexible
+  willingToRelocate: boolean
+  compensationMin: string
+  compensationMax: string
   cvFile: File | null
-  linkedinUrl: string
   termsAccepted: boolean
 }
 
@@ -42,14 +76,34 @@ interface FormErrors {
   [key: string]: string | undefined
 }
 
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 6
 
 const STEP_LABELS = [
   { label: "Personal Info", icon: User },
   { label: "Professional", icon: Briefcase },
   { label: "Board Experience", icon: Users },
-  { label: "Skills", icon: PenTool },
-  { label: "Documents", icon: FileText },
+  { label: "Work History", icon: Briefcase },
+  { label: "Education & Skills", icon: PenTool },
+  { label: "Availability", icon: FileText },
+]
+
+// Predefined options for skills and expertise
+const SKILL_OPTIONS = [
+  "Financial Strategy", "M&A", "Corporate Finance", "Risk Management", 
+  "Digital Transformation", "ESG & Sustainability", "Audit & Compliance",
+  "Strategic Planning", "Leadership", "Change Management", "Innovation"
+]
+
+const FUNCTIONAL_EXPERTISE_OPTIONS = [
+  "CEO Leadership", "CFO", "Strategic Planning", "Investor Relations",
+  "Treasury Management", "Financial Reporting", "Risk Management",
+  "Cost Optimization", "M&A", "Data Analytics"
+]
+
+const INDUSTRY_OPTIONS = [
+  "Financial Services", "Technology", "Healthcare", "Retail",
+  "Manufacturing", "Energy", "Real Estate", "Media & Entertainment",
+  "Telecommunications", "Consumer Goods", "Professional Services"
 ]
 
 export default function SignUpForm() {
@@ -62,15 +116,42 @@ export default function SignUpForm() {
     lastName: "",
     email: "",
     phone: "",
+    location: "",
+    linkedinUrl: "",
     currentRole: "",
     company: "",
     industry: "",
     yearsOfExperience: "",
-    boardExperience: "",
-    keySkills: "",
-    professionalBio: "",
+    summary: "",
+    boardExperience: false,
+    boardPositions: 0,
+    boardDetails: "",
+    workExperiences: [{
+      companyName: "",
+      title: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+      isCurrent: false,
+      description: "",
+      isBoardPosition: false
+    }],
+    education: [{
+      institution: "",
+      degree: "",
+      fieldOfStudy: "",
+      graduationDate: ""
+    }],
+    keySkills: [],
+    functionalExpertise: [],
+    industryExpertise: [],
+    activelySeeking: false,
+    availability: "immediately",
+    remotePreference: "flexible",
+    willingToRelocate: false,
+    compensationMin: "",
+    compensationMax: "",
     cvFile: null,
-    linkedinUrl: "",
     termsAccepted: false,
   })
   const [errors, setErrors] = useState<FormErrors>({})
@@ -82,7 +163,57 @@ export default function SignUpForm() {
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData)
-        setFormData(parsed)
+        // Ensure all fields are initialized even if missing from saved data
+        setFormData({
+          ...parsed,
+          // String fields
+          firstName: parsed.firstName || "",
+          lastName: parsed.lastName || "",
+          email: parsed.email || "",
+          phone: parsed.phone || "",
+          location: parsed.location || "",
+          linkedinUrl: parsed.linkedinUrl || "",
+          currentRole: parsed.currentRole || "",
+          company: parsed.company || "",
+          industry: parsed.industry || "",
+          yearsOfExperience: parsed.yearsOfExperience || "",
+          summary: parsed.summary || "",
+          boardDetails: parsed.boardDetails || "",
+          compensationMin: parsed.compensationMin || "",
+          compensationMax: parsed.compensationMax || "",
+          // Boolean fields
+          boardExperience: parsed.boardExperience ?? false,
+          activelySeeking: parsed.activelySeeking ?? false,
+          willingToRelocate: parsed.willingToRelocate ?? false,
+          termsAccepted: parsed.termsAccepted ?? false,
+          // String fields with defaults
+          availability: parsed.availability || "immediately",
+          remotePreference: parsed.remotePreference || "flexible",
+          // Number fields
+          boardPositions: parsed.boardPositions || 0,
+          // Array fields
+          keySkills: parsed.keySkills || [],
+          functionalExpertise: parsed.functionalExpertise || [],
+          industryExpertise: parsed.industryExpertise || [],
+          workExperiences: parsed.workExperiences || [{
+            companyName: "",
+            title: "",
+            location: "",
+            startDate: "",
+            endDate: "",
+            isCurrent: false,
+            description: "",
+            isBoardPosition: false
+          }],
+          education: parsed.education || [{
+            institution: "",
+            degree: "",
+            fieldOfStudy: "",
+            graduationDate: ""
+          }],
+          // File field
+          cvFile: null // Files can't be stored in localStorage
+        })
       } catch (e) {
         console.error('Failed to load saved form data')
       }
@@ -120,31 +251,37 @@ export default function SignUpForm() {
           newErrors.email = "Please enter a valid email"
         }
         if (!formData.phone.trim()) newErrors.phone = "Phone is required"
+        if (!formData.location.trim()) newErrors.location = "Location is required"
         break
       case 2:
         if (!formData.currentRole.trim()) newErrors.currentRole = "Current role is required"
         if (!formData.company.trim()) newErrors.company = "Company is required"
         if (!formData.industry.trim()) newErrors.industry = "Industry is required"
         if (!formData.yearsOfExperience.trim()) newErrors.yearsOfExperience = "Years of experience is required"
+        if (!formData.summary.trim()) {
+          newErrors.summary = "Professional summary is required"
+        } else if (formData.summary.length < 50) {
+          newErrors.summary = "Professional summary must be at least 50 characters"
+        }
         break
       case 3:
-        if (!formData.boardExperience) newErrors.boardExperience = "Please select your board experience"
+        // Board experience is optional, no validation needed
         break
       case 4:
-        if (!formData.keySkills.trim()) newErrors.keySkills = "Key skills are required"
-        if (!formData.professionalBio.trim()) {
-          newErrors.professionalBio = "Professional bio is required"
-        } else if (formData.professionalBio.length < 50) {
-          newErrors.professionalBio = "Professional bio must be at least 50 characters"
+        // At least one work experience is required
+        const hasValidWorkExp = formData.workExperiences.some(exp => 
+          exp.companyName.trim() && exp.title.trim()
+        )
+        if (!hasValidWorkExp) {
+          newErrors.workExperiences = "At least one work experience is required"
         }
         break
       case 5:
+        if (formData.keySkills.length === 0) newErrors.keySkills = "Select at least one core skill"
+        if (formData.functionalExpertise.length === 0) newErrors.functionalExpertise = "Select at least one functional expertise"
+        break
+      case 6:
         if (!formData.cvFile) newErrors.cvFile = "Please upload your CV/Resume"
-        if (!formData.linkedinUrl.trim()) {
-          newErrors.linkedinUrl = "LinkedIn URL is required"
-        } else if (!formData.linkedinUrl.includes("linkedin.com")) {
-          newErrors.linkedinUrl = "Please enter a valid LinkedIn URL"
-        }
         if (!formData.termsAccepted) newErrors.termsAccepted = "You must accept the terms and conditions"
         break
     }
@@ -169,9 +306,69 @@ export default function SignUpForm() {
     if (validateStep()) {
       setIsSubmitting(true)
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        console.log("Form submitted:", formData)
+        // Prepare tags from skills and expertise
+        const tags = [
+          ...formData.keySkills.map(skill => ({ name: skill, category: 'skill' })),
+          ...formData.functionalExpertise.map(exp => ({ name: exp, category: 'expertise' })),
+          ...formData.industryExpertise.map(ind => ({ name: ind, category: 'industry' }))
+        ]
+
+        // Prepare the data
+        const signupData = {
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            title: formData.currentRole,
+            summary: formData.summary,
+            experience: getExperienceLevel(formData.yearsOfExperience),
+            location: formData.location,
+            linkedinUrl: formData.linkedinUrl,
+            adminNotes: JSON.stringify({
+              phone: formData.phone,
+              company: formData.company,
+              industry: formData.industry,
+              boardExperience: formData.boardExperience,
+              boardPositions: formData.boardPositions,
+              boardDetails: formData.boardDetails,
+              workExperiences: formData.workExperiences,
+              education: formData.education,
+              tags: tags,
+              activelySeeking: formData.activelySeeking,
+              availableImmediate: formData.availableImmediate,
+              willingToRelocate: formData.willingToRelocate,
+              compensationMin: formData.compensationMin,
+              compensationMax: formData.compensationMax,
+              yearsExperience: parseInt(formData.yearsOfExperience),
+              availability: formData.availability,
+              remotePreference: formData.remotePreference
+            }),
+        }
+        
+        console.log('Submitting signup data:', signupData)
+        console.log('Experience level:', getExperienceLevel(formData.yearsOfExperience))
+        console.log('Summary length:', formData.summary.length)
+        
+        // Create the candidate profile via public signup API
+        const response = await fetch('/api/v1/candidates/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(signupData)
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          console.error('Signup API error:', error)
+          if (error.errors) {
+            // Zod validation errors
+            const validationErrors = error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join('\n')
+            throw new Error(`Validation errors:\n${validationErrors}`)
+          }
+          throw new Error(error.message || 'Failed to create profile')
+        }
+
+        console.log("Profile created successfully")
         // Clear saved data
         localStorage.removeItem('signupFormData')
         localStorage.removeItem('signupFormStep')
@@ -179,9 +376,24 @@ export default function SignUpForm() {
         router.push('/signup/success')
       } catch (error) {
         console.error('Submission failed:', error)
+        if (error instanceof Error) {
+          alert(error.message)
+        } else {
+          alert('Failed to create profile. Please try again.')
+        }
         setIsSubmitting(false)
       }
     }
+  }
+
+  // Helper function to map years of experience to experience level
+  const getExperienceLevel = (years: string): string => {
+    const yearsNum = parseInt(years)
+    if (yearsNum <= 5) return 'junior'
+    if (yearsNum <= 10) return 'mid'
+    if (yearsNum <= 20) return 'senior'
+    if (yearsNum <= 25) return 'lead'
+    return 'executive'
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -207,9 +419,81 @@ export default function SignUpForm() {
     }
   }
 
+  // Work experience management
+  const addWorkExperience = () => {
+    setFormData(prev => ({
+      ...prev,
+      workExperiences: [...prev.workExperiences, {
+        companyName: "",
+        title: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+        isCurrent: false,
+        description: "",
+        isBoardPosition: false
+      }]
+    }))
+  }
+
+  const removeWorkExperience = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      workExperiences: prev.workExperiences.filter((_, i) => i !== index)
+    }))
+  }
+
+  const updateWorkExperience = (index: number, field: keyof WorkExperience, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      workExperiences: prev.workExperiences.map((exp, i) => 
+        i === index ? { ...exp, [field]: value } : exp
+      )
+    }))
+  }
+
+  // Education management
+  const addEducation = () => {
+    setFormData(prev => ({
+      ...prev,
+      education: [...prev.education, {
+        institution: "",
+        degree: "",
+        fieldOfStudy: "",
+        graduationDate: ""
+      }]
+    }))
+  }
+
+  const removeEducation = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      education: prev.education.filter((_, i) => i !== index)
+    }))
+  }
+
+  const updateEducation = (index: number, field: keyof Education, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      education: prev.education.map((edu, i) => 
+        i === index ? { ...edu, [field]: value } : edu
+      )
+    }))
+  }
+
+  // Skills management
+  const toggleSkill = (skill: string, category: 'keySkills' | 'functionalExpertise' | 'industryExpertise') => {
+    setFormData(prev => ({
+      ...prev,
+      [category]: prev[category].includes(skill)
+        ? prev[category].filter(s => s !== skill)
+        : [...prev[category], skill]
+    }))
+  }
+
   return (
     <div className="py-8 sm:py-12 md:py-16 min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-4xl font-bebas-neue text-gray-900 mb-3 sm:mb-4">
             Join Our Network
@@ -351,6 +635,31 @@ export default function SignUpForm() {
                   />
                   {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                 </div>
+
+                <div>
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => updateFormData("location", e.target.value)}
+                    placeholder="London, UK"
+                    className={cn("mt-1", errors.location && "border-red-500")}
+                  />
+                  {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
+                </div>
+
+                <div>
+                  <Label htmlFor="linkedinUrl">LinkedIn Profile URL</Label>
+                  <Input
+                    id="linkedinUrl"
+                    type="url"
+                    value={formData.linkedinUrl}
+                    onChange={(e) => updateFormData("linkedinUrl", e.target.value)}
+                    placeholder="https://linkedin.com/in/yourprofile"
+                    className="mt-1"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">Optional</p>
+                </div>
               </div>
             )}
 
@@ -386,13 +695,21 @@ export default function SignUpForm() {
 
                 <div>
                   <Label htmlFor="industry">Industry</Label>
-                  <Input
-                    id="industry"
+                  <Select
                     value={formData.industry}
-                    onChange={(e) => updateFormData("industry", e.target.value)}
-                    placeholder="Technology, Finance, Healthcare, etc."
-                    className={cn("mt-1", errors.industry && "border-red-500")}
-                  />
+                    onValueChange={(value) => updateFormData("industry", value)}
+                  >
+                    <SelectTrigger className={cn("mt-1", errors.industry && "border-red-500")}>
+                      <SelectValue placeholder="Select your industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INDUSTRY_OPTIONS.map((industry) => (
+                        <SelectItem key={industry} value={industry}>
+                          {industry}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   {errors.industry && <p className="text-red-500 text-sm mt-1">{errors.industry}</p>}
                 </div>
 
@@ -408,90 +725,467 @@ export default function SignUpForm() {
                   />
                   {errors.yearsOfExperience && <p className="text-red-500 text-sm mt-1">{errors.yearsOfExperience}</p>}
                 </div>
+
+                <div>
+                  <Label htmlFor="summary">Professional Summary</Label>
+                  <Textarea
+                    id="summary"
+                    value={formData.summary}
+                    onChange={(e) => updateFormData("summary", e.target.value)}
+                    placeholder="Please provide a brief professional summary highlighting your career achievements and expertise."
+                    className={cn("mt-1 min-h-[150px]", errors.summary && "border-red-500")}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Minimum 50 characters ({formData.summary.length}/50)
+                  </p>
+                  {errors.summary && <p className="text-red-500 text-sm mt-1">{errors.summary}</p>}
+                </div>
               </div>
             )}
 
             {currentStep === 3 && (
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-xl sm:text-2xl font-bebas-neue text-gray-900 mb-4 sm:mb-6">
-                  Board Experience
+                  Board Experience Overview
                 </h2>
 
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-900">
+                    <strong>Note:</strong> You'll add specific board positions in the next step (Work History). 
+                    Simply mark them as board positions using the checkbox provided.
+                  </p>
+                </div>
+
                 <div>
-                  <Label>Board Experience</Label>
+                  <Label>Do you have board experience?</Label>
                   <RadioGroup
-                    value={formData.boardExperience}
-                    onValueChange={(value) => updateFormData("boardExperience", value)}
+                    value={formData.boardExperience ? "yes" : "no"}
+                    onValueChange={(value) => updateFormData("boardExperience", value === "yes")}
                     className="mt-4 space-y-3"
                   >
                     <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="no-experience" id="no-experience" />
-                      <Label htmlFor="no-experience" className="font-normal">
-                        No previous board experience
+                      <RadioGroupItem value="no" id="no-board-exp" />
+                      <Label htmlFor="no-board-exp" className="font-normal">
+                        No board experience
                       </Label>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="previous-experience" id="previous-experience" />
-                      <Label htmlFor="previous-experience" className="font-normal">
-                        Previous board experience
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="currently-serving" id="currently-serving" />
-                      <Label htmlFor="currently-serving" className="font-normal">
-                        Currently serving on board(s)
+                      <RadioGroupItem value="yes" id="has-board-exp" />
+                      <Label htmlFor="has-board-exp" className="font-normal">
+                        Yes, I have board experience
                       </Label>
                     </div>
                   </RadioGroup>
-                  {errors.boardExperience && <p className="text-red-500 text-sm mt-2">{errors.boardExperience}</p>}
                 </div>
+
+                {formData.boardExperience && (
+                  <div>
+                    <Label htmlFor="boardDetails">Brief Overview (Optional)</Label>
+                    <Textarea
+                      id="boardDetails"
+                      value={formData.boardDetails}
+                      onChange={(e) => updateFormData("boardDetails", e.target.value)}
+                      placeholder="Optionally provide a brief overview of your board experience philosophy or approach."
+                      className="mt-1 min-h-[100px]"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
             {currentStep === 4 && (
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-xl sm:text-2xl font-bebas-neue text-gray-900 mb-4 sm:mb-6">
-                  Skills & Expertise
+                  Work Experience
                 </h2>
 
-                <div>
-                  <Label htmlFor="keySkills">Key Skills & Expertise</Label>
-                  <Input
-                    id="keySkills"
-                    value={formData.keySkills}
-                    onChange={(e) => updateFormData("keySkills", e.target.value)}
-                    placeholder="Strategic Planning, Financial Oversight, Digital Transformation, etc."
-                    className={cn("mt-1", errors.keySkills && "border-red-500")}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Enter your key skills separated by commas
-                  </p>
-                  {errors.keySkills && <p className="text-red-500 text-sm mt-1">{errors.keySkills}</p>}
-                </div>
+                {errors.workExperiences && (
+                  <p className="text-red-500 text-sm">{errors.workExperiences}</p>
+                )}
 
-                <div>
-                  <Label htmlFor="professionalBio">Professional Bio</Label>
-                  <Textarea
-                    id="professionalBio"
-                    value={formData.professionalBio}
-                    onChange={(e) => updateFormData("professionalBio", e.target.value)}
-                    placeholder="Please provide a brief professional biography highlighting your career achievements and expertise."
-                    className={cn("mt-1 min-h-[200px]", errors.professionalBio && "border-red-500")}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                    Minimum 50 characters ({formData.professionalBio.length}/50)
-                  </p>
-                  {errors.professionalBio && <p className="text-red-500 text-sm mt-1">{errors.professionalBio}</p>}
-                </div>
+                {formData.workExperiences.map((exp, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-lg font-semibold">Position {index + 1}</h3>
+                      {formData.workExperiences.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeWorkExperience(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Job Title</Label>
+                        <Input
+                          value={exp.title}
+                          onChange={(e) => updateWorkExperience(index, "title", e.target.value)}
+                          placeholder="CEO, CFO, Board Director, etc."
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label>Company</Label>
+                        <Input
+                          value={exp.companyName}
+                          onChange={(e) => updateWorkExperience(index, "companyName", e.target.value)}
+                          placeholder="Company name"
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Location</Label>
+                      <Input
+                        value={exp.location}
+                        onChange={(e) => updateWorkExperience(index, "location", e.target.value)}
+                        placeholder="London, UK"
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <Label>Start Date</Label>
+                        <Input
+                          type="month"
+                          value={exp.startDate}
+                          onChange={(e) => updateWorkExperience(index, "startDate", e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label>End Date</Label>
+                        <Input
+                          type="month"
+                          value={exp.endDate}
+                          onChange={(e) => updateWorkExperience(index, "endDate", e.target.value)}
+                          disabled={exp.isCurrent}
+                          className="mt-1"
+                        />
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Checkbox
+                            id={`current-${index}`}
+                            checked={exp.isCurrent}
+                            onCheckedChange={(checked) => 
+                              updateWorkExperience(index, "isCurrent", checked as boolean)
+                            }
+                          />
+                          <Label htmlFor={`current-${index}`} className="text-sm font-normal">
+                            Currently working here
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea
+                        value={exp.description}
+                        onChange={(e) => updateWorkExperience(index, "description", e.target.value)}
+                        placeholder="Describe your key responsibilities and achievements"
+                        className="mt-1 min-h-[100px]"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2 mt-4">
+                      <Checkbox
+                        id={`board-${index}`}
+                        checked={exp.isBoardPosition}
+                        onCheckedChange={(checked) => 
+                          updateWorkExperience(index, "isBoardPosition", checked as boolean)
+                        }
+                      />
+                      <Label htmlFor={`board-${index}`} className="text-sm font-normal">
+                        This is a board position (Director, Trustee, Chair, etc.)
+                      </Label>
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addWorkExperience}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Another Position
+                </Button>
               </div>
             )}
 
             {currentStep === 5 && (
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-xl sm:text-2xl font-bebas-neue text-gray-900 mb-4 sm:mb-6">
-                  Documents & Consent
+                  Education & Skills
                 </h2>
 
+                {/* Education Section */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Education</h3>
+                  {formData.education.map((edu, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-4 mb-4">
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-medium">Education {index + 1}</h4>
+                        {formData.education.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeEducation(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Institution</Label>
+                          <Input
+                            value={edu.institution}
+                            onChange={(e) => updateEducation(index, "institution", e.target.value)}
+                            placeholder="University name"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label>Degree</Label>
+                          <Input
+                            value={edu.degree}
+                            onChange={(e) => updateEducation(index, "degree", e.target.value)}
+                            placeholder="MBA, BSc, etc."
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Field of Study</Label>
+                          <Input
+                            value={edu.fieldOfStudy}
+                            onChange={(e) => updateEducation(index, "fieldOfStudy", e.target.value)}
+                            placeholder="Business Administration"
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label>Graduation Year</Label>
+                          <Input
+                            type="number"
+                            value={edu.graduationDate}
+                            onChange={(e) => updateEducation(index, "graduationDate", e.target.value)}
+                            placeholder="2005"
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addEducation}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Another Education
+                  </Button>
+                </div>
+
+                {/* Core Skills */}
+                <div>
+                  <Label>Core Skills</Label>
+                  <p className="text-sm text-gray-500 mb-3">Select all that apply</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {SKILL_OPTIONS.map((skill) => (
+                      <div
+                        key={skill}
+                        className={cn(
+                          "border rounded-lg p-2 text-sm cursor-pointer transition-all",
+                          formData.keySkills.includes(skill)
+                            ? "bg-blue-50 border-blue-500 text-blue-700"
+                            : "bg-white border-gray-300 hover:border-gray-400"
+                        )}
+                        onClick={() => toggleSkill(skill, 'keySkills')}
+                      >
+                        {skill}
+                      </div>
+                    ))}
+                  </div>
+                  {errors.keySkills && <p className="text-red-500 text-sm mt-1">{errors.keySkills}</p>}
+                </div>
+
+                {/* Functional Expertise */}
+                <div>
+                  <Label>Functional Expertise</Label>
+                  <p className="text-sm text-gray-500 mb-3">Select all that apply</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {FUNCTIONAL_EXPERTISE_OPTIONS.map((expertise) => (
+                      <div
+                        key={expertise}
+                        className={cn(
+                          "border rounded-lg p-2 text-sm cursor-pointer transition-all",
+                          formData.functionalExpertise.includes(expertise)
+                            ? "bg-blue-50 border-blue-500 text-blue-700"
+                            : "bg-white border-gray-300 hover:border-gray-400"
+                        )}
+                        onClick={() => toggleSkill(expertise, 'functionalExpertise')}
+                      >
+                        {expertise}
+                      </div>
+                    ))}
+                  </div>
+                  {errors.functionalExpertise && <p className="text-red-500 text-sm mt-1">{errors.functionalExpertise}</p>}
+                </div>
+
+                {/* Industry Expertise */}
+                <div>
+                  <Label>Industry Expertise</Label>
+                  <p className="text-sm text-gray-500 mb-3">Select up to 3</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {INDUSTRY_OPTIONS.map((industry) => (
+                      <div
+                        key={industry}
+                        className={cn(
+                          "border rounded-lg p-2 text-sm cursor-pointer transition-all",
+                          formData.industryExpertise.includes(industry)
+                            ? "bg-blue-50 border-blue-500 text-blue-700"
+                            : "bg-white border-gray-300 hover:border-gray-400",
+                          formData.industryExpertise.length >= 3 && !formData.industryExpertise.includes(industry)
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        )}
+                        onClick={() => {
+                          if (formData.industryExpertise.length < 3 || formData.industryExpertise.includes(industry)) {
+                            toggleSkill(industry, 'industryExpertise')
+                          }
+                        }}
+                      >
+                        {industry}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 6 && (
+              <div className="space-y-4 sm:space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bebas-neue text-gray-900 mb-4 sm:mb-6">
+                  Availability & Documents
+                </h2>
+
+                {/* Availability */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Availability</h3>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        id="activelySeeking"
+                        checked={formData.activelySeeking}
+                        onCheckedChange={(checked) => 
+                          updateFormData("activelySeeking", checked as boolean)
+                        }
+                      />
+                      <Label htmlFor="activelySeeking" className="font-normal">
+                        I am actively seeking board positions
+                      </Label>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="availability">When are you available?</Label>
+                      <Select
+                        value={formData.availability}
+                        onValueChange={(value) => updateFormData("availability", value)}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select availability" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="immediately">Immediately</SelectItem>
+                          <SelectItem value="2weeks">2 weeks</SelectItem>
+                          <SelectItem value="1month">1 month</SelectItem>
+                          <SelectItem value="3months">3 months</SelectItem>
+                          <SelectItem value="6months">6 months</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="remotePreference">Work preference</Label>
+                      <Select
+                        value={formData.remotePreference}
+                        onValueChange={(value) => updateFormData("remotePreference", value)}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select work preference" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="remote">Remote only</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
+                          <SelectItem value="onsite">On-site only</SelectItem>
+                          <SelectItem value="flexible">Flexible</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        id="willingToRelocate"
+                        checked={formData.willingToRelocate}
+                        onCheckedChange={(checked) => 
+                          updateFormData("willingToRelocate", checked as boolean)
+                        }
+                      />
+                      <Label htmlFor="willingToRelocate" className="font-normal">
+                        I am willing to travel internationally
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Compensation Expectations */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Compensation Expectations (Optional)</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="compensationMin">Minimum (Annual)</Label>
+                      <Input
+                        id="compensationMin"
+                        type="number"
+                        value={formData.compensationMin}
+                        onChange={(e) => updateFormData("compensationMin", e.target.value)}
+                        placeholder="50000"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="compensationMax">Maximum (Annual)</Label>
+                      <Input
+                        id="compensationMax"
+                        type="number"
+                        value={formData.compensationMax}
+                        onChange={(e) => updateFormData("compensationMax", e.target.value)}
+                        placeholder="150000"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">In GBP (£)</p>
+                </div>
+
+                {/* CV Upload */}
                 <div>
                   <Label>Upload your CV/Resume</Label>
                   <div
@@ -559,36 +1253,10 @@ export default function SignUpForm() {
                       )}
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="mt-3 bg-[#6b93ce] text-white hover:bg-[#5a82bd] border-none"
-                    onClick={() => document.getElementById('file-upload')?.click()}
-                  >
-                    Browse Files
-                  </Button>
                   {errors.cvFile && <p className="text-red-500 text-sm mt-1">{errors.cvFile}</p>}
                 </div>
 
-                <div>
-                  <Label htmlFor="linkedinUrl">LinkedIn Profile URL</Label>
-                  <Input
-                    id="linkedinUrl"
-                    type="url"
-                    value={formData.linkedinUrl}
-                    onChange={(e) => updateFormData("linkedinUrl", e.target.value)}
-                    placeholder="https://linkedin.com/in/yourprofile"
-                    className={cn("mt-1", errors.linkedinUrl && "border-red-500")}
-                  />
-                  {errors.linkedinUrl ? (
-                    <p className="text-red-500 text-sm mt-1">{errors.linkedinUrl}</p>
-                  ) : (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Please enter a valid LinkedIn URL.
-                    </p>
-                  )}
-                </div>
-
+                {/* Terms and Conditions */}
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
                     <Checkbox

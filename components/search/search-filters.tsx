@@ -31,7 +31,7 @@ const filterSections: FilterSection[] = [
   },
   {
     title: "Sector Experience",
-    key: "sector",
+    key: "sectors",
     type: "checkbox",
     options: [
       { value: "financial-services", label: "Financial Services", count: 423 },
@@ -60,7 +60,7 @@ const filterSections: FilterSection[] = [
   {
     title: "Location",
     key: "location",
-    type: "checkbox",
+    type: "radio",
     options: [
       { value: "london", label: "London", count: 456 },
       { value: "south-east", label: "South East", count: 234 },
@@ -92,10 +92,11 @@ const filterSections: FilterSection[] = [
     key: "availability",
     type: "radio",
     options: [
-      { value: "immediate", label: "Immediate" },
-      { value: "1-month", label: "Within 1 month" },
-      { value: "3-months", label: "Within 3 months" },
-      { value: "6-months", label: "Within 6 months" },
+      { value: "immediately", label: "Immediate" },
+      { value: "2weeks", label: "Within 2 weeks" },
+      { value: "1month", label: "Within 1 month" },
+      { value: "3months", label: "Within 3 months" },
+      { value: "6months", label: "Within 6 months" },
     ]
   }
 ]
@@ -107,7 +108,7 @@ interface Props {
 }
 
 export default function SearchFilters({ filters, updateFilter, onToggle }: Props) {
-  const [expandedSections, setExpandedSections] = useState<string[]>(["role", "sector"])
+  const [expandedSections, setExpandedSections] = useState<string[]>(["role", "sectors"])
   
   const toggleSection = (section: string) => {
     setExpandedSections(prev =>
@@ -119,20 +120,20 @@ export default function SearchFilters({ filters, updateFilter, onToggle }: Props
 
   const resetFilters = () => {
     updateFilter("role", [])
-    updateFilter("sector", [])
+    updateFilter("sectors", [])
     updateFilter("skills", [])
     updateFilter("experience", "")
-    updateFilter("location", [])
+    updateFilter("location", "")
     updateFilter("availability", "")
     updateFilter("boardExperience", [])
   }
 
   const activeFilterCount = [
     filters.role.length,
-    filters.sector.length,
+    filters.sectors.length,
     filters.skills.length,
     filters.experience ? 1 : 0,
-    filters.location.length,
+    filters.location ? 1 : 0,
     filters.availability ? 1 : 0,
     filters.boardExperience.length,
   ].reduce((a, b) => a + b, 0)

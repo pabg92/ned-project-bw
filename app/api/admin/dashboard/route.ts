@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { supabaseAdmin } from '@/lib/supabase/client';
-import { requireAdmin } from '@/lib/auth/utils';
+import { requireAdmin } from '@/lib/auth/admin-check';
 
 export async function GET(request: NextRequest) {
   try {

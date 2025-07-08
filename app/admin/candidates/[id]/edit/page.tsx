@@ -68,15 +68,47 @@ export default function EditCandidatePage() {
     const fetchCandidate = async () => {
       try {
         setLoading(true);
-        const token = await getToken();
+        
+        // Prepare headers
+        const headers: any = {
+          'Content-Type': 'application/json',
+        };
+        
+        // Add auth token if available
+        if (getToken) {
+          try {
+            const token = await getToken();
+            if (token) {
+              headers['Authorization'] = `Bearer ${token}`;
+            }
+          } catch (authError) {
+            console.warn('Failed to get auth token:', authError);
+          }
+        }
+        
+        console.log('Fetching candidate with ID:', candidateId);
+        
         const response = await fetch(`/api/admin/candidates/${candidateId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers,
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch candidate data');
+          const errorText = await response.text();
+          console.error('Failed to fetch candidate data:', {
+            candidateId,
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText,
+            url: `/api/admin/candidates/${candidateId}`
+          });
+          
+          // Try to parse error response
+          try {
+            const errorData = JSON.parse(errorText);
+            throw new Error(errorData.error || `Failed to fetch candidate data: ${response.statusText}`);
+          } catch {
+            throw new Error(`Failed to fetch candidate data: ${response.statusText}`);
+          }
         }
 
         const result = await response.json();

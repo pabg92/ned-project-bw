@@ -9,10 +9,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import ProfileCard, { Profile } from "./profile-card"
+import ProfileCard from "./profile-card"
 import { SearchFilters } from "@/app/search/page"
 import { useShortlist } from "@/hooks/use-shortlist"
+import { useCredits } from "@/hooks/use-credits"
+import { useUser } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 // NO MOCK DATA - Only show real database profiles
 
@@ -35,15 +38,18 @@ export default function SearchResults({
   onToggleFilters,
   showFilters
 }: Props) {
-  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [profiles, setProfiles] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedProfiles, setSelectedProfiles] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
+  const [unlockedProfiles, setUnlockedProfiles] = useState<string[]>([])
   const itemsPerPage = 12
   const router = useRouter()
+  const { isSignedIn } = useUser()
+  const { credits, deductCredits, hasEnoughCredits } = useCredits()
   
   const { addProfile, removeProfile, isInShortlist } = useShortlist()
 
@@ -87,7 +93,27 @@ export default function SearchResults({
         const data = await response.json()
 
         if (data.success && data.data.profiles.length > 0) {
-          setProfiles(data.data.profiles)
+          // Transform API response to match ProfileDisplayData structure
+          const transformedProfiles = data.data.profiles.map((profile: any) => ({
+            ...profile,
+            fullName: profile.name || 'Unknown Executive',
+            initials: profile.name ? profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'XX',
+            coreSkills: (profile.skills || []).map((skill: string, index: number) => ({
+              id: `skill-${index}`,
+              name: skill
+            })),
+            industryExpertise: (profile.sectors || []).map((sector: string, index: number) => ({
+              id: `sector-${index}`,
+              name: sector
+            })),
+            functionalExpertise: [],
+            tags: [],
+            workExperiences: profile.workExperiences || [],
+            education: profile.education || [],
+            isUnlocked: unlockedProfiles.includes(profile.id)
+          }))
+          
+          setProfiles(transformedProfiles)
           setTotalCount(data.data.pagination.total)
           setTotalPages(data.data.pagination.totalPages)
         } else {
@@ -111,23 +137,81 @@ export default function SearchResults({
     fetchProfiles()
   }, [filters, currentPage, sortBy])
 
-  const handleUnlock = (id: string) => {
-    // Navigate to the profile page when unlock is clicked
-    router.push(`/search/${id}`)
+  const handleUnlock = async (id: string) => {
+    if (!isSignedIn) {
+      router.push(`/sign-in?redirect=/search`)
+      return
+    }
+
+    if (!hasEnoughCredits(1)) {
+      router.push('/billing?reason=insufficient-credits')
+      return
+    }
+
+    try {
+      // Deduct credits for unlocking
+      await deductCredits(1, id, 'profile_unlock')
+      
+      // Add to unlocked profiles list
+      setUnlockedProfiles(prev => [...prev, id])
+      
+      // Update the profile in the list
+      setProfiles(prev => prev.map(p => 
+        p.id === id ? { ...p, isUnlocked: true } : p
+      ))
+      
+      // Show success message
+      toast.success('Profile unlocked successfully!')
+      
+      // Navigate to the profile page to see full details
+      router.push(`/search/${id}`)
+    } catch (error: any) {
+      console.error('Failed to unlock profile:', error)
+      toast.error(error.message || 'Failed to unlock profile')
+    }
   }
 
-  const handleBulkUnlock = () => {
+  const handleBulkUnlock = async () => {
     if (selectedProfiles.length === 0) return
     
+    if (!isSignedIn) {
+      router.push(`/sign-in?redirect=/search`)
+      return
+    }
+
+    const lockedSelectedProfiles = selectedProfiles.filter(id => 
+      !unlockedProfiles.includes(id)
+    )
+    
+    const requiredCredits = lockedSelectedProfiles.length
+    
+    if (!hasEnoughCredits(requiredCredits)) {
+      router.push(`/billing?reason=insufficient-credits&required=${requiredCredits}`)
+      return
+    }
+    
     setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
+    
+    try {
+      // Process each profile unlock
+      for (const profileId of lockedSelectedProfiles) {
+        await deductCredits(1, profileId, 'profile_unlock')
+        setUnlockedProfiles(prev => [...prev, profileId])
+      }
+      
+      // Update all profiles at once
       setProfiles(prev =>
-        prev.map(p => selectedProfiles.includes(p.id) ? { ...p, isUnlocked: true } : p)
+        prev.map(p => lockedSelectedProfiles.includes(p.id) ? { ...p, isUnlocked: true } : p)
       )
+      
       setSelectedProfiles([])
+      toast.success(`Successfully unlocked ${lockedSelectedProfiles.length} profiles!`)
+    } catch (error: any) {
+      console.error('Failed to bulk unlock profiles:', error)
+      toast.error(error.message || 'Failed to unlock profiles')
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleSave = (id: string) => {
@@ -165,7 +249,7 @@ export default function SearchResults({
   // No need to filter client-side as API handles it
   const displayedProfiles = profiles
 
-  const lockedProfiles = profiles.filter(p => !p.isUnlocked)
+  const lockedProfiles = profiles.filter(p => !p.isUnlocked && !unlockedProfiles.includes(p.id))
   const selectedLockedCount = selectedProfiles.filter(id => 
     lockedProfiles.some(p => p.id === id)
   ).length

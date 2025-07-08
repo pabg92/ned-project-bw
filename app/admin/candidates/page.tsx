@@ -173,9 +173,16 @@ export default function AdminCandidates() {
       setLoading(true);
 
       // Check if we should use real Supabase data or mock data
-      // Use real data if we have Supabase URL configured (regardless of dev mode)
-      const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+      // Always use real data if we have Supabase URL configured
+      const hasSupabase = !!(process.env.NEXT_PUBLIC_SUPABASE_URL || window.location.hostname === 'localhost');
       const useRealData = hasSupabase;
+      
+      console.log('Admin candidates page:', {
+        isDevMode,
+        hasSupabase,
+        useRealData,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not set'
+      });
 
       if (!useRealData && isDevMode) {
         // Mock data for development mode (when no Supabase configured)
@@ -324,16 +331,36 @@ export default function AdminCandidates() {
   const fetchCandidateDetails = async (candidateId: string) => {
     try {
       setDetailsLoading(true);
-      const token = await getToken();
+      
+      // Prepare headers
+      const headers: any = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add auth token if available
+      if (getToken) {
+        try {
+          const token = await getToken();
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+        } catch (authError) {
+          console.warn('Failed to get auth token:', authError);
+        }
+      }
+      
       const response = await fetch(`/api/admin/candidates/${candidateId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch candidate details');
+        const errorText = await response.text();
+        console.error('Failed to fetch candidate details:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        });
+        throw new Error(`Failed to fetch candidate details: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -390,6 +417,101 @@ export default function AdminCandidates() {
       ...prev,
       page: newPage,
     }));
+  };
+
+  const handleQuickApprove = async (candidateId: string) => {
+    if (confirm('Are you sure you want to approve this candidate?')) {
+      setActionLoading(candidateId);
+      try {
+        const headers: any = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (getToken) {
+          try {
+            const token = await getToken();
+            if (token) {
+              headers['Authorization'] = `Bearer ${token}`;
+            }
+          } catch (authError) {
+            console.warn('Failed to get auth token:', authError);
+          }
+        }
+
+        const response = await fetch(`/api/admin/candidates/${candidateId}/approval`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            action: 'approve',
+            reason: 'Quick approval from candidate list',
+            priority: 'medium',
+            notifyCandidate: true
+          })
+        });
+
+        if (response.ok) {
+          alert('Candidate approved successfully!');
+          fetchCandidates(); // Refresh the list
+        } else {
+          const error = await response.text();
+          console.error('Approval failed:', error);
+          alert('Failed to approve candidate. Please try again.');
+        }
+      } catch (err) {
+        console.error('Failed to approve candidate:', err);
+        alert('Failed to approve candidate. Please try again.');
+      } finally {
+        setActionLoading(null);
+      }
+    }
+  };
+
+  const handleQuickReject = async (candidateId: string) => {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (!reason) return;
+
+    setActionLoading(candidateId);
+    try {
+      const headers: any = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (getToken) {
+        try {
+          const token = await getToken();
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+        } catch (authError) {
+          console.warn('Failed to get auth token:', authError);
+        }
+      }
+
+      const response = await fetch(`/api/admin/candidates/${candidateId}/approval`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          action: 'reject',
+          reason,
+          priority: 'medium',
+          notifyCandidate: true
+        })
+      });
+
+      if (response.ok) {
+        alert('Candidate rejected.');
+        fetchCandidates(); // Refresh the list
+      } else {
+        const error = await response.text();
+        console.error('Rejection failed:', error);
+        alert('Failed to reject candidate. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to reject candidate:', err);
+      alert('Failed to reject candidate. Please try again.');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleApprovalAction = async (candidateId: string, action: string, reason?: string) => {
@@ -594,6 +716,7 @@ export default function AdminCandidates() {
                   <option value="">All statuses</option>
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
+                  <option value="pending">Pending Approval</option>
                 </select>
               </div>
               <div>
@@ -697,9 +820,15 @@ export default function AdminCandidates() {
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           candidate.status.isActive 
                             ? 'bg-green-100 text-green-800' 
+                            : candidate.adminData.verificationStatus === 'unverified'
+                            ? 'bg-yellow-100 text-yellow-800'
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {candidate.status.isActive ? 'Active' : 'Inactive'}
+                          {candidate.status.isActive 
+                            ? 'Active' 
+                            : candidate.adminData.verificationStatus === 'unverified'
+                            ? 'Pending'
+                            : 'Inactive'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -723,7 +852,7 @@ export default function AdminCandidates() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
+                        <div className="flex flex-wrap gap-2">
                           <button
                             onClick={() => {
                               setSelectedCandidate(candidate.id);
@@ -739,18 +868,34 @@ export default function AdminCandidates() {
                           >
                             Edit
                           </button>
-                          <div className="relative inline-block text-left">
-                            <button
-                              onClick={() => {
-                                const action = confirm('Do you want to permanently delete this candidate?\n\nClick OK for permanent deletion or Cancel for soft delete (deactivate).');
-                                handleDeleteCandidate(candidate.id, action);
-                              }}
-                              disabled={actionLoading === candidate.id}
-                              className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                            >
-                              {actionLoading === candidate.id ? 'Deleting...' : 'Delete'}
-                            </button>
-                          </div>
+                          {!candidate.status.isActive && candidate.adminData.verificationStatus === 'unverified' && (
+                            <>
+                              <button
+                                onClick={() => handleQuickApprove(candidate.id)}
+                                disabled={actionLoading === candidate.id}
+                                className="text-green-600 hover:text-green-900 disabled:opacity-50"
+                              >
+                                {actionLoading === candidate.id ? 'Processing...' : 'Approve'}
+                              </button>
+                              <button
+                                onClick={() => handleQuickReject(candidate.id)}
+                                disabled={actionLoading === candidate.id}
+                                className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          <button
+                            onClick={() => {
+                              const action = confirm('Do you want to permanently delete this candidate?\n\nClick OK for permanent deletion or Cancel for soft delete (deactivate).');
+                              handleDeleteCandidate(candidate.id, action);
+                            }}
+                            disabled={actionLoading === candidate.id}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                          >
+                            {actionLoading === candidate.id && !candidate.status.isActive ? 'Processing...' : 'Delete'}
+                          </button>
                         </div>
                       </td>
                     </tr>

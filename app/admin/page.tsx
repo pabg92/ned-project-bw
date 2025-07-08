@@ -59,7 +59,7 @@ export default function AdminDashboard() {
         const token = await getToken();
         const response = await fetch('/api/admin/dashboard?period=30', {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            'Authorization': token ? `Bearer ${token}` : '',
             'Content-Type': 'application/json',
           },
         });
