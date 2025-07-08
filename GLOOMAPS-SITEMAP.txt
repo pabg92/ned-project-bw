@@ -1,0 +1,215 @@
+Board Champions
+
+Home
+    Hero Section
+    Stats Section
+    Featured Experts
+    About Us
+    Testimonials
+    Client Logos
+    Process & CTA
+    Footer
+
+Sign In
+    Email Input
+    Password Input
+    Remember Me
+    Forgot Password Link
+    Sign In Button
+    Sign Up Link
+
+Sign Up
+    Email Input
+    Password Input
+    Terms Checkbox
+    Sign Up Button
+    Sign In Link
+
+Candidate Signup
+    Step 1: Personal Info
+        First Name
+        Last Name
+        Email
+        Phone
+        Location
+        LinkedIn URL
+    Step 2: Professional
+        Current Role
+        Company
+        Industry
+        Years Experience
+        Professional Summary
+    Step 3: Board Experience
+        Has Board Experience?
+        Board Details (Optional)
+    Step 4: Work History
+        Add Position
+            Job Title
+            Company
+            Start/End Dates
+            Description
+            Is Board Position?
+    Step 5: Education & Skills
+        Add Education
+            Institution
+            Degree
+            Field of Study
+            Graduation Year
+        Core Skills Selection
+        Functional Expertise
+        Industry Expertise
+    Step 6: Availability
+        When Available?
+        Work Preference
+        Travel Willing?
+        Compensation Range
+        Upload CV
+        Accept Terms
+    Success Page
+
+Search (Auth Required)
+    Search Bar
+    Filters
+        Experience Level
+        Location
+        Availability
+        Skills
+        Industry
+    Results Grid
+        Profile Cards
+            Name/Title
+            Location
+            Experience
+            Skills Tags
+            Unlock Button
+            Save Heart
+    Pagination
+
+Profile Detail (Auth Required)
+    Profile Header
+        Avatar/Initials
+        Name (or Anonymous)
+        Title
+        Location
+        Experience
+        Availability
+        Board Positions Count
+    About Section
+    Skills & Expertise
+        Core Skills
+        Functional Expertise
+    Board Experience
+        Position
+        Company
+        Dates
+        Description
+    Executive Experience
+        Position
+        Company
+        Dates
+        Description
+    Contact Information
+        Unlock Required
+        Email
+        LinkedIn
+    Education
+        Degree
+        Institution
+        Year
+    Key Achievements
+    Availability Status
+
+Shortlist (Auth Required)
+    Saved Profiles List
+    Remove Button
+    View Profile Links
+    Export Options
+
+User Profile (Auth Required)
+    Personal Information
+        Edit Name
+        Edit Email
+        Edit Phone
+    Professional Information
+        Edit Title
+        Edit Summary
+        Edit Location
+    Settings
+        Privacy Settings
+        Notification Preferences
+    Credits Balance
+        Current Credits
+        Purchase More Link
+
+Admin Dashboard (Admin Only)
+    Stats Overview
+        Total Users
+        Active Candidates
+        Pending Approvals
+        Revenue
+    Recent Activity
+    Quick Actions
+
+Admin Candidates (Admin Only)
+    Candidates Table
+        Name
+        Email
+        Status
+        Date Applied
+        Actions
+    Filter by Status
+        All
+        Pending
+        Approved
+        Rejected
+    Bulk Actions
+
+Admin Candidate Detail (Admin Only)
+    Candidate Information
+        All Signup Data
+        Profile Preview
+    Approval Actions
+        Approve Button
+        Reject Button
+        Request Changes
+    Edit Information
+    View Documents
+    Activity History
+
+Billing/Credits
+    Current Balance
+    Credit Packages
+        5 Credits - £25
+        10 Credits - £45
+        20 Credits - £80
+    Payment Form
+        Card Details
+        Billing Address
+    Purchase History
+
+Error Pages
+    404 Not Found
+    500 Server Error
+    403 Forbidden
+
+Footer (Global)
+    Company Links
+        About Us
+        Our Process
+        Case Studies
+        Testimonials
+    Resources
+        Blog
+        FAQ
+        Help Center
+    Legal
+        Privacy Policy
+        Terms of Service
+        Cookie Policy
+    Contact
+        Email
+        Phone
+        Address
+    Social Media
+        LinkedIn
+        Twitter

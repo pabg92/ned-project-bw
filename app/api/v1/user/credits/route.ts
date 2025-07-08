@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase/client';
 
 export async function GET() {
   try {
@@ -10,10 +10,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const supabase = createClient();
-
     // Get user's credit balance
-    const { data: credits, error } = await supabase
+    const { data: credits, error } = await supabaseAdmin
       .from('user_credits')
       .select('credits, total_purchased, credits_expiry_date')
       .eq('user_id', userId)
@@ -22,7 +20,7 @@ export async function GET() {
     if (error) {
       // If no credit record exists, create one
       if (error.code === 'PGRST116') {
-        const { data: newCredits, error: insertError } = await supabase
+        const { data: newCredits, error: insertError } = await supabaseAdmin
           .from('user_credits')
           .insert({
             user_id: userId,
