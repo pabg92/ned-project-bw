@@ -29,6 +29,7 @@ interface Props {
   showFilters: boolean
   isSignedIn?: boolean
   isCompanyUser?: boolean
+  onTotalCountChange?: (count: number) => void
 }
 
 export default function SearchResults({
@@ -40,7 +41,8 @@ export default function SearchResults({
   onToggleFilters,
   showFilters,
   isSignedIn = false,
-  isCompanyUser = false
+  isCompanyUser = false,
+  onTotalCountChange
 }: Props) {
   const [profiles, setProfiles] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -120,12 +122,14 @@ export default function SearchResults({
           setProfiles(transformedProfiles)
           setTotalCount(data.data.pagination.total)
           setTotalPages(data.data.pagination.totalPages)
+          onTotalCountChange?.(data.data.pagination.total)
         } else {
           console.error('No profiles found or API error:', data.error || 'No profiles')
           // NO MOCK DATA - Show empty state
           setProfiles([])
           setTotalCount(0)
           setTotalPages(0)
+          onTotalCountChange?.(0)
         }
       } catch (error) {
         console.error('Error fetching profiles:', error)
@@ -133,6 +137,7 @@ export default function SearchResults({
         setProfiles([])
         setTotalCount(0)
         setTotalPages(0)
+        onTotalCountChange?.(0)
       } finally {
         setIsLoading(false)
       }

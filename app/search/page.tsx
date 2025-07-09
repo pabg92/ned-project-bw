@@ -11,9 +11,21 @@ import EnhancedSearchBar from "@/components/search/enhanced-search-bar"
 import SearchCTABanner from "@/components/search/search-cta-banner"
 import { useShortlist } from "@/hooks/use-shortlist"
 import { useCredits } from "@/hooks/use-credits"
+import { useSavedSearches } from "@/hooks/use-saved-searches"
 import { Button } from "@/components/ui/button"
-import { CreditCard, Info } from "lucide-react"
+import { CreditCard, Info, Bookmark, BookmarkCheck } from "lucide-react"
 import Link from "next/link"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 
 export interface SearchFilters {
   query: string
@@ -54,6 +66,31 @@ export default function SearchPage() {
   const userRole = user?.publicMetadata?.role as string
   const isCompanyUser = userRole === 'company' || userRole === 'admin'
   
+  // Parse URL parameters on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const urlFilters: Partial<SearchFilters> = {}
+      
+      if (params.get('query')) urlFilters.query = params.get('query')!
+      if (params.get('experience')) urlFilters.experience = params.get('experience')!
+      if (params.get('location')) urlFilters.location = params.get('location')!
+      if (params.get('availability')) urlFilters.availability = params.get('availability')!
+      if (params.get('remotePreference')) urlFilters.remotePreference = params.get('remotePreference')!
+      if (params.get('role')) urlFilters.role = params.get('role')!.split(',')
+      if (params.get('sectors')) urlFilters.sectors = params.get('sectors')!.split(',')
+      if (params.get('skills')) urlFilters.skills = params.get('skills')!.split(',')
+      if (params.get('boardExperience')) urlFilters.boardExperience = params.get('boardExperience')!.split(',')
+      
+      if (Object.keys(urlFilters).length > 0) {
+        setFilters(prev => ({ ...prev, ...urlFilters }))
+        if (urlFilters.query) {
+          setSearchQuery(urlFilters.query)
+        }
+      }
+    }
+  }, [])
+  
   const [filters, setFilters] = useState<SearchFilters>({
     query: "",
     role: [],
@@ -71,9 +108,11 @@ export default function SearchPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("relevance")
   const [showFilters, setShowFilters] = useState(true)
-  const [savedSearches, setSavedSearches] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("") // Local state for immediate UI updates
   const [debouncedQuery, setDebouncedQuery] = useState("") // Debounced state for API calls
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [searchName, setSearchName] = useState("")
+  const [totalResults, setTotalResults] = useState(0)
   
   // Use real credits from Clerk (only for company users)
   const { credits, loading: creditsLoading } = useCredits()
@@ -81,6 +120,10 @@ export default function SearchPage() {
   // Use real shortlist (only for authenticated users)
   const { profiles: shortlistProfiles } = useShortlist()
   const shortlistCount = isSignedIn ? shortlistProfiles.length : 0
+  
+  // Use saved searches
+  const { searches: savedSearches, addSearch } = useSavedSearches()
+  const savedSearchCount = savedSearches.length
   
   // Show loading state while checking auth (only show for authenticated users)
   if (!isLoaded || (isSignedIn && creditsLoading)) {
@@ -103,8 +146,30 @@ export default function SearchPage() {
       router.push('/sign-in?redirect_url=/search')
       return
     }
-    const searchString = JSON.stringify(filters)
-    setSavedSearches(prev => [...prev, searchString])
+    
+    // Check if any filters are applied
+    const hasFilters = filters.query || filters.role.length > 0 || filters.sectors.length > 0 || 
+                      filters.skills.length > 0 || filters.experience || filters.location || 
+                      filters.availability || filters.boardExperience.length > 0
+    
+    if (!hasFilters) {
+      toast.error("Please apply some filters before saving the search")
+      return
+    }
+    
+    setShowSaveDialog(true)
+  }
+  
+  const handleConfirmSaveSearch = () => {
+    if (!searchName.trim()) {
+      toast.error("Please enter a name for your saved search")
+      return
+    }
+    
+    addSearch(searchName, filters, totalResults)
+    toast.success(`Search "${searchName}" saved successfully!`)
+    setShowSaveDialog(false)
+    setSearchName("")
   }
 
   return (
@@ -112,7 +177,7 @@ export default function SearchPage() {
       <SearchNavbar 
         credits={credits}
         shortlistCount={shortlistCount}
-        savedSearchCount={savedSearches.length}
+        savedSearchCount={savedSearchCount}
       />
       
       {/* Welcome Banners based on user status */}
@@ -216,12 +281,63 @@ export default function SearchPage() {
               showFilters={showFilters}
               isSignedIn={isSignedIn}
               isCompanyUser={isCompanyUser}
+              onTotalCountChange={setTotalResults}
             />
           </div>
         </div>
       </div>
       
       <Footer />
+      
+      {/* Save Search Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Search</DialogTitle>
+            <DialogDescription>
+              Save your current search filters to quickly access them later.
+              This search found {totalResults} matching profiles.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="search-name">Search Name</Label>
+              <Input
+                id="search-name"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                placeholder="e.g., Senior CFOs in London"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleConfirmSaveSearch()
+                  }
+                }}
+              />
+            </div>
+            <div className="text-sm text-gray-600">
+              <p className="font-medium mb-2">Current filters:</p>
+              <ul className="space-y-1">
+                {filters.query && <li>• Search: "{filters.query}"</li>}
+                {filters.role.length > 0 && <li>• Roles: {filters.role.join(", ")}</li>}
+                {filters.sectors.length > 0 && <li>• Sectors: {filters.sectors.join(", ")}</li>}
+                {filters.skills.length > 0 && <li>• Skills: {filters.skills.join(", ")}</li>}
+                {filters.experience && <li>• Experience: {filters.experience}</li>}
+                {filters.location && <li>• Location: {filters.location}</li>}
+                {filters.boardExperience.length > 0 && <li>• Board Experience: {filters.boardExperience.join(", ")}</li>}
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmSaveSearch}>
+              <Bookmark className="h-4 w-4 mr-2" />
+              Save Search
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

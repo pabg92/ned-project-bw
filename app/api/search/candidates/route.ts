@@ -107,16 +107,10 @@ export async function GET(request: NextRequest) {
             type
           )
         )
-      `, { count: 'exact' })
-      .eq('is_active', true)
-      .eq('profile_completed', true);
+      `, { count: 'exact' });
 
-    // Apply search filters
-    if (validatedParams.query) {
-      const searchQuery = `%${validatedParams.query}%`;
-      // Expanded search to include user names and work experiences
-      query = query.or(`title.ilike.${searchQuery},summary.ilike.${searchQuery},location.ilike.${searchQuery},users.first_name.ilike.${searchQuery},users.last_name.ilike.${searchQuery}`);
-    }
+    // Note: We'll handle search filtering in post-processing to include user names
+    // This is because Supabase doesn't support nested field references in or() clauses properly
 
     // Handle experience filter - map year ranges to levels
     if (validatedParams.experience) {
@@ -183,9 +177,7 @@ export async function GET(request: NextRequest) {
         query = query.order('created_at', { ascending: false });
     }
 
-    // Apply pagination
-    const offset = (validatedParams.page - 1) * validatedParams.limit;
-    query = query.range(offset, offset + validatedParams.limit - 1);
+    // We'll apply pagination after filtering in post-processing
 
     // Execute query
     const { data: candidates, error, count } = await query;
@@ -200,8 +192,10 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    // Transform data to match the frontend's expected format
-    const profiles = (candidates || []).map(candidate => {
+    // Filter and transform data to match the frontend's expected format
+    const profiles = (candidates || [])
+      .filter(candidate => candidate.is_active && candidate.profile_completed)
+      .map(candidate => {
       try {
         // Get user data
         const user = candidate.users || {};
@@ -267,8 +261,20 @@ export async function GET(request: NextRequest) {
       }
     }).filter(Boolean);
 
-    // Post-process filtering for sectors and skills
+    // Post-process filtering for query (including user names), sectors and skills
     let filteredProfiles = profiles;
+    
+    // Additional filtering for user names if query is provided
+    if (validatedParams.query) {
+      const queryLower = validatedParams.query.toLowerCase();
+      filteredProfiles = filteredProfiles.filter(profile => {
+        // Check if name includes the search query
+        return profile.name.toLowerCase().includes(queryLower) ||
+               profile.title.toLowerCase().includes(queryLower) ||
+               profile.location.toLowerCase().includes(queryLower) ||
+               profile.bio.toLowerCase().includes(queryLower);
+      });
+    }
     
     if (validatedParams.sectors && validatedParams.sectors.length > 0) {
       filteredProfiles = filteredProfiles.filter(profile => {
@@ -290,16 +296,20 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Adjust count for filtered results
-    const filteredCount = filteredProfiles.length;
-    const totalPages = Math.ceil(filteredCount / validatedParams.limit);
+    // Apply pagination to filtered results
+    const totalCount = filteredProfiles.length;
+    const startIndex = (validatedParams.page - 1) * validatedParams.limit;
+    const endIndex = startIndex + validatedParams.limit;
+    const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
+    
+    const totalPages = Math.ceil(totalCount / validatedParams.limit);
 
     return createSuccessResponse({
-      profiles: filteredProfiles,
+      profiles: paginatedProfiles,
       pagination: {
         page: validatedParams.page,
         limit: validatedParams.limit,
-        total: filteredCount,
+        total: totalCount,
         totalPages,
         hasNextPage: validatedParams.page < totalPages,
         hasPreviousPage: validatedParams.page > 1,
