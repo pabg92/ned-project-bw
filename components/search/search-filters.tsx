@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronDown, Filter, X, RotateCcw } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ChevronDown, Filter, X, RotateCcw, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -16,90 +16,7 @@ interface FilterSection {
   type: "checkbox" | "radio"
 }
 
-const filterSections: FilterSection[] = [
-  {
-    title: "Role Type",
-    key: "role",
-    type: "checkbox",
-    options: [
-      { value: "chair", label: "Chair", count: 145 },
-      { value: "ned", label: "Non-Executive Director", count: 892 },
-      { value: "advisor", label: "Advisor", count: 534 },
-      { value: "trustee", label: "Trustee", count: 267 },
-      { value: "senior-independent", label: "Senior Independent Director", count: 89 },
-    ]
-  },
-  {
-    title: "Sector Experience",
-    key: "sectors",
-    type: "checkbox",
-    options: [
-      { value: "financial-services", label: "Financial Services", count: 423 },
-      { value: "technology", label: "Technology", count: 567 },
-      { value: "healthcare", label: "Healthcare", count: 234 },
-      { value: "retail", label: "Retail & Consumer", count: 345 },
-      { value: "manufacturing", label: "Manufacturing", count: 189 },
-      { value: "energy", label: "Energy & Renewables", count: 156 },
-      { value: "real-estate", label: "Real Estate", count: 278 },
-      { value: "education", label: "Education", count: 123 },
-      { value: "nonprofit", label: "Not-for-Profit", count: 234 },
-    ]
-  },
-  {
-    title: "Years of Experience",
-    key: "experience",
-    type: "radio",
-    options: [
-      { value: "0-5", label: "0-5 years" },
-      { value: "5-10", label: "5-10 years" },
-      { value: "10-15", label: "10-15 years" },
-      { value: "15-20", label: "15-20 years" },
-      { value: "20+", label: "20+ years" },
-    ]
-  },
-  {
-    title: "Location",
-    key: "location",
-    type: "radio",
-    options: [
-      { value: "london", label: "London", count: 456 },
-      { value: "south-east", label: "South East", count: 234 },
-      { value: "south-west", label: "South West", count: 178 },
-      { value: "midlands", label: "Midlands", count: 267 },
-      { value: "north", label: "North", count: 345 },
-      { value: "scotland", label: "Scotland", count: 123 },
-      { value: "wales", label: "Wales", count: 89 },
-      { value: "ni", label: "Northern Ireland", count: 45 },
-      { value: "international", label: "International", count: 234 },
-    ]
-  },
-  {
-    title: "Board Experience",
-    key: "boardExperience",
-    type: "checkbox",
-    options: [
-      { value: "ftse100", label: "FTSE 100", count: 234 },
-      { value: "ftse250", label: "FTSE 250", count: 345 },
-      { value: "aim", label: "AIM Listed", count: 456 },
-      { value: "private-equity", label: "Private Equity Backed", count: 367 },
-      { value: "startup", label: "Startup/Scale-up", count: 289 },
-      { value: "public-sector", label: "Public Sector", count: 178 },
-      { value: "charity", label: "Charity/Third Sector", count: 234 },
-    ]
-  },
-  {
-    title: "Availability",
-    key: "availability",
-    type: "radio",
-    options: [
-      { value: "immediately", label: "Immediate" },
-      { value: "2weeks", label: "Within 2 weeks" },
-      { value: "1month", label: "Within 1 month" },
-      { value: "3months", label: "Within 3 months" },
-      { value: "6months", label: "Within 6 months" },
-    ]
-  }
-]
+// Filter sections are now dynamically generated in getFilterSections()
 
 interface Props {
   filters: SearchFiltersType
@@ -109,6 +26,107 @@ interface Props {
 
 export default function SearchFilters({ filters, updateFilter, onToggle }: Props) {
   const [expandedSections, setExpandedSections] = useState<string[]>(["role", "sectors"])
+  const [filterCounts, setFilterCounts] = useState<Record<string, any>>({});
+  const [isLoadingCounts, setIsLoadingCounts] = useState(true);
+  
+  // Fetch real filter counts
+  useEffect(() => {
+    const fetchFilterCounts = async () => {
+      try {
+        const response = await fetch('/api/search/filter-counts');
+        const data = await response.json();
+        
+        if (data.success) {
+          setFilterCounts(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching filter counts:', error);
+      } finally {
+        setIsLoadingCounts(false);
+      }
+    };
+    
+    fetchFilterCounts();
+  }, []);
+  
+  // Update filter sections with real counts
+  const getFilterSections = (): FilterSection[] => {
+    const sections: FilterSection[] = [
+      {
+        title: "Role Type",
+        key: "role",
+        type: "checkbox",
+        options: filterCounts.role || [
+          { value: "chair", label: "Chair", count: 0 },
+          { value: "ned", label: "Non-Executive Director", count: 0 },
+          { value: "advisor", label: "Advisor", count: 0 },
+          { value: "trustee", label: "Trustee", count: 0 },
+          { value: "senior-independent", label: "Senior Independent Director", count: 0 },
+        ]
+      },
+      {
+        title: "Sector Experience",
+        key: "sectors",
+        type: "checkbox",
+        options: filterCounts.sectors || [
+          { value: "financial-services", label: "Financial Services", count: 0 },
+          { value: "technology", label: "Technology", count: 0 },
+          { value: "healthcare", label: "Healthcare", count: 0 },
+        ]
+      },
+      {
+        title: "Years of Experience",
+        key: "experience",
+        type: "radio",
+        options: [
+          { value: "0-5", label: "0-5 years", count: filterCounts.experience?.find((e: any) => e.value === 'junior')?.count || 0 },
+          { value: "5-10", label: "5-10 years", count: filterCounts.experience?.find((e: any) => e.value === 'mid')?.count || 0 },
+          { value: "10-15", label: "10-15 years", count: filterCounts.experience?.find((e: any) => e.value === 'senior')?.count || 0 },
+          { value: "15-20", label: "15-20 years", count: filterCounts.experience?.find((e: any) => e.value === 'lead')?.count || 0 },
+          { value: "20+", label: "20+ years", count: filterCounts.experience?.find((e: any) => e.value === 'executive')?.count || 0 },
+        ]
+      },
+      {
+        title: "Location",
+        key: "location",
+        type: "radio",
+        options: filterCounts.location || [
+          { value: "london", label: "London", count: 0 },
+          { value: "midlands", label: "Midlands", count: 0 },
+          { value: "uk", label: "UK", count: 0 },
+          { value: "international", label: "International", count: 0 },
+        ]
+      },
+      {
+        title: "Board Experience",
+        key: "boardExperience",
+        type: "checkbox",
+        options: filterCounts.boardExperience || [
+          { value: "ftse100", label: "FTSE 100", count: 0 },
+          { value: "ftse250", label: "FTSE 250", count: 0 },
+          { value: "aim", label: "AIM Listed", count: 0 },
+          { value: "private-equity", label: "Private Equity Backed", count: 0 },
+          { value: "startup", label: "Startup/Scale-up", count: 0 },
+          { value: "public-sector", label: "Public Sector", count: 0 },
+          { value: "charity", label: "Charity/Third Sector", count: 0 },
+        ]
+      },
+      {
+        title: "Availability",
+        key: "availability",
+        type: "radio",
+        options: filterCounts.availability || [
+          { value: "immediately", label: "Immediate", count: 0 },
+          { value: "2weeks", label: "Within 2 weeks", count: 0 },
+          { value: "1month", label: "Within 1 month", count: 0 },
+          { value: "3months", label: "Within 3 months", count: 0 },
+          { value: "6months", label: "Within 6 months", count: 0 },
+        ]
+      }
+    ];
+    
+    return sections;
+  };
   
   const toggleSection = (section: string) => {
     setExpandedSections(prev =>
@@ -176,7 +194,12 @@ export default function SearchFilters({ filters, updateFilter, onToggle }: Props
 
       {/* Filter Sections */}
       <div className="divide-y divide-gray-200">
-        {filterSections.map((section) => (
+        {isLoadingCounts ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-[#6b93ce]" />
+          </div>
+        ) : (
+          getFilterSections().map((section) => (
           <div key={section.title} className="p-4">
             <button
               onClick={() => toggleSection(section.key)}
@@ -237,41 +260,45 @@ export default function SearchFilters({ filters, updateFilter, onToggle }: Props
               </div>
             )}
           </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Skills Tags */}
       <div className="p-4 border-t border-gray-200">
         <h4 className="font-medium text-gray-900 mb-3">Popular Skills</h4>
         <div className="flex flex-wrap gap-2">
-          {[
-            "Digital Transformation",
-            "Risk Management",
-            "M&A",
-            "ESG",
-            "Cybersecurity",
-            "Finance",
-            "Strategy",
-            "Governance",
-          ].map((skill) => (
+          {(filterCounts.skills || [
+            { value: "Digital Transformation", label: "Digital Transformation", count: 0 },
+            { value: "Risk Management", label: "Risk Management", count: 0 },
+            { value: "M&A", label: "M&A", count: 0 },
+            { value: "ESG", label: "ESG", count: 0 },
+            { value: "Cybersecurity", label: "Cybersecurity", count: 0 },
+            { value: "Finance", label: "Finance", count: 0 },
+            { value: "Strategy", label: "Strategy", count: 0 },
+            { value: "Governance", label: "Governance", count: 0 },
+          ]).map((skill: any) => (
             <button
-              key={skill}
+              key={skill.value}
               onClick={() => {
                 const currentSkills = filters.skills
-                if (currentSkills.includes(skill)) {
-                  updateFilter("skills", currentSkills.filter(s => s !== skill))
+                if (currentSkills.includes(skill.value)) {
+                  updateFilter("skills", currentSkills.filter(s => s !== skill.value))
                 } else {
-                  updateFilter("skills", [...currentSkills, skill])
+                  updateFilter("skills", [...currentSkills, skill.value])
                 }
               }}
               className={cn(
-                "px-3 py-1 rounded-full text-xs font-medium transition-colors",
-                filters.skills.includes(skill)
+                "px-3 py-1 rounded-full text-xs font-medium transition-colors flex items-center gap-1",
+                filters.skills.includes(skill.value)
                   ? "bg-[#6b93ce] text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               )}
             >
-              {skill}
+              {skill.label}
+              {skill.count > 0 && (
+                <span className="text-[10px] opacity-75">({skill.count})</span>
+              )}
             </button>
           ))}
         </div>

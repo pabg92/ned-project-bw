@@ -25,21 +25,19 @@ interface Props {
   onDebouncedChange?: (value: string) => void
 }
 
-const recentSearches = [
-  "CFO Financial Services London",
-  "Digital Transformation Expert",
-  "Board Chair Technology",
-  "Risk Management FTSE 100",
-  "ESG Specialist"
-]
+// Recent searches will be stored in localStorage
+const getRecentSearches = (): string[] => {
+  if (typeof window === 'undefined') return []
+  const stored = localStorage.getItem('boardchampions-recent-searches')
+  return stored ? JSON.parse(stored).slice(0, 5) : []
+}
 
-const searchSuggestions = [
-  { type: "role", value: "Chief Financial Officer" },
-  { type: "skill", value: "Digital Transformation" },
-  { type: "sector", value: "Financial Services" },
-  { type: "location", value: "London" },
-  { type: "company", value: "FTSE 100" }
-]
+const saveRecentSearch = (search: string) => {
+  if (typeof window === 'undefined' || !search.trim()) return
+  const current = getRecentSearches()
+  const updated = [search, ...current.filter(s => s !== search)].slice(0, 10)
+  localStorage.setItem('boardchampions-recent-searches', JSON.stringify(updated))
+}
 
 const searchTemplates = [
   { 
@@ -68,20 +66,58 @@ export default function EnhancedSearchBar({ value, onChange, onSaveSearch, onDeb
   const [isFocused, setIsFocused] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [searchSuggestions, setSearchSuggestions] = useState<Array<{ type: string; value: string }>>([])
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Filter suggestions based on input
-  const filteredSuggestions = value.length > 2 
-    ? searchSuggestions.filter(s => 
-        s.value.toLowerCase().includes(value.toLowerCase())
-      )
-    : []
+  // Load recent searches on mount
+  useEffect(() => {
+    setRecentSearches(getRecentSearches())
+  }, [])
+  
+  // Fetch suggestions when input changes
+  useEffect(() => {
+    if (suggestionTimeoutRef.current) {
+      clearTimeout(suggestionTimeoutRef.current)
+    }
+    
+    if (value.length > 1) {
+      setIsLoadingSuggestions(true)
+      suggestionTimeoutRef.current = setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(value)}`)
+          const data = await response.json()
+          if (data.success) {
+            setSearchSuggestions(data.data)
+          }
+        } catch (error) {
+          console.error('Error fetching suggestions:', error)
+        } finally {
+          setIsLoadingSuggestions(false)
+        }
+      }, 200) // 200ms delay for suggestions
+    } else {
+      setSearchSuggestions([])
+      setIsLoadingSuggestions(false)
+    }
+    
+    return () => {
+      if (suggestionTimeoutRef.current) {
+        clearTimeout(suggestionTimeoutRef.current)
+      }
+    }
+  }, [value])
 
   const handleSuggestionClick = (suggestion: string) => {
     onChange(suggestion)
+    saveRecentSearch(suggestion)
     setShowSuggestions(false)
     inputRef.current?.focus()
+    // Update recent searches
+    setRecentSearches(getRecentSearches())
   }
 
   const handleTemplateClick = (template: typeof searchTemplates[0]) => {
@@ -109,6 +145,9 @@ export default function EnhancedSearchBar({ value, onChange, onSaveSearch, onDeb
     if (onDebouncedChange) {
       debounceTimeoutRef.current = setTimeout(() => {
         onDebouncedChange(newValue)
+        if (newValue.trim()) {
+          saveRecentSearch(newValue)
+        }
       }, 300) // 300ms delay
     }
   }, [onChange, onDebouncedChange])
@@ -239,16 +278,16 @@ export default function EnhancedSearchBar({ value, onChange, onSaveSearch, onDeb
             )}
 
             {/* Recent Searches */}
-            {!value && (
+            {!value && recentSearches.length > 0 && (
               <div className="p-4 border-b border-gray-100">
                 <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   Recent Searches
                 </h3>
                 <div className="space-y-1">
-                  {recentSearches.slice(0, 3).map((search) => (
+                  {recentSearches.slice(0, 3).map((search, index) => (
                     <button
-                      key={search}
+                      key={`${search}-${index}`}
                       onClick={() => handleSuggestionClick(search)}
                       className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 text-sm text-gray-700 transition-colors"
                     >
@@ -259,27 +298,39 @@ export default function EnhancedSearchBar({ value, onChange, onSaveSearch, onDeb
               </div>
             )}
 
-            {/* Filtered Suggestions */}
-            {filteredSuggestions.length > 0 && (
+            {/* Search Suggestions */}
+            {value && (
               <div className="p-4">
-                <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Suggestions
-                </h3>
-                <div className="space-y-1">
-                  {filteredSuggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestionClick(suggestion.value)}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                    >
-                      <Badge variant="outline" className="text-xs">
-                        {suggestion.type}
-                      </Badge>
-                      <span className="text-sm text-gray-700">{suggestion.value}</span>
-                    </button>
-                  ))}
-                </div>
+                {isLoadingSuggestions ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#6b93ce]"></div>
+                  </div>
+                ) : searchSuggestions.length > 0 ? (
+                  <>
+                    <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4" />
+                      Suggestions
+                    </h3>
+                    <div className="space-y-1">
+                      {searchSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(suggestion.value)}
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                        >
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {suggestion.type}
+                          </Badge>
+                          <span className="text-sm text-gray-700">{suggestion.value}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No suggestions found
+                  </p>
+                )}
               </div>
             )}
           </div>
