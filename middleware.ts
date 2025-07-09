@@ -26,6 +26,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/search(.*)",           // Search API (read-only public access)
   "/api/webhooks(.*)",         // Webhook endpoints
   "/api/health",               // Health check
+  "/api/test-supabase",        // Test endpoints
+  "/api/test-supabase-v2",     // Test endpoints
 ]);
 
 // Define company-only routes (companies and admins can access)
