@@ -170,3 +170,55 @@ body {
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out;
 }
+
+/* Process Step Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Process step card animations */
+.process-step-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.process-step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Arrow connector styles */
+.arrow-connector {
+  animation: softPulse 3s ease-in-out infinite;
+}
+
+/* Smooth transitions for visibility */
+.transition-smooth {
+  transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
