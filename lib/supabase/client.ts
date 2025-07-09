@@ -19,7 +19,15 @@ const createSupabaseClient = () => {
 };
 
 const createSupabaseAdmin = () => {
-  if (!supabaseUrl || !supabaseServiceKey) {
+  // For Vercel, we need to check env vars at runtime
+  const runtimeUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || supabaseUrl;
+  const runtimeKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseServiceKey;
+  
+  if (!runtimeUrl || !runtimeKey) {
+    // During build, return a placeholder
+    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+      throw new Error('Supabase admin credentials not configured');
+    }
     console.warn('Supabase admin environment variables not found. Using placeholder values for build.');
     return createClient('https://placeholder.supabase.co', 'placeholder-key', {
       auth: {
@@ -28,7 +36,10 @@ const createSupabaseAdmin = () => {
       },
     });
   }
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  
+  console.log('Creating Supabase admin client with URL:', runtimeUrl.substring(0, 30) + '...');
+  
+  return createClient(runtimeUrl, runtimeKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -39,8 +50,32 @@ const createSupabaseAdmin = () => {
 // Supabase client for auth and storage
 export const supabase = createSupabaseClient();
 
-// Supabase admin client for server-side operations
+// For backward compatibility, create admin client
+// Note: This is created at import time which may cause issues on Vercel
+// Use getSupabaseAdmin() from server.ts for new code
 export const supabaseAdmin = createSupabaseAdmin();
+
+// Export the function for server-side usage
+export const getSupabaseAdminClient = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!url || !key) {
+    console.error('Supabase environment variables missing:', { 
+      hasUrl: !!url, 
+      hasKey: !!key,
+      nodeEnv: process.env.NODE_ENV 
+    });
+    throw new Error('Missing Supabase environment variables');
+  }
+  
+  return createClient(url, key, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+};
 
 // Database connection for Drizzle ORM
 const getDatabaseUrl = () => {
