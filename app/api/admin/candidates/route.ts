@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth/admin-check';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
@@ -56,6 +56,8 @@ type GetCandidatesQuery = z.infer<typeof getCandidatesQuerySchema>;
  * Get all candidate profiles with admin-level access and filtering
  */
 export async function GET(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     // In dev mode or test mode, skip admin authentication but still allow Supabase access
     const isDevMode = process.env.DEV_MODE === 'true';

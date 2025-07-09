@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { 
   CandidateProfileApiResponse,
   Tag,
@@ -31,6 +31,8 @@ interface SignupMetadata {
  */
 export async function processProfileOnApproval(profileId: string, adminId: string) {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
+    
     // Get the current profile
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('candidate_profiles')

@@ -6,6 +6,8 @@ import { CLERK_WEBHOOK_SECRET, DEFAULT_ROLE } from '@/lib/auth/config';
 import { UserMetadata } from '@/lib/types/auth';
 
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   const WEBHOOK_SECRET = CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 
 /**
@@ -11,6 +11,8 @@ import { createErrorResponse, createSuccessResponse } from '@/lib/validations/mi
  * without updating other visibility settings.
  */
 export async function POST(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     // Get authenticated user from Clerk
     const { userId } = await auth();

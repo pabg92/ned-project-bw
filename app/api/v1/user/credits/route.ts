@@ -1,8 +1,10 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 
 export async function GET() {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     const { userId } = await auth();
 

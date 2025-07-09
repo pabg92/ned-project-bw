@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { z } from 'zod';
 import { UserRole } from '@/lib/types/auth';
@@ -29,6 +29,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     // Get authenticated admin user
     const { userId: adminId } = await auth();

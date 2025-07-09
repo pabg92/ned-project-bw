@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { requireAdmin } from '@/lib/auth/admin-check';
 
 export async function GET(request: NextRequest) {
@@ -31,6 +31,9 @@ export async function GET(request: NextRequest) {
 
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - periodDays);
+
+    // Get Supabase admin client
+    const supabaseAdmin = getSupabaseAdmin();
 
     // Fetch real data from Supabase
     // Get total candidates

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { updateCandidateProfileSchema } from '@/lib/validations/candidate';
 import { withValidation, createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 
@@ -12,6 +12,8 @@ import { withValidation, createErrorResponse, createSuccessResponse } from '@/li
  * including all related data like skills, work experience, and education.
  */
 export async function GET(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     // Get authenticated user from Clerk
     const { userId } = await auth();

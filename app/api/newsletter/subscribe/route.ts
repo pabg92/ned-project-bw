@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase/client"
+import { getSupabaseAdmin } from '@/lib/supabase/server-client'
 import { z } from "zod"
 
 // Validation schema
@@ -9,6 +9,8 @@ const subscribeSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     // Parse and validate request body
     const body = await request.json()

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { z } from 'zod';
 
@@ -24,6 +24,8 @@ const querySchema = z.object({
  * including soft-deleted and suspended accounts.
  */
 export async function GET(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     // Get authenticated admin user
     const { userId: adminId } = await auth();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { z } from 'zod';
 
@@ -55,6 +55,8 @@ interface SignupMetadata {
  * Public endpoint for candidate registration
  */
 export async function POST(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     const body = await request.json();
     console.log('[SIGNUP] Received data:', {

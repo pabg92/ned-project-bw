@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { requireAdmin } from '@/lib/auth/admin-check';
 import { withValidation, createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { z } from 'zod';
@@ -42,6 +42,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const supabaseAdmin = getSupabaseAdmin();
+
   try {
     // In dev mode, skip admin authentication but still allow Supabase access
     const isDevMode = process.env.DEV_MODE === 'true';

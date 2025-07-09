@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { z } from 'zod';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 
@@ -43,6 +43,9 @@ export async function GET(request: NextRequest) {
 
     // Validate parameters
     const validatedParams = searchCandidatesSchema.parse(params);
+
+    // Get Supabase admin client
+    const supabaseAdmin = getSupabaseAdmin();
 
     // Build query with all related data
     let query = supabaseAdmin
