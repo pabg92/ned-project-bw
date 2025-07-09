@@ -40,9 +40,9 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white w-full shadow-lg overflow-x-hidden">
-        <div className="w-full">
-          <div className="w-full px-6 lg:px-8 xl:px-12 2xl:px-16">
+      <nav className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white shadow-lg overflow-hidden">
+        <div className="w-full max-w-[100vw] overflow-hidden">
+          <div className="px-6 lg:px-8 xl:px-12 2xl:px-16">
             <div className="flex items-center h-20 gap-6 max-w-[1920px] mx-auto">
             {/* Logo */}
             <div className="flex-shrink-0 min-w-0">
@@ -58,8 +58,8 @@ export default function Navbar() {
             </div>
 
             {/* Navigation Menu - Desktop Only */}
-            <div className="hidden xl:flex items-center flex-1 justify-between">
-              <div className="flex items-center justify-center flex-1 space-x-2 lg:space-x-3 xl:space-x-4">
+            <div className="hidden xl:flex items-center flex-1 justify-between min-w-0">
+              <div className="flex items-center justify-center flex-1 space-x-2 lg:space-x-3 xl:space-x-4 min-w-0">
                 {navigationItems.map((item) => (
                   <div key={item.name} className="relative">
                     {item.hasDropdown ? (
@@ -94,9 +94,9 @@ export default function Navbar() {
               </div>
 
               {/* Right Side - Dynamic based on auth state */}
-              <div className="flex items-center space-x-6 ml-auto">
+              <div className="flex items-center space-x-6 ml-auto flex-shrink-0">
                 {/* Social Media Icons - Desktop Only */}
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 flex-shrink-0">
                   <Link
                     href="https://linkedin.com"
                     target="_blank"
