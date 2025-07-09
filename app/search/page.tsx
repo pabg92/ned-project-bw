@@ -72,6 +72,8 @@ export default function SearchPage() {
   const [sortBy, setSortBy] = useState("relevance")
   const [showFilters, setShowFilters] = useState(true)
   const [savedSearches, setSavedSearches] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState("") // Local state for immediate UI updates
+  const [debouncedQuery, setDebouncedQuery] = useState("") // Debounced state for API calls
   
   // Use real credits from Clerk (only for company users)
   const { credits, loading: creditsLoading } = useCredits()
@@ -183,8 +185,9 @@ export default function SearchPage() {
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Enhanced Search Bar */}
         <EnhancedSearchBar 
-          value={filters.query}
-          onChange={(value) => updateFilter("query", value)}
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onDebouncedChange={(value) => updateFilter("query", value)}
           onSaveSearch={handleSaveSearch}
         />
         

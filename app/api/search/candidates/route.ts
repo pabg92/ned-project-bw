@@ -6,10 +6,12 @@ import { createErrorResponse, createSuccessResponse } from '@/lib/validations/mi
 // Validation schema for search parameters
 const searchCandidatesSchema = z.object({
   query: z.string().optional(),
-  experience: z.enum(['junior', 'mid', 'senior', 'lead', 'executive']).optional(),
+  experience: z.string().optional(), // Changed to accept year ranges like "0-5", "5-10", etc.
   location: z.string().optional(),
   sectors: z.array(z.string()).optional(),
   skills: z.array(z.string()).optional(),
+  role: z.array(z.string()).optional(), // Added role filter
+  boardExperience: z.array(z.string()).optional(), // Added board experience filter
   availability: z.enum(['immediately', '2weeks', '1month', '3months', '6months']).optional(),
   remotePreference: z.enum(['remote', 'hybrid', 'onsite', 'flexible']).optional(),
   salaryMin: z.number().optional(),
@@ -28,10 +30,12 @@ export async function GET(request: NextRequest) {
     // Parse query parameters
     const params: SearchParams = {
       query: searchParams.get('query') || undefined,
-      experience: searchParams.get('experience') as any || undefined,
+      experience: searchParams.get('experience') || undefined,
       location: searchParams.get('location') || undefined,
       sectors: searchParams.get('sectors')?.split(',').filter(Boolean) || undefined,
       skills: searchParams.get('skills')?.split(',').filter(Boolean) || undefined,
+      role: searchParams.get('role')?.split(',').filter(Boolean) || undefined,
+      boardExperience: searchParams.get('boardExperience')?.split(',').filter(Boolean) || undefined,
       availability: searchParams.get('availability') as any || undefined,
       remotePreference: searchParams.get('remotePreference') as any || undefined,
       salaryMin: searchParams.get('salaryMin') ? Number(searchParams.get('salaryMin')) : undefined,
@@ -110,15 +114,61 @@ export async function GET(request: NextRequest) {
     // Apply search filters
     if (validatedParams.query) {
       const searchQuery = `%${validatedParams.query}%`;
-      query = query.or(`title.ilike.${searchQuery},summary.ilike.${searchQuery},location.ilike.${searchQuery}`);
+      // Expanded search to include user names and work experiences
+      query = query.or(`title.ilike.${searchQuery},summary.ilike.${searchQuery},location.ilike.${searchQuery},users.first_name.ilike.${searchQuery},users.last_name.ilike.${searchQuery}`);
     }
 
+    // Handle experience filter - map year ranges to levels
     if (validatedParams.experience) {
-      query = query.eq('experience', validatedParams.experience);
+      const experienceLevel = mapExperienceYearsToLevel(validatedParams.experience);
+      if (experienceLevel) {
+        query = query.eq('experience', experienceLevel);
+      }
     }
 
     if (validatedParams.location) {
       query = query.ilike('location', `%${validatedParams.location}%`);
+    }
+
+    // Handle role filter through tags
+    if (validatedParams.role && validatedParams.role.length > 0) {
+      // Filter profiles that have any of the specified role tags
+      query = query.contains('private_metadata', { roles: validatedParams.role });
+    }
+
+    // Handle sectors filter through tags - simplified approach
+    if (validatedParams.sectors && validatedParams.sectors.length > 0) {
+      // For now, we'll filter in post-processing since complex tag queries are challenging
+      // This will be handled after the query executes
+    }
+
+    // Handle skills filter - simplified approach
+    if (validatedParams.skills && validatedParams.skills.length > 0) {
+      // For now, we'll filter in post-processing since complex tag queries are challenging
+      // This will be handled after the query executes
+    }
+
+    // Handle board experience filter
+    if (validatedParams.boardExperience && validatedParams.boardExperience.length > 0) {
+      query = query.contains('private_metadata', { boardExperienceTypes: validatedParams.boardExperience });
+    }
+
+    // Handle availability filter
+    if (validatedParams.availability) {
+      query = query.eq('availability', validatedParams.availability);
+    }
+
+    // Handle remote preference filter
+    if (validatedParams.remotePreference) {
+      query = query.eq('remote_preference', validatedParams.remotePreference);
+    }
+
+    // Handle salary range filters
+    if (validatedParams.salaryMin) {
+      query = query.gte('salary_min', validatedParams.salaryMin);
+    }
+    if (validatedParams.salaryMax) {
+      query = query.lte('salary_max', validatedParams.salaryMax);
     }
 
     // Apply sorting
@@ -164,6 +214,7 @@ export async function GET(request: NextRequest) {
         const skills = tags.filter(tag => tag.type === 'skill').map(tag => tag.name);
         const expertise = tags.filter(tag => tag.type === 'expertise').map(tag => tag.name);
         const industries = tags.filter(tag => tag.type === 'industry').map(tag => tag.name);
+        const roles = tags.filter(tag => tag.type === 'role').map(tag => tag.name);
 
         // Get work experiences
         const workExperiences = candidate.work_experiences || [];
@@ -187,6 +238,7 @@ export async function GET(request: NextRequest) {
           experience: formatExperience(candidate.experience),
           sectors: industries.slice(0, 5),
           skills: [...skills, ...expertise].slice(0, 5),
+          roles: roles, // Added roles
           bio: candidate.summary || 'Profile summary not available.',
           imageUrl: null,
           isUnlocked: false,
@@ -205,6 +257,9 @@ export async function GET(request: NextRequest) {
           portfolioUrl: candidate.portfolio_url,
           githubUrl: candidate.github_url,
           resumeUrl: candidate.resume_url,
+          // Raw data for filtering
+          rawExperience: candidate.experience,
+          privateMetadata: candidate.private_metadata,
         };
       } catch (err) {
         console.error('Error transforming candidate:', candidate.id, err);
@@ -212,14 +267,39 @@ export async function GET(request: NextRequest) {
       }
     }).filter(Boolean);
 
-    const totalPages = Math.ceil((count || 0) / validatedParams.limit);
+    // Post-process filtering for sectors and skills
+    let filteredProfiles = profiles;
+    
+    if (validatedParams.sectors && validatedParams.sectors.length > 0) {
+      filteredProfiles = filteredProfiles.filter(profile => {
+        // Check if profile has any of the requested sectors
+        const profileSectors = profile.sectors.map(s => s.toLowerCase());
+        return validatedParams.sectors.some(sector => 
+          profileSectors.some(ps => ps.includes(sector.toLowerCase()))
+        );
+      });
+    }
+
+    if (validatedParams.skills && validatedParams.skills.length > 0) {
+      filteredProfiles = filteredProfiles.filter(profile => {
+        // Check if profile has any of the requested skills
+        const profileSkills = profile.skills.map(s => s.toLowerCase());
+        return validatedParams.skills.some(skill => 
+          profileSkills.some(ps => ps.includes(skill.toLowerCase()))
+        );
+      });
+    }
+
+    // Adjust count for filtered results
+    const filteredCount = filteredProfiles.length;
+    const totalPages = Math.ceil(filteredCount / validatedParams.limit);
 
     return createSuccessResponse({
-      profiles,
+      profiles: filteredProfiles,
       pagination: {
         page: validatedParams.page,
         limit: validatedParams.limit,
-        total: count || 0,
+        total: filteredCount,
         totalPages,
         hasNextPage: validatedParams.page < totalPages,
         hasPreviousPage: validatedParams.page > 1,
@@ -236,6 +316,21 @@ export async function GET(request: NextRequest) {
     
     return createErrorResponse('Failed to search candidates', 500);
   }
+}
+
+// Helper function to map year ranges to experience levels
+function mapExperienceYearsToLevel(yearRange?: string): string | undefined {
+  if (!yearRange) return undefined;
+  
+  const experienceMap: Record<string, string> = {
+    '0-5': 'junior',
+    '5-10': 'mid',
+    '10-15': 'senior',
+    '15-20': 'lead',
+    '20+': 'executive',
+  };
+  
+  return experienceMap[yearRange];
 }
 
 function formatExperience(experience?: string | number | null): string {

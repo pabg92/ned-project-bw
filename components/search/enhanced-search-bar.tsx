@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { 
   Search, Mic, X, Clock, TrendingUp, Sparkles, 
   ChevronDown, Filter, Save, Command
@@ -22,6 +22,7 @@ interface Props {
   value: string
   onChange: (value: string) => void
   onSaveSearch: () => void
+  onDebouncedChange?: (value: string) => void
 }
 
 const recentSearches = [
@@ -63,11 +64,12 @@ const searchTemplates = [
   }
 ]
 
-export default function EnhancedSearchBar({ value, onChange, onSaveSearch }: Props) {
+export default function EnhancedSearchBar({ value, onChange, onSaveSearch, onDebouncedChange }: Props) {
   const [isFocused, setIsFocused] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Filter suggestions based on input
   const filteredSuggestions = value.length > 2 
@@ -94,9 +96,32 @@ export default function EnhancedSearchBar({ value, onChange, onSaveSearch }: Pro
     }
   }
 
+  // Debounced change handler
+  const handleInputChange = useCallback((newValue: string) => {
+    onChange(newValue) // Immediate update for UI
+    
+    // Clear existing timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+    
+    // Set new timeout for debounced callback
+    if (onDebouncedChange) {
+      debounceTimeoutRef.current = setTimeout(() => {
+        onDebouncedChange(newValue)
+      }, 300) // 300ms delay
+    }
+  }, [onChange, onDebouncedChange])
+
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown as any)
-    return () => document.removeEventListener("keydown", handleKeyDown as any)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown as any)
+      // Clean up timeout on unmount
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+    }
   }, [])
 
   return (
@@ -113,7 +138,7 @@ export default function EnhancedSearchBar({ value, onChange, onSaveSearch }: Pro
             ref={inputRef}
             type="text"
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
             onFocus={() => {
               setIsFocused(true)
               setShowSuggestions(true)
