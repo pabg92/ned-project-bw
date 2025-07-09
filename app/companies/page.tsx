@@ -2,12 +2,13 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Search, CreditCard, Users, Shield, Zap, ArrowRight, Building2 } from "lucide-react"
+import { CheckCircle, Search, CreditCard, Users, Shield, Zap, ArrowRight, Building2, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
-import React from "react"
+import React, { useState } from "react"
 import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 /**
  * Companies Landing Page
@@ -28,6 +29,7 @@ export default function CompaniesPage() {
   const { isSignedIn, user, isLoaded } = useUser()
   const router = useRouter()
   const userRole = user?.publicMetadata?.role as string
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null)
 
   // Log user state for debugging
   React.useEffect(() => {
@@ -56,7 +58,7 @@ export default function CompaniesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section - Using navbar gradient colors */}
-      <section className="relative bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white py-24 px-4">
+      <section className="relative bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white py-16 px-4">
         <div className="max-w-6xl mx-auto text-center">
           {/* Board Champions Logo */}
           <div className="mb-8">
@@ -94,65 +96,91 @@ export default function CompaniesPage() {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             
-            {isSignedIn && userRole !== 'company' && (
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => router.push('/sign-in')}
-                className="border-white text-white hover:bg-white/10 text-lg px-8 py-6"
-              >
-                Sign In
-              </Button>
-            )}
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={() => router.push('/sign-in')}
+              className="bg-white/10 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-[#4a4a4a] text-lg px-8 py-6 font-semibold transition-all"
+            >
+              Sign In
+            </Button>
           </div>
+          
+          <p className="mt-4 text-sm text-[#c5d5e4]">
+            Already have an account? Sign in to browse profiles instantly.
+          </p>
         </div>
       </section>
 
+      {/* Quick Access Bar for Existing Users */}
+      {!isSignedIn && (
+        <section className="bg-[#f8f9fa] border-b py-4 px-4">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-[#6b93ce]" />
+              <p className="text-gray-700">
+                <span className="font-semibold">Existing user?</span> Sign in to access your dashboard and browse profiles
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push('/sign-in')}
+              className="bg-[#6b93ce] text-white hover:bg-[#5a82bd] font-semibold shadow-md hover:shadow-lg transition-all"
+            >
+              Sign In to Dashboard
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </section>
+      )}
+
       {/* How It Works */}
-      <section className="py-20 px-4">
+      <section className="py-16 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bebas-neue text-center mb-12 text-[#4a4a4a]">
+          <h2 className="text-3xl font-bebas-neue text-center mb-10 text-[#4a4a4a]">
             How It Works
           </h2>
           
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-6 relative">
+            {/* Connecting line for desktop */}
+            <div className="hidden md:block absolute top-10 left-24 right-24 h-0.5 bg-gradient-to-r from-transparent via-[#6b93ce]/20 to-transparent" />
+            
             {[
               {
                 step: "1",
-                icon: <Users className="h-8 w-8" />,
+                icon: <Users className="h-6 w-6" />,
                 title: "Sign Up",
                 description: "Create your company account in seconds"
               },
               {
                 step: "2",
-                icon: <Search className="h-8 w-8" />,
+                icon: <Search className="h-6 w-6" />,
                 title: "Search & Filter",
                 description: "Browse anonymized profiles of board-ready executives"
               },
               {
                 step: "3",
-                icon: <CreditCard className="h-8 w-8" />,
+                icon: <CreditCard className="h-6 w-6" />,
                 title: "Unlock Profiles",
                 description: "Use credits to reveal full candidate details"
               },
               {
                 step: "4",
-                icon: <CheckCircle className="h-8 w-8" />,
+                icon: <CheckCircle className="h-6 w-6" />,
                 title: "Connect",
                 description: "Contact candidates directly with full information"
               }
-            ].map((item) => (
-              <div key={item.step} className="text-center">
+            ].map((item, index) => (
+              <div key={item.step} className="text-center relative">
                 <div className="relative">
-                  <div className="w-20 h-20 bg-[#6b93ce] rounded-full flex items-center justify-center mx-auto mb-4 text-white">
+                  <div className="w-16 h-16 bg-[#6b93ce] rounded-full flex items-center justify-center mx-auto mb-3 text-white shadow-md">
                     {item.icon}
                   </div>
-                  <span className="absolute -top-2 -right-2 bg-[#5a5a5a] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-[#5a5a5a] text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
                     {item.step}
                   </span>
                 </div>
-                <h3 className="text-xl font-semibold mb-2 text-[#4a4a4a]">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
+                <h3 className="text-lg font-semibold mb-1 text-[#4a4a4a]">{item.title}</h3>
+                <p className="text-sm text-gray-600">{item.description}</p>
               </div>
             ))}
           </div>
@@ -340,7 +368,7 @@ export default function CompaniesPage() {
               size="lg"
               variant="outline"
               asChild
-              className="border-white text-white hover:bg-white/10 text-lg px-8 py-6"
+              className="bg-white/10 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-[#4a4a4a] text-lg px-8 py-6 font-semibold transition-all"
             >
               <Link href="/sign-in">
                 Existing User? Sign In
@@ -361,51 +389,56 @@ export default function CompaniesPage() {
             Frequently Asked Questions
           </h2>
           
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-[#4a4a4a]">
-                  How does the credit system work?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Each credit allows you to unlock one candidate's full profile, including 
-                  their contact information, detailed experience, and LinkedIn profile. 
-                  Once unlocked, you have permanent access to that profile.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-[#4a4a4a]">
-                  Can I see profiles before purchasing credits?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Yes! You can browse all anonymized profiles for free. You'll see their 
-                  experience level, skills, location, and professional summary. Credits are 
-                  only needed to reveal identity and contact details.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-[#4a4a4a]">
-                  Are all candidates actively looking?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  All candidates on our platform have explicitly expressed interest in 
-                  board positions. Each profile shows their availability timeline, from 
-                  "immediately available" to "open to opportunities."
-                </p>
-              </CardContent>
-            </Card>
+          <div className="space-y-4">
+            {[
+              {
+                question: "How does the credit system work?",
+                answer: "Each credit allows you to unlock one candidate's full profile, including their contact information, detailed experience, and LinkedIn profile. Once unlocked, you have permanent access to that profile."
+              },
+              {
+                question: "Can I see profiles before purchasing credits?",
+                answer: "Yes! You can browse all anonymized profiles for free. You'll see their experience level, skills, location, and professional summary. Credits are only needed to reveal identity and contact details."
+              },
+              {
+                question: "Are all candidates actively looking?",
+                answer: "All candidates on our platform have explicitly expressed interest in board positions. Each profile shows their availability timeline, from 'immediately available' to 'open to opportunities.'"
+              },
+              {
+                question: "Do credits expire?",
+                answer: "No, credits never expire. Once you purchase credits, they remain in your account until you use them. You can buy credits when you need them and use them at your own pace."
+              },
+              {
+                question: "Can I get a refund on unused credits?",
+                answer: "We offer a 14-day money-back guarantee on unused credits. If you're not satisfied with our service, contact support for a full refund of any unused credits."
+              }
+            ].map((faq, index) => (
+              <Card 
+                key={index} 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => setOpenFAQ(openFAQ === index ? null : index)}
+              >
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg text-[#4a4a4a]">
+                      {faq.question}
+                    </CardTitle>
+                    <ChevronDown 
+                      className={cn(
+                        "h-5 w-5 text-gray-500 transition-transform duration-200",
+                        openFAQ === index && "transform rotate-180"
+                      )}
+                    />
+                  </div>
+                </CardHeader>
+                {openFAQ === index && (
+                  <CardContent className="pt-0">
+                    <p className="text-gray-600">
+                      {faq.answer}
+                    </p>
+                  </CardContent>
+                )}
+              </Card>
+            ))}
           </div>
         </div>
       </section>

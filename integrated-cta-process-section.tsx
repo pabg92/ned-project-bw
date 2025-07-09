@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { typography, buttonStyles, cn, spacing } from "@/lib/typography"
 import { useState, useEffect, useRef } from "react"
 import React from "react"
+import { useUser } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
 
 const processSteps = [
   {
@@ -51,6 +53,10 @@ export default function IntegratedCTAProcessSection() {
   const [errorMessage, setErrorMessage] = useState("")
   const [isVisible, setIsVisible] = useState(false)
   const processRef = useRef<HTMLDivElement>(null)
+  
+  const { isSignedIn, user } = useUser()
+  const router = useRouter()
+  const userRole = user?.publicMetadata?.role as string
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -106,7 +112,16 @@ export default function IntegratedCTAProcessSection() {
       <div className={spacing.container}>
         {/* CTA Buttons - Mobile optimized with proper touch targets */}
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center mb-12">
-          <Button className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto min-w-0 sm:min-w-[280px] group")}>
+          <Button 
+            onClick={() => {
+              if (isSignedIn && userRole === 'company') {
+                router.push('/search')
+              } else {
+                router.push('/companies')
+              }
+            }}
+            className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto min-w-0 sm:min-w-[280px] group")}
+          >
             <span>I need an <span className="font-bold">expert</span></span>
             <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
