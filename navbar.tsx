@@ -58,8 +58,8 @@ export default function Navbar() {
             </div>
 
             {/* Navigation Menu - Desktop Only */}
-            <div className="hidden xl:flex items-center flex-1 justify-between min-w-0">
-              <div className="flex items-center justify-center flex-1 space-x-2 lg:space-x-3 xl:space-x-4 min-w-0">
+            <div className="hidden 2xl:flex items-center flex-1 justify-between min-w-0">
+              <div className="flex items-center justify-center flex-1 space-x-1 xl:space-x-2 2xl:space-x-3 min-w-0">
                 {navigationItems.map((item) => (
                   <div key={item.name} className="relative">
                     {item.hasDropdown ? (
@@ -67,12 +67,12 @@ export default function Navbar() {
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            className={`text-white hover:bg-white/20 hover:scale-105 px-3 py-2 text-base font-bebas-neue tracking-wider flex items-center gap-2 min-w-[100px] justify-center transition-all duration-300 rounded-md ${
+                            className={`text-white hover:bg-white/20 hover:scale-105 px-2 xl:px-3 py-2 text-sm xl:text-base font-bebas-neue tracking-wider flex items-center gap-1 xl:gap-2 justify-center transition-all duration-300 rounded-md ${
                               item.isActive ? "bg-[#6b93ce] hover:bg-[#5a82bd] shadow-lg" : ""
                             }`}
                           >
-                            {item.name}
-                            <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
+                            <span className="whitespace-nowrap">{item.name}</span>
+                            <ChevronDown className="h-3 w-3 xl:h-4 xl:w-4 transition-transform duration-300 group-hover:rotate-180 flex-shrink-0" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="bg-gradient-to-b from-[#6b93ce] to-[#5a82bd] border-none shadow-xl rounded-lg mt-2">
@@ -211,7 +211,7 @@ export default function Navbar() {
             </div>
 
             {/* Mobile menu button - Accessible 48x48px touch target */}
-            <div className="xl:hidden flex-shrink-0 ml-auto">
+            <div className="2xl:hidden flex-shrink-0 ml-auto">
               <Button 
                 variant="ghost" 
                 className="text-white hover:bg-white/20 p-3 rounded-lg transition-all duration-300 min-w-[48px] min-h-[48px]" 
@@ -233,7 +233,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 xl:hidden">
+        <div className="fixed inset-0 z-50 2xl:hidden">
           {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black/50" 
