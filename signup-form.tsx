@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, ChevronRight, Upload, Check, FileText, User, Briefcase, Users, PenTool, CheckCircle, Plus, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Upload, Check, FileText, User, Briefcase, Users, PenTool, CheckCircle, Plus, X, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,6 +22,7 @@ interface WorkExperience {
   isCurrent: boolean
   description: string
   isBoardPosition: boolean
+  companyType?: string // Added for board company type
 }
 
 interface Education {
@@ -29,6 +30,17 @@ interface Education {
   degree: string
   fieldOfStudy: string
   graduationDate: string
+}
+
+interface DealExperience {
+  dealType: string // M&A, IPO, PE, Restructuring, etc.
+  dealValue: string
+  dealCurrency: string
+  companyName: string
+  role: string // Led, Advised, Board oversight, etc.
+  year: string
+  description: string
+  sector: string
 }
 
 interface FormData {
@@ -42,6 +54,7 @@ interface FormData {
   
   // Step 2: Professional Background
   currentRole: string
+  roleTypes: string[] // Added for role type selection
   company: string
   industry: string
   yearsOfExperience: string
@@ -50,18 +63,23 @@ interface FormData {
   // Step 3: Board Experience
   boardExperience: boolean
   boardPositions: number
+  boardExperienceTypes: string[] // Added for board experience types
+  boardCommittees: string[] // Added for committee experience
   boardDetails: string
   
   // Step 4: Work Experience
   workExperiences: WorkExperience[]
   
-  // Step 5: Education & Skills
+  // Step 5: Transaction/Deal Experience
+  dealExperiences: DealExperience[]
+  
+  // Step 6: Education & Skills
   education: Education[]
   keySkills: string[]
   functionalExpertise: string[]
   industryExpertise: string[]
   
-  // Step 6: Availability & Documents
+  // Step 7: Availability & Documents
   activelySeeking: boolean
   availability: string // immediately, 2weeks, 1month, 3months, 6months
   remotePreference: string // remote, hybrid, onsite, flexible
@@ -76,15 +94,77 @@ interface FormErrors {
   [key: string]: string | undefined
 }
 
-const TOTAL_STEPS = 6
+const TOTAL_STEPS = 7
 
 const STEP_LABELS = [
   { label: "Personal Info", icon: User },
   { label: "Professional", icon: Briefcase },
   { label: "Board Experience", icon: Users },
   { label: "Work History", icon: Briefcase },
+  { label: "Deal Experience", icon: TrendingUp },
   { label: "Education & Skills", icon: PenTool },
   { label: "Availability", icon: FileText },
+]
+
+// Predefined options for roles
+const ROLE_TYPE_OPTIONS = [
+  { value: "chair", label: "Chair" },
+  { value: "ned", label: "Non-Executive Director" },
+  { value: "advisor", label: "Advisor" },
+  { value: "trustee", label: "Trustee" },
+  { value: "senior-independent", label: "Senior Independent Director" },
+]
+
+const BOARD_EXPERIENCE_TYPE_OPTIONS = [
+  { value: "ftse100", label: "FTSE 100" },
+  { value: "ftse250", label: "FTSE 250" },
+  { value: "aim", label: "AIM Listed" },
+  { value: "private-equity", label: "Private Equity Backed" },
+  { value: "startup", label: "Startup/Scale-up" },
+  { value: "public-sector", label: "Public Sector" },
+  { value: "charity", label: "Charity/Third Sector" },
+]
+
+const BOARD_COMMITTEE_OPTIONS = [
+  { value: "audit", label: "Audit Committee" },
+  { value: "remuneration", label: "Remuneration Committee" },
+  { value: "nomination", label: "Nomination Committee" },
+  { value: "risk", label: "Risk Committee" },
+  { value: "governance", label: "Governance Committee" },
+  { value: "strategy", label: "Strategy Committee" },
+  { value: "technology", label: "Technology/Digital Committee" },
+  { value: "esg", label: "ESG/Sustainability Committee" },
+  { value: "investment", label: "Investment Committee" },
+]
+
+const DEAL_TYPE_OPTIONS = [
+  { value: "acquisition", label: "Acquisition" },
+  { value: "merger", label: "Merger" },
+  { value: "divestiture", label: "Divestiture" },
+  { value: "ipo", label: "IPO" },
+  { value: "private-placement", label: "Private Placement" },
+  { value: "leveraged-buyout", label: "Leveraged Buyout (LBO)" },
+  { value: "management-buyout", label: "Management Buyout (MBO)" },
+  { value: "restructuring", label: "Restructuring" },
+  { value: "refinancing", label: "Refinancing" },
+  { value: "joint-venture", label: "Joint Venture" },
+  { value: "strategic-partnership", label: "Strategic Partnership" },
+]
+
+const DEAL_ROLE_OPTIONS = [
+  { value: "led-transaction", label: "Led Transaction" },
+  { value: "board-oversight", label: "Board Oversight" },
+  { value: "advisor", label: "Advisor" },
+  { value: "negotiated", label: "Negotiated Deal" },
+  { value: "due-diligence", label: "Due Diligence Lead" },
+  { value: "integration-lead", label: "Integration Lead" },
+  { value: "committee-chair", label: "Committee Chair" },
+]
+
+const CURRENCY_OPTIONS = [
+  { value: "GBP", label: "£ GBP" },
+  { value: "USD", label: "$ USD" },
+  { value: "EUR", label: "€ EUR" },
 ]
 
 // Predefined options for skills and expertise
@@ -119,12 +199,15 @@ export default function SignUpForm() {
     location: "",
     linkedinUrl: "",
     currentRole: "",
+    roleTypes: [],
     company: "",
     industry: "",
     yearsOfExperience: "",
     summary: "",
     boardExperience: false,
     boardPositions: 0,
+    boardExperienceTypes: [],
+    boardCommittees: [],
     boardDetails: "",
     workExperiences: [{
       companyName: "",
@@ -134,8 +217,10 @@ export default function SignUpForm() {
       endDate: "",
       isCurrent: false,
       description: "",
-      isBoardPosition: false
+      isBoardPosition: false,
+      companyType: ""
     }],
+    dealExperiences: [],
     education: [{
       institution: "",
       degree: "",
@@ -192,6 +277,8 @@ export default function SignUpForm() {
           // Number fields
           boardPositions: parsed.boardPositions || 0,
           // Array fields
+          roleTypes: parsed.roleTypes || [],
+          boardExperienceTypes: parsed.boardExperienceTypes || [],
           keySkills: parsed.keySkills || [],
           functionalExpertise: parsed.functionalExpertise || [],
           industryExpertise: parsed.industryExpertise || [],
@@ -203,7 +290,8 @@ export default function SignUpForm() {
             endDate: "",
             isCurrent: false,
             description: "",
-            isBoardPosition: false
+            isBoardPosition: false,
+            companyType: ""
           }],
           education: parsed.education || [{
             institution: "",
@@ -277,10 +365,13 @@ export default function SignUpForm() {
         }
         break
       case 5:
+        // Deal experience is optional
+        break
+      case 6:
         if (formData.keySkills.length === 0) newErrors.keySkills = "Select at least one core skill"
         if (formData.functionalExpertise.length === 0) newErrors.functionalExpertise = "Select at least one functional expertise"
         break
-      case 6:
+      case 7:
         if (!formData.cvFile) newErrors.cvFile = "Please upload your CV/Resume"
         if (!formData.termsAccepted) newErrors.termsAccepted = "You must accept the terms and conditions"
         break
@@ -329,8 +420,12 @@ export default function SignUpForm() {
               industry: formData.industry,
               boardExperience: formData.boardExperience,
               boardPositions: formData.boardPositions,
+              boardExperienceTypes: formData.boardExperienceTypes, // Added board experience types
+              boardCommittees: formData.boardCommittees, // Added committee experience
               boardDetails: formData.boardDetails,
+              roleTypes: formData.roleTypes, // Added role types
               workExperiences: formData.workExperiences,
+              dealExperiences: formData.dealExperiences, // Added deal experiences
               education: formData.education,
               tags: tags,
               activelySeeking: formData.activelySeeking,
@@ -431,7 +526,8 @@ export default function SignUpForm() {
         endDate: "",
         isCurrent: false,
         description: "",
-        isBoardPosition: false
+        isBoardPosition: false,
+        companyType: ""
       }]
     }))
   }
@@ -477,6 +573,39 @@ export default function SignUpForm() {
       ...prev,
       education: prev.education.map((edu, i) => 
         i === index ? { ...edu, [field]: value } : edu
+      )
+    }))
+  }
+
+  // Deal experience management
+  const addDealExperience = () => {
+    setFormData(prev => ({
+      ...prev,
+      dealExperiences: [...prev.dealExperiences, {
+        dealType: "",
+        dealValue: "",
+        dealCurrency: "GBP",
+        companyName: "",
+        role: "",
+        year: "",
+        description: "",
+        sector: ""
+      }]
+    }))
+  }
+
+  const removeDealExperience = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      dealExperiences: prev.dealExperiences.filter((_, i) => i !== index)
+    }))
+  }
+
+  const updateDealExperience = (index: number, field: keyof DealExperience, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      dealExperiences: prev.dealExperiences.map((deal, i) => 
+        i === index ? { ...deal, [field]: value } : deal
       )
     }))
   }
@@ -682,6 +811,31 @@ export default function SignUpForm() {
                 </div>
 
                 <div>
+                  <Label>Role Types</Label>
+                  <p className="text-sm text-gray-500 mb-3">Select the types of board roles you're interested in</p>
+                  <div className="space-y-2">
+                    {ROLE_TYPE_OPTIONS.map((role) => (
+                      <div key={role.value} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={role.value}
+                          checked={formData.roleTypes.includes(role.value)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              updateFormData("roleTypes", [...formData.roleTypes, role.value])
+                            } else {
+                              updateFormData("roleTypes", formData.roleTypes.filter(r => r !== role.value))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={role.value} className="font-normal cursor-pointer">
+                          {role.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
                   <Label htmlFor="company">Company</Label>
                   <Input
                     id="company"
@@ -779,16 +933,68 @@ export default function SignUpForm() {
                 </div>
 
                 {formData.boardExperience && (
-                  <div>
-                    <Label htmlFor="boardDetails">Brief Overview (Optional)</Label>
-                    <Textarea
-                      id="boardDetails"
-                      value={formData.boardDetails}
-                      onChange={(e) => updateFormData("boardDetails", e.target.value)}
-                      placeholder="Optionally provide a brief overview of your board experience philosophy or approach."
-                      className="mt-1 min-h-[100px]"
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <Label>Types of Board Experience</Label>
+                      <p className="text-sm text-gray-500 mb-3">Select all that apply to your board experience</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {BOARD_EXPERIENCE_TYPE_OPTIONS.map((type) => (
+                          <div key={type.value} className="flex items-center space-x-3">
+                            <Checkbox
+                              id={type.value}
+                              checked={formData.boardExperienceTypes.includes(type.value)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  updateFormData("boardExperienceTypes", [...formData.boardExperienceTypes, type.value])
+                                } else {
+                                  updateFormData("boardExperienceTypes", formData.boardExperienceTypes.filter(t => t !== type.value))
+                                }
+                              }}
+                            />
+                            <Label htmlFor={type.value} className="font-normal cursor-pointer">
+                              {type.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>Committee Experience</Label>
+                      <p className="text-sm text-gray-500 mb-3">Select all committees you have served on</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {BOARD_COMMITTEE_OPTIONS.map((committee) => (
+                          <div key={committee.value} className="flex items-center space-x-3">
+                            <Checkbox
+                              id={committee.value}
+                              checked={formData.boardCommittees.includes(committee.value)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  updateFormData("boardCommittees", [...formData.boardCommittees, committee.value])
+                                } else {
+                                  updateFormData("boardCommittees", formData.boardCommittees.filter(c => c !== committee.value))
+                                }
+                              }}
+                            />
+                            <Label htmlFor={committee.value} className="font-normal cursor-pointer">
+                              {committee.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="boardDetails">Brief Overview (Optional)</Label>
+                      <Textarea
+                        id="boardDetails"
+                        value={formData.boardDetails}
+                        onChange={(e) => updateFormData("boardDetails", e.target.value)}
+                        placeholder="Optionally provide a brief overview of your board experience philosophy or approach."
+                        className="mt-1 min-h-[100px]"
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -894,17 +1100,43 @@ export default function SignUpForm() {
                       />
                     </div>
 
-                    <div className="flex items-center space-x-2 mt-4">
-                      <Checkbox
-                        id={`board-${index}`}
-                        checked={exp.isBoardPosition}
-                        onCheckedChange={(checked) => 
-                          updateWorkExperience(index, "isBoardPosition", checked as boolean)
-                        }
-                      />
-                      <Label htmlFor={`board-${index}`} className="text-sm font-normal">
-                        This is a board position (Director, Trustee, Chair, etc.)
-                      </Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`board-${index}`}
+                          checked={exp.isBoardPosition}
+                          onCheckedChange={(checked) => {
+                            updateWorkExperience(index, "isBoardPosition", checked as boolean)
+                            if (!checked) {
+                              updateWorkExperience(index, "companyType", "")
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`board-${index}`} className="text-sm font-normal">
+                          This is a board position (Director, Trustee, Chair, etc.)
+                        </Label>
+                      </div>
+                      
+                      {exp.isBoardPosition && (
+                        <div>
+                          <Label>Company Type</Label>
+                          <Select
+                            value={exp.companyType || ""}
+                            onValueChange={(value) => updateWorkExperience(index, "companyType", value)}
+                          >
+                            <SelectTrigger className="mt-1">
+                              <SelectValue placeholder="Select company type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {BOARD_EXPERIENCE_TYPE_OPTIONS.map((type) => (
+                                <SelectItem key={type.value} value={type.value}>
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -922,6 +1154,170 @@ export default function SignUpForm() {
             )}
 
             {currentStep === 5 && (
+              <div className="space-y-4 sm:space-y-6">
+                <h2 className="text-xl sm:text-2xl font-bebas-neue text-gray-900 mb-4 sm:mb-6">
+                  Transaction & Deal Experience
+                </h2>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-blue-900">
+                    <strong>For PE Firms:</strong> Share your most significant transactions, deals, and exits. 
+                    This helps demonstrate your value creation track record.
+                  </p>
+                </div>
+
+                {formData.dealExperiences.length === 0 ? (
+                  <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                    <TrendingUp className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                    <p className="text-gray-600 mb-4">No deal experience added yet</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addDealExperience}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Deal Experience
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {formData.dealExperiences.map((deal, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-4">
+                        <div className="flex justify-between items-start">
+                          <h3 className="text-lg font-semibold">Deal {index + 1}</h3>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeDealExperience(index)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Deal Type</Label>
+                            <select
+                              value={deal.dealType}
+                              onChange={(e) => updateDealExperience(index, "dealType", e.target.value)}
+                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                            >
+                              <option value="">Select deal type</option>
+                              {DEAL_TYPE_OPTIONS.map(option => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <Label>Your Role</Label>
+                            <select
+                              value={deal.role}
+                              onChange={(e) => updateDealExperience(index, "role", e.target.value)}
+                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+                            >
+                              <option value="">Select your role</option>
+                              {DEAL_ROLE_OPTIONS.map(option => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="sm:col-span-2">
+                            <Label>Deal Value</Label>
+                            <div className="flex gap-2 mt-1">
+                              <select
+                                value={deal.dealCurrency}
+                                onChange={(e) => updateDealExperience(index, "dealCurrency", e.target.value)}
+                                className="w-24 px-3 py-2 border border-gray-300 rounded-md"
+                              >
+                                {CURRENCY_OPTIONS.map(option => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                              <Input
+                                type="number"
+                                value={deal.dealValue}
+                                onChange={(e) => updateDealExperience(index, "dealValue", e.target.value)}
+                                placeholder="e.g., 250 (millions)"
+                                className="flex-1"
+                              />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Enter value in millions</p>
+                          </div>
+
+                          <div>
+                            <Label>Year</Label>
+                            <Input
+                              type="number"
+                              value={deal.year}
+                              onChange={(e) => updateDealExperience(index, "year", e.target.value)}
+                              placeholder="2023"
+                              min="1990"
+                              max={new Date().getFullYear()}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Company/Target</Label>
+                            <Input
+                              value={deal.companyName}
+                              onChange={(e) => updateDealExperience(index, "companyName", e.target.value)}
+                              placeholder="Company name"
+                              className="mt-1"
+                            />
+                          </div>
+
+                          <div>
+                            <Label>Sector</Label>
+                            <Input
+                              value={deal.sector}
+                              onChange={(e) => updateDealExperience(index, "sector", e.target.value)}
+                              placeholder="e.g., Technology, Healthcare"
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label>Deal Description & Impact</Label>
+                          <Textarea
+                            value={deal.description}
+                            onChange={(e) => updateDealExperience(index, "description", e.target.value)}
+                            placeholder="Describe your role, the strategic rationale, and the value created (e.g., 3x return, successful exit, cost synergies achieved)"
+                            className="mt-1 min-h-[100px]"
+                          />
+                        </div>
+                      </div>
+                    ))}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={addDealExperience}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Another Deal
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {currentStep === 6 && (
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-xl sm:text-2xl font-bebas-neue text-gray-900 mb-4 sm:mb-6">
                   Education & Skills
@@ -1079,7 +1475,7 @@ export default function SignUpForm() {
               </div>
             )}
 
-            {currentStep === 6 && (
+            {currentStep === 7 && (
               <div className="space-y-4 sm:space-y-6">
                 <h2 className="text-xl sm:text-2xl font-bebas-neue text-gray-900 mb-4 sm:mb-6">
                   Availability & Documents

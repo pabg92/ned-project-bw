@@ -40,7 +40,7 @@ const adminUpdateCandidateSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabaseAdmin = getSupabaseAdmin();
 
@@ -53,7 +53,7 @@ export async function GET(
       await requireAdmin();
     }
 
-    const candidateId = params.id;
+    const candidateId = (await params).id;
     
     console.log('GET /api/admin/candidates/[id] - Fetching candidate:', candidateId);
 
@@ -247,6 +247,8 @@ export async function GET(
         skillAssessmentScore: candidate.private_metadata?.skillAssessmentScore,
         adminNotes: candidate.private_metadata?.adminNotes,
         portfolioReviewNotes: candidate.private_metadata?.portfolioReviewNotes,
+        roles: candidate.private_metadata?.roles || [], // Added role types
+        boardExperienceTypes: candidate.private_metadata?.boardExperienceTypes || [], // Added board experience types
       },
       
       // Timestamps
@@ -273,6 +275,8 @@ export async function GET(
 export const PUT = withValidation(
   { body: adminUpdateCandidateSchema },
   async ({ body }, request) => {
+    const supabaseAdmin = getSupabaseAdmin();
+    
     try {
       // In dev mode, skip admin authentication but still allow Supabase access
       const isDevMode = process.env.DEV_MODE === 'true';
@@ -444,8 +448,10 @@ function calculateProfileCompletion(profile: any): number {
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const supabaseAdmin = getSupabaseAdmin();
+  
   try {
     // In dev mode, skip admin authentication but still allow Supabase access
     const isDevMode = process.env.DEV_MODE === 'true';
@@ -459,7 +465,7 @@ export async function DELETE(
       adminUser = { id: isDevMode ? 'dev-admin' : 'test-admin', email: isDevMode ? 'admin@dev.com' : 'admin@test.com' };
     }
 
-    const candidateId = params.id;
+    const candidateId = (await params).id;
     const { searchParams } = new URL(request.url);
     const hardDelete = searchParams.get('hard') === 'true';
 

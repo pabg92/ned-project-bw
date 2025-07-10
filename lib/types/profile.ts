@@ -43,6 +43,10 @@ export interface WorkExperience {
   isCurrent: boolean;
   description?: string;
   achievements?: string;
+  isBoardPosition?: boolean;
+  is_board_position?: boolean; // Support both naming conventions
+  companyType?: string;
+  company_type?: string; // Support both naming conventions
   createdAt?: string;
   updatedAt?: string;
 }

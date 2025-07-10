@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { requireAdmin } from '@/lib/auth/admin-check';
 import { withValidation, createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
 import { z } from 'zod';
-// import { processProfileOnApproval } from '@/lib/services/admin-profile-processor'; // No longer needed
+import { processProfileOnApproval } from '@/lib/services/admin-profile-processor';
 
 const approvalActionSchema = z.object({
   action: z.enum(['approve', 'reject', 'request_changes'], {
@@ -22,7 +22,7 @@ const approvalActionSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabaseAdmin = getSupabaseAdmin();
 
@@ -33,7 +33,7 @@ export async function GET(
       await requireAdmin();
     }
 
-    const candidateId = params.id;
+    const candidateId = (await params).id;
     
     console.log('[APPROVAL GET] Fetching candidate:', candidateId);
 
@@ -132,6 +132,8 @@ export async function GET(
 export const POST = withValidation(
   { body: approvalActionSchema },
   async ({ body }, request) => {
+    const supabaseAdmin = getSupabaseAdmin();
+    
     try {
       // Check admin authentication
       const isDevMode = process.env.DEV_MODE === 'true';

@@ -547,26 +547,49 @@ export default function AdminCandidates() {
   };
 
   const handleDeleteCandidate = async (candidateId: string, hardDelete: boolean = false) => {
-    const confirmMessage = hardDelete 
-      ? 'Are you sure you want to permanently delete this candidate? This action cannot be undone.'
-      : 'Are you sure you want to deactivate this candidate? This can be reversed later.';
+    // Always use soft delete from the portal
+    const confirmMessage = 'Are you sure you want to deactivate this candidate? This can be reversed later.';
     
     if (!confirm(confirmMessage)) return;
 
     try {
       setActionLoading(candidateId);
-      const token = await getToken();
-      const response = await fetch(`/api/admin/candidates/${candidateId}${hardDelete ? '?hard=true' : ''}`, {
+      
+      const headers: any = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add auth token if available
+      if (getToken) {
+        try {
+          const token = await getToken();
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+        } catch (authError) {
+          console.warn('Failed to get auth token:', authError);
+        }
+      }
+      
+      const response = await fetch(`/api/admin/candidates/${candidateId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete candidate');
+        let errorMessage = 'Failed to delete candidate';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON, try to get text
+          try {
+            errorMessage = await response.text();
+          } catch (textError) {
+            // Use default error message
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
@@ -887,14 +910,11 @@ export default function AdminCandidates() {
                             </>
                           )}
                           <button
-                            onClick={() => {
-                              const action = confirm('Do you want to permanently delete this candidate?\n\nClick OK for permanent deletion or Cancel for soft delete (deactivate).');
-                              handleDeleteCandidate(candidate.id, action);
-                            }}
+                            onClick={() => handleDeleteCandidate(candidate.id, false)}
                             disabled={actionLoading === candidate.id}
                             className="text-red-600 hover:text-red-900 disabled:opacity-50"
                           >
-                            {actionLoading === candidate.id && !candidate.status.isActive ? 'Processing...' : 'Delete'}
+                            {actionLoading === candidate.id ? 'Processing...' : 'Delete'}
                           </button>
                         </div>
                       </td>
@@ -1089,6 +1109,46 @@ export default function AdminCandidates() {
                           </div>
                         )}
                       </div>
+                      
+                      {/* Role Types */}
+                      {candidateDetails.adminData?.roles && candidateDetails.adminData.roles.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-500">Role Types</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {candidateDetails.adminData.roles.map((role: string, idx: number) => (
+                              <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {role === 'chair' ? 'Chair' :
+                                 role === 'ned' ? 'Non-Executive Director' :
+                                 role === 'advisor' ? 'Advisor' :
+                                 role === 'trustee' ? 'Trustee' :
+                                 role === 'senior-independent' ? 'Senior Independent Director' :
+                                 role}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Board Experience Types */}
+                      {candidateDetails.adminData?.boardExperienceTypes && candidateDetails.adminData.boardExperienceTypes.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-500">Board Experience Types</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {candidateDetails.adminData.boardExperienceTypes.map((type: string, idx: number) => (
+                              <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                {type === 'listed' ? 'Listed Company' :
+                                 type === 'private-equity' ? 'Private Equity Backed' :
+                                 type === 'private' ? 'Private Company' :
+                                 type === 'public-sector' ? 'Public Sector' :
+                                 type === 'charity' ? 'Charity' :
+                                 type === 'startup' ? 'Startup' :
+                                 type}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
                       {candidateDetails.adminData?.adminNotes && (
                         <div className="mt-3">
                           <p className="text-sm text-gray-500">Admin Notes</p>

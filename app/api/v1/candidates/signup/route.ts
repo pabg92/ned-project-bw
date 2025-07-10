@@ -23,7 +23,9 @@ interface SignupMetadata {
   industry?: string;
   boardExperience?: boolean;
   boardPositions?: number;
+  boardExperienceTypes?: string[]; // Added for board experience types
   boardDetails?: string;
+  roleTypes?: string[]; // Added for role types
   workExperiences?: Array<{
     companyName: string;
     title: string;
@@ -33,6 +35,7 @@ interface SignupMetadata {
     isCurrent: boolean;
     description: string;
     isBoardPosition: boolean;
+    companyType?: string; // Added for board company type
   }>;
   education?: Array<{
     institution: string;
@@ -139,8 +142,16 @@ export async function POST(request: NextRequest) {
           willingToRelocate: metadata.willingToRelocate,
           boardExperience: metadata.boardExperience,
           boardPositions: metadata.boardPositions,
+          boardExperienceTypes: metadata.boardExperienceTypes || [], // Store board experience types
+          boardCommittees: metadata.boardCommittees || [], // Store board committees
           yearsExperience: metadata.yearsExperience,
-          boardPositionsData: metadata.workExperiences?.filter(exp => exp.isBoardPosition),
+          roles: metadata.roleTypes || [], // Store role types
+          dealExperiences: metadata.dealExperiences || [], // Store deal experiences
+          workExperiences: metadata.workExperiences || [], // Store all work experiences
+          boardPositionsData: metadata.workExperiences?.filter(exp => exp.isBoardPosition).map(exp => ({
+            ...exp,
+            companyType: exp.companyType || null // Include company type for board positions
+          })),
         }
       })
       .select()
@@ -162,19 +173,38 @@ export async function POST(request: NextRequest) {
       console.log('[SIGNUP] Processing work experiences:', metadata.workExperiences.length);
       const workExperiencesToInsert = metadata.workExperiences
         .filter(exp => exp.companyName && exp.title)
-        .map(exp => ({
-          candidate_id: newProfile.id,
-          company_name: exp.companyName,
-          position: exp.title,
-          start_date: exp.startDate,
-          end_date: exp.isCurrent ? null : exp.endDate,
-          is_current: exp.isCurrent,
-          description: exp.description || null,
-          // location: exp.location || null, // Column doesn't exist
-          // is_board_position: exp.isBoardPosition || false // Column needs to be added to DB
-        }));
+        .map(exp => {
+          // Format dates properly - add day component if missing
+          const formatDate = (date: string | null | undefined): string | null => {
+            if (!date || date === '') return null;
+            // If date is in YYYY-MM format, append -01
+            if (date.match(/^\d{4}-\d{2}$/)) {
+              return `${date}-01`;
+            }
+            // If date is in YYYY format, append -01-01
+            if (date.match(/^\d{4}$/)) {
+              return `${date}-01-01`;
+            }
+            return date;
+          };
+          
+          return {
+            candidate_id: newProfile.id,
+            company_name: exp.companyName,
+            position: exp.title,
+            start_date: formatDate(exp.startDate),
+            end_date: exp.isCurrent ? null : formatDate(exp.endDate),
+            is_current: exp.isCurrent || false,
+            description: exp.description || null,
+            location: exp.location || null,
+            is_board_position: exp.isBoardPosition || false,
+            company_type: exp.isBoardPosition && exp.companyType ? exp.companyType : null
+          };
+        });
 
       if (workExperiencesToInsert.length > 0) {
+        console.log('[SIGNUP] Formatted work experiences for insert:', JSON.stringify(workExperiencesToInsert, null, 2));
+        
         const { error: workError } = await supabaseAdmin
           .from('work_experiences')
           .insert(workExperiencesToInsert);
@@ -182,8 +212,27 @@ export async function POST(request: NextRequest) {
         if (workError) {
           console.error('[SIGNUP] Failed to insert work experiences:', workError);
           console.error('[SIGNUP] Work experiences data:', workExperiencesToInsert);
+          console.error('[SIGNUP] Work error details:', {
+            code: workError.code,
+            message: workError.message,
+            details: workError.details,
+            hint: workError.hint
+          });
+          
+          // Store error in private metadata for debugging
+          const updatedMetadata = newProfile.private_metadata || {};
+          updatedMetadata.workExperienceError = {
+            error: workError.message,
+            timestamp: new Date().toISOString()
+          };
+          
+          await supabaseAdmin
+            .from('candidate_profiles')
+            .update({ private_metadata: updatedMetadata })
+            .eq('id', newProfile.id);
+            
         } else {
-          console.log(`[SIGNUP] Inserted ${workExperiencesToInsert.length} work experiences`);
+          console.log(`[SIGNUP] Successfully inserted ${workExperiencesToInsert.length} work experiences`);
         }
       }
     }

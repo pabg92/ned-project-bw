@@ -10,12 +10,15 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  props: { params: Promise<{ id: string }> } | { params: { id: string } }
 ) {
   const supabaseAdmin = getSupabaseAdmin();
 
   try {
-    const { id: profileId } = await params;
+    // Handle both Next.js 15 Promise params and regular params
+    const resolvedParams = 'then' in props.params ? await props.params : props.params;
+    const profileId = resolvedParams.id;
+    console.log('[Profile API] Fetching profile:', profileId);
     
     // Get the current user's ID if authenticated
     const { userId } = await auth();
@@ -42,6 +45,8 @@ export async function GET(
         is_active,
         is_anonymized,
         profile_completed,
+        private_metadata,
+        admin_notes,
         created_at,
         updated_at,
         users!candidate_profiles_user_id_fkey(
@@ -175,7 +180,74 @@ export async function GET(
       .eq('candidate_id', profileId)
       .order('graduation_year', { ascending: false });
 
-    // Prepare response data
+    // Get deal experiences from database
+    const { data: dealExperiencesDb } = await supabaseAdmin
+      .from('deal_experiences')
+      .select('*')
+      .eq('candidate_id', profileId)
+      .order('year', { ascending: false });
+
+    // Get board committees from database
+    const { data: boardCommitteesDb } = await supabaseAdmin
+      .from('board_committees')
+      .select('committee_type')
+      .eq('candidate_id', profileId);
+
+    // Get board experience types from database
+    const { data: boardExperienceTypesDb } = await supabaseAdmin
+      .from('board_experience_types')
+      .select('experience_type')
+      .eq('candidate_id', profileId);
+
+    // Parse private metadata to get additional data
+    let privateMetadata: any = {};
+    if (profile.private_metadata) {
+      privateMetadata = profile.private_metadata;
+    }
+
+    // Parse admin notes to get enriched data
+    let adminNotesData: any = {};
+    if (profile.admin_notes) {
+      try {
+        adminNotesData = JSON.parse(profile.admin_notes);
+      } catch (e) {
+        console.log('Failed to parse admin_notes');
+      }
+    }
+
+    // Use database data first, then fall back to metadata
+    const dealExperiences = dealExperiencesDb && dealExperiencesDb.length > 0 
+      ? dealExperiencesDb.map(deal => ({
+          dealType: deal.deal_type,
+          dealValue: deal.deal_value?.toString(),
+          dealCurrency: deal.deal_currency,
+          companyName: deal.company_name,
+          role: deal.role,
+          year: deal.year.toString(),
+          description: deal.description,
+          sector: deal.sector
+        }))
+      : adminNotesData.dealExperiences || privateMetadata.dealExperiences || [];
+    
+    // Extract board committees from database or metadata
+    const boardCommittees = boardCommitteesDb && boardCommitteesDb.length > 0
+      ? boardCommitteesDb.map(c => c.committee_type)
+      : adminNotesData.boardCommittees || privateMetadata.boardCommittees || [];
+    
+    // Extract board experience types from database or metadata
+    const boardExperienceTypes = boardExperienceTypesDb && boardExperienceTypesDb.length > 0
+      ? boardExperienceTypesDb.map(t => t.experience_type)
+      : adminNotesData.boardExperienceTypes || privateMetadata.boardExperienceTypes || [];
+    
+    // Extract enriched skills data
+    const keySkills = adminNotesData.tags?.filter((t: any) => t.category === 'skill').map((t: any) => t.name) || privateMetadata.skills || skills;
+    const functionalExpertise = adminNotesData.tags?.filter((t: any) => t.category === 'expertise').map((t: any) => t.name) || privateMetadata.functionalExpertise || [];
+    const industryExpertise = adminNotesData.tags?.filter((t: any) => t.category === 'industry').map((t: any) => t.name) || privateMetadata.industryExpertise || sectors;
+
+    // Calculate board positions from work experiences
+    const boardPositions = adminNotesData.boardPositions || privateMetadata.boardPositions || 0;
+
+    // Prepare response data with enhanced information
     const responseData = {
       id: profile.id,
       name: displayName,
@@ -186,12 +258,18 @@ export async function GET(
       imageUrl,
       availability: formatAvailability(profile.availability),
       remotePreference: profile.remote_preference,
-      skills,
-      sectors,
+      skills: keySkills,
+      sectors: industryExpertise,
+      keySkills,
+      functionalExpertise,
+      industryExpertise,
+      dealExperiences: showFullDetails ? dealExperiences : [],
+      boardCommittees: showFullDetails ? boardCommittees : [],
       linkedinUrl,
       githubUrl,
       portfolioUrl,
       email: showFullDetails ? email : undefined,
+      phone: showFullDetails ? privateMetadata.phone : undefined,
       user: showFullDetails ? {
         email: profile.users?.email,
         firstName: profile.users?.first_name,
@@ -202,9 +280,41 @@ export async function GET(
       profileCompleted: profile.profile_completed,
       isAnonymized: profile.is_anonymized,
       isUnlocked: hasUnlockedProfile,
-      boardPositions: 0, // TODO: Calculate from work experiences
+      boardPositions,
       workExperiences: showFullDetails ? workExperiences : [],
       education: showFullDetails ? education : [],
+      // Include enriched data from private metadata
+      adminNotes: showFullDetails ? JSON.stringify({
+        phone: privateMetadata.phone,
+        company: privateMetadata.company,
+        industry: privateMetadata.industry,
+        boardExperience: privateMetadata.boardExperience,
+        boardPositions: privateMetadata.boardPositions,
+        boardExperienceTypes: boardExperienceTypes,
+        boardCommittees: boardCommittees,
+        boardDetails: privateMetadata.boardDetails,
+        roleTypes: privateMetadata.roles || privateMetadata.roleTypes || [],
+        workExperiences: privateMetadata.boardPositionsData ? [
+          ...(workExperiences || []),
+          ...(privateMetadata.boardPositionsData || [])
+        ] : workExperiences,
+        education: education,
+        tags: [
+          ...skills.map(s => ({ name: s, category: 'skill' })),
+          ...sectors.map(s => ({ name: s, category: 'industry' }))
+        ],
+        activelySeeking: privateMetadata.activelySeeking,
+        willingToRelocate: privateMetadata.willingToRelocate,
+        compensationMin: profile.salary_min,
+        compensationMax: profile.salary_max,
+        yearsExperience: privateMetadata.yearsExperience,
+        availability: profile.availability,
+        remotePreference: profile.remote_preference
+      }) : undefined,
+      roleTypes: privateMetadata.roles || privateMetadata.roleTypes || [],
+      boardExperienceTypes: boardExperienceTypes,
+      activelySeeking: privateMetadata.activelySeeking,
+      willingToRelocate: privateMetadata.willingToRelocate,
       // Salary information - only show to authenticated users or own profile
       salary: (userId || isOwnProfile) ? {
         min: profile.salary_min ? parseFloat(profile.salary_min) : null,

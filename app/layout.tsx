@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
 import './globals.css'
+import './globals-print.css'
 
 export const metadata: Metadata = {
   title: 'Board Champions',

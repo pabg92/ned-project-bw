@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import { ArrowLeft, MapPin, Briefcase, Calendar, Globe, Mail, Linkedin, Github, ExternalLink, Edit, Lock, CreditCard, Heart, Share2, Download, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, MapPin, Briefcase, Calendar, Globe, Mail, Linkedin, Github, ExternalLink, Edit, Lock, CreditCard, Heart, Share2, Download, CheckCircle2, Users, Award, Target, Building2, GraduationCap, Languages, Phone, Printer, TrendingUp, DollarSign, Clock, Shield, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import Navbar from "@/navbar"
 import Footer from "@/footer"
 import { useCredits } from "@/hooks/use-credits"
 import { cn } from "@/lib/utils"
+import { generateCV, generateCVFilename } from "@/lib/utils/cv-export"
 
 interface ProfileData {
   id: string
@@ -29,6 +31,7 @@ interface ProfileData {
   githubUrl?: string
   portfolioUrl?: string
   email?: string
+  phone?: string
   user?: {
     email: string
     firstName: string
@@ -46,10 +49,145 @@ interface ProfileData {
   }
   boardPositions?: number
   workExperiences?: any[]
+  dealExperiences?: any[]
   education?: any[]
+  adminNotes?: string
+  roleTypes?: string[]
+  boardExperienceTypes?: string[]
+  boardCommittees?: string[]
+  keySkills?: string[]
+  functionalExpertise?: string[]
+  industryExpertise?: string[]
+  activelySeeking?: boolean
+  willingToRelocate?: boolean
+  certifications?: any[]
+  languages?: string[]
+  achievements?: string[]
 }
 
-export default function ProfilePage() {
+// Helper function to extract achievements from work experiences
+const extractAchievements = (workExperiences: any[]): string[] => {
+  const achievements: string[] = []
+  const achievementKeywords = [
+    'increased', 'improved', 'led', 'delivered', 'achieved', 'saved', 'reduced',
+    'grew', 'launched', 'implemented', 'transformed', 'generated', 'secured',
+    'million', 'billion', '%', 'revenue', 'EBITDA', 'growth', 'acquisition',
+    'merger', 'exit', 'IPO', 'restructuring', 'turnaround'
+  ]
+
+  workExperiences?.forEach(exp => {
+    if (exp.description) {
+      const sentences = exp.description.split(/[.!?]+/).filter(Boolean)
+      sentences.forEach(sentence => {
+        const hasKeyword = achievementKeywords.some(keyword => 
+          sentence.toLowerCase().includes(keyword.toLowerCase())
+        )
+        if (hasKeyword && sentence.length > 20 && sentence.length < 200) {
+          achievements.push(sentence.trim())
+        }
+      })
+    }
+  })
+
+  return achievements.slice(0, 6) // Top 6 achievements
+}
+
+// Helper function to calculate board metrics
+const calculateBoardMetrics = (workExperiences: any[]) => {
+  const boardRoles = workExperiences?.filter(exp => exp.isBoardPosition || exp.is_board_position) || []
+  const boardTypes = new Set<string>()
+  let ftseCount = 0
+  let peCount = 0
+  let totalBoardYears = 0
+
+  boardRoles.forEach(role => {
+    if (role.companyType) {
+      boardTypes.add(role.companyType)
+      if (role.companyType.includes('ftse')) ftseCount++
+      if (role.companyType === 'private-equity') peCount++
+    }
+    
+    // Calculate years
+    if (role.startDate || role.start_date) {
+      const start = new Date(role.startDate || role.start_date)
+      const end = role.isCurrent || role.is_current ? new Date() : new Date(role.endDate || role.end_date || new Date())
+      const years = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365)
+      totalBoardYears += Math.max(0, years)
+    }
+  })
+
+  return {
+    totalPositions: boardRoles.length,
+    boardTypes: Array.from(boardTypes),
+    ftseCount,
+    peCount,
+    totalYears: Math.round(totalBoardYears)
+  }
+}
+
+// Helper function to format board experience types
+const formatBoardExperienceType = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    'ftse100': 'FTSE 100',
+    'ftse250': 'FTSE 250',
+    'aim': 'AIM Listed',
+    'private-equity': 'Private Equity',
+    'startup': 'Startup/Scale-up',
+    'public-sector': 'Public Sector',
+    'charity': 'Charity/Third Sector'
+  }
+  return typeMap[type] || type
+}
+
+// Helper function to format committee types
+const formatCommitteeType = (committee: string): string => {
+  const committeeMap: Record<string, string> = {
+    'audit': 'Audit Committee',
+    'remuneration': 'Remuneration Committee',
+    'nomination': 'Nomination Committee',
+    'risk': 'Risk Committee',
+    'governance': 'Governance Committee',
+    'strategy': 'Strategy Committee',
+    'technology': 'Technology/Digital Committee',
+    'esg': 'ESG/Sustainability Committee',
+    'investment': 'Investment Committee'
+  }
+  return committeeMap[committee] || committee
+}
+
+// Helper function to format deal types
+const formatDealType = (dealType: string): string => {
+  const dealTypeMap: Record<string, string> = {
+    'acquisition': 'Acquisition',
+    'merger': 'Merger',
+    'divestiture': 'Divestiture',
+    'ipo': 'IPO',
+    'private-placement': 'Private Placement',
+    'leveraged-buyout': 'Leveraged Buyout (LBO)',
+    'management-buyout': 'Management Buyout (MBO)',
+    'restructuring': 'Restructuring',
+    'refinancing': 'Refinancing',
+    'joint-venture': 'Joint Venture',
+    'strategic-partnership': 'Strategic Partnership'
+  }
+  return dealTypeMap[dealType] || dealType
+}
+
+// Helper function to format deal roles
+const formatDealRole = (role: string): string => {
+  const roleMap: Record<string, string> = {
+    'led-transaction': 'Led Transaction',
+    'board-oversight': 'Board Oversight',
+    'advisor': 'Advisor',
+    'negotiated': 'Negotiated Deal',
+    'due-diligence': 'Due Diligence Lead',
+    'integration-lead': 'Integration Lead',
+    'committee-chair': 'Committee Chair'
+  }
+  return roleMap[role] || role
+}
+
+export default function ProfessionalProfilePage() {
   const params = useParams()
   const router = useRouter()
   const { user, isSignedIn } = useUser()
@@ -83,7 +221,97 @@ export default function ProfilePage() {
 
       const result = await response.json()
       if (result.success && result.data) {
-        setProfile(result.data)
+        // Enhanced data parsing with all fields
+        let enrichedProfile = result.data
+        
+        // First, get base data from the response
+        enrichedProfile.roleTypes = result.data.roleTypes || []
+        enrichedProfile.boardExperienceTypes = result.data.boardExperienceTypes || []
+        enrichedProfile.activelySeeking = result.data.activelySeeking
+        enrichedProfile.willingToRelocate = result.data.willingToRelocate
+        
+        // Then parse adminNotes if available for additional data
+        if (result.data.adminNotes) {
+          try {
+            const adminData = JSON.parse(result.data.adminNotes)
+            
+            // Merge work experiences from database with board positions from adminNotes
+            let allWorkExperiences = [...(result.data.workExperiences || [])]
+            
+            // Add board positions from adminNotes if they exist
+            if (adminData.workExperiences && Array.isArray(adminData.workExperiences)) {
+              // Filter out board positions that might already exist in the database
+              const boardPositionsToAdd = adminData.workExperiences.filter((exp: any) => 
+                exp.isBoardPosition && 
+                !allWorkExperiences.some(we => 
+                  we.company_name === exp.companyName && 
+                  we.position === exp.title
+                )
+              )
+              
+              // Add the board positions with proper field mapping
+              boardPositionsToAdd.forEach((bp: any) => {
+                allWorkExperiences.push({
+                  companyName: bp.companyName,
+                  company_name: bp.companyName,
+                  title: bp.title,
+                  position: bp.title,
+                  location: bp.location,
+                  startDate: bp.startDate,
+                  start_date: bp.startDate,
+                  endDate: bp.endDate,
+                  end_date: bp.endDate,
+                  isCurrent: bp.isCurrent,
+                  is_current: bp.isCurrent,
+                  description: bp.description,
+                  isBoardPosition: true,
+                  is_board_position: true,
+                  companyType: bp.companyType
+                })
+              })
+            }
+            
+            enrichedProfile = {
+              ...result.data,
+              phone: adminData.phone || result.data.phone,
+              roleTypes: adminData.roleTypes || result.data.roleTypes || [],
+              boardExperienceTypes: adminData.boardExperienceTypes || result.data.boardExperienceTypes || [],
+              boardCommittees: adminData.boardCommittees || result.data.boardCommittees || [],
+              keySkills: adminData.tags?.filter((t: any) => t.category === 'skill').map((t: any) => t.name) || result.data.skills || [],
+              functionalExpertise: adminData.tags?.filter((t: any) => t.category === 'expertise').map((t: any) => t.name) || result.data.sectors || [],
+              industryExpertise: adminData.tags?.filter((t: any) => t.category === 'industry').map((t: any) => t.name) || [],
+              activelySeeking: adminData.activelySeeking !== undefined ? adminData.activelySeeking : result.data.activelySeeking,
+              willingToRelocate: adminData.willingToRelocate !== undefined ? adminData.willingToRelocate : result.data.willingToRelocate,
+              workExperiences: allWorkExperiences,
+              dealExperiences: adminData.dealExperiences || result.data.dealExperiences || [],
+              education: adminData.education || result.data.education || [],
+              compensationMin: adminData.compensationMin,
+              compensationMax: adminData.compensationMax,
+              availability: adminData.availability || result.data.availability,
+              remotePreference: adminData.remotePreference || result.data.remotePreference
+            }
+            
+            // Extract achievements from all work experiences
+            enrichedProfile.achievements = extractAchievements(enrichedProfile.workExperiences)
+          } catch (e) {
+            console.error('Failed to parse adminNotes:', e)
+            // Still use the data we have
+            enrichedProfile.workExperiences = result.data.workExperiences || []
+            enrichedProfile.education = result.data.education || []
+            enrichedProfile.keySkills = result.data.skills || []
+            enrichedProfile.functionalExpertise = result.data.sectors || []
+            enrichedProfile.achievements = extractAchievements(enrichedProfile.workExperiences)
+          }
+        } else {
+          // No adminNotes, use what we have
+          enrichedProfile.workExperiences = result.data.workExperiences || []
+          enrichedProfile.education = result.data.education || []
+          enrichedProfile.keySkills = result.data.skills || []
+          enrichedProfile.functionalExpertise = result.data.sectors || []
+          enrichedProfile.achievements = extractAchievements(enrichedProfile.workExperiences)
+        }
+        
+        setProfile(enrichedProfile)
         setIsUnlocked(result.data.isOwnProfile || !result.data.isAnonymized || result.data.isUnlocked)
       } else {
         setError("Profile data not available")
@@ -125,7 +353,7 @@ export default function ProfilePage() {
         <Navbar />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6b93ce] mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e3a5f] mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading profile...</p>
           </div>
         </div>
@@ -148,7 +376,7 @@ export default function ProfilePage() {
             </p>
             <Button
               onClick={() => router.push("/search")}
-              className="bg-[#6b93ce] hover:bg-[#5a82bd] text-white"
+              className="bg-[#1e3a5f] hover:bg-[#162d4a] text-white"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Search
@@ -160,8 +388,10 @@ export default function ProfilePage() {
     )
   }
 
+  const boardMetrics = calculateBoardMetrics(profile.workExperiences || [])
+
   const getAvailabilityColor = (availability: string) => {
-    switch (availability.toLowerCase()) {
+    switch (availability?.toLowerCase()) {
       case 'immediate':
       case 'immediately':
         return 'text-green-600'
@@ -184,416 +414,832 @@ export default function ProfilePage() {
     return availMap[availability] || availability
   }
 
+  const formatRoleType = (roleType: string) => {
+    const roleMap: Record<string, string> = {
+      'chair': 'Chair',
+      'ned': 'Non-Executive Director',
+      'advisor': 'Advisor',
+      'trustee': 'Trustee',
+      'senior-independent': 'Senior Independent Director'
+    }
+    return roleMap[roleType] || roleType
+  }
+
+  const formatBoardExperienceType = (type: string) => {
+    const typeMap: Record<string, string> = {
+      'ftse100': 'FTSE 100',
+      'ftse250': 'FTSE 250',
+      'aim': 'AIM Listed',
+      'private-equity': 'Private Equity Backed',
+      'startup': 'Startup/Scale-up',
+      'public-sector': 'Public Sector',
+      'charity': 'Charity/Third Sector'
+    }
+    return typeMap[type] || type
+  }
+
+  const formatDate = (date: string) => {
+    if (!date) return ''
+    const d = new Date(date)
+    return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+  }
+
+  const formatDateRange = (startDate: string, endDate?: string, isCurrent?: boolean) => {
+    const start = formatDate(startDate)
+    if (isCurrent || !endDate) return `${start} - Present`
+    return `${start} - ${formatDate(endDate)}`
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <style jsx global>{`
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          
+          body {
+            background: white !important;
+            margin: 0 !important;
+          }
+          
+          .print-break-before {
+            page-break-before: always;
+          }
+          
+          .print-break-inside-avoid {
+            page-break-inside: avoid;
+          }
+          
+          .shadow-lg, .shadow-xl {
+            box-shadow: none !important;
+          }
+          
+          .bg-gray-50 {
+            background: white !important;
+          }
+          
+          .container {
+            max-width: 100% !important;
+            padding: 0 !important;
+          }
+          
+          h1, h2, h3 {
+            color: #1a202c !important;
+          }
+          
+          .text-white {
+            color: #1a202c !important;
+          }
+          
+          .bg-gradient-to-r {
+            background: #1e3a5f !important;
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+        
+        .font-inter {
+          font-family: 'Inter', sans-serif;
+        }
+        
+        .font-playfair {
+          font-family: 'Playfair Display', serif;
+        }
+      `}</style>
+
+      <div className="no-print">
+        <Navbar />
+      </div>
       
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Back button */}
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="mb-6 hover:bg-gray-100"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Search
-        </Button>
-
-        {/* Profile Header */}
-        <div className="bg-gradient-to-r from-[#6b93ce] to-[#5a82bd] rounded-xl p-8 text-white mb-8">
-          <div className="flex items-start gap-6">
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              {profile.imageUrl && !profile.isAnonymized && isUnlocked ? (
-                <img
-                  src={profile.imageUrl}
-                  alt={profile.name}
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-white/20 flex items-center justify-center">
-                  <span className="text-2xl font-bold">
-                    {isUnlocked && profile.name 
-                      ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase()
-                      : 'EP'
-                    }
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">
-                {isUnlocked ? profile.name : 'Executive Profile'}
-              </h1>
-              <p className="text-xl mb-4">{profile.title}</p>
-              
-              <div className="flex flex-wrap items-center gap-4 text-sm mb-4">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{profile.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4" />
-                  <span>{profile.experience}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>Available: {formatAvailability(profile.availability)}</span>
-                </div>
-                {profile.workExperiences && profile.workExperiences.filter(exp => 
-                  exp.is_board_position === true
-                ).length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span>{profile.workExperiences.filter(exp => 
-                      exp.is_board_position === true
-                    ).length} Board Positions</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Tags */}
-              <div className="flex gap-2">
-                <Badge variant="secondary" className="bg-white/20 border-white/50 text-white">
-                  Anonymized
-                </Badge>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-2">
+      <div className="container mx-auto px-4 py-8 max-w-7xl font-inter">
+        {/* Navigation Bar */}
+        <div className="flex justify-between items-center mb-6 no-print">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="hover:bg-gray-100"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Search
+          </Button>
+          
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsSaved(!isSaved)}
+            >
+              <Heart className={cn("h-4 w-4 mr-2", isSaved && "fill-current text-red-500")} />
+              {isSaved ? 'Saved' : 'Save'}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => window.print()}
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Print
+            </Button>
+            {isUnlocked && (
               <Button
-                size="icon"
-                variant="ghost"
-                className="text-white hover:bg-white/20"
-                onClick={() => setIsSaved(!isSaved)}
+                size="sm"
+                className="bg-[#1e3a5f] hover:bg-[#162d4a] text-white"
+                onClick={() => generateCV(profile)}
               >
-                <Heart className={cn("h-5 w-5", isSaved && "fill-current")} />
+                <Download className="h-4 w-4 mr-2" />
+                Download CV
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="text-white hover:bg-white/20"
-              >
-                <Share2 className="h-5 w-5" />
-              </Button>
-              {isUnlocked && profile.linkedinUrl && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="bg-white/20 hover:bg-white/30 text-white"
-                  onClick={() => window.open(profile.linkedinUrl, '_blank')}
-                >
-                  <Linkedin className="h-4 w-4 mr-2" />
-                  LinkedIn
-                </Button>
-              )}
-              {isUnlocked && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="bg-white/20 hover:bg-white/30 text-white"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download CV
-                </Button>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* About */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">About</h2>
-                <p className="text-gray-700 leading-relaxed">
-                  {profile.bio || 'No description available.'}
-                </p>
-              </CardContent>
-            </Card>
+        {/* Professional CV Container */}
+        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+          {/* Enhanced Professional Header */}
+          <div className="bg-gradient-to-r from-[#1e3a5f] to-[#2d4a6f] text-white p-10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-black/10"></div>
+            <div className="relative z-10">
+              <div className="flex items-start gap-8">
+                <div className="flex-shrink-0">
+                  {profile.imageUrl && !profile.isAnonymized && isUnlocked ? (
+                    <img
+                      src={profile.imageUrl}
+                      alt={profile.name}
+                      className="w-36 h-36 rounded-full border-4 border-white shadow-2xl object-cover"
+                    />
+                  ) : (
+                    <div className="w-36 h-36 rounded-full border-4 border-white shadow-2xl bg-white/20 flex items-center justify-center">
+                      <span className="text-4xl font-bold font-playfair">
+                        {isUnlocked && profile.name 
+                          ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase()
+                          : 'EP'
+                        }
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-            {/* Skills & Expertise */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span className="text-[#6b93ce]">⚡</span>
-                  Skills & Expertise
-                </h2>
+                <div className="flex-1">
+                  <h1 className="text-5xl font-bold mb-3 font-playfair">
+                    {isUnlocked ? profile.name : 'Executive Profile'}
+                  </h1>
+                  <h2 className="text-2xl text-white/90 mb-4">{profile.title}</h2>
+                  
+                  {/* Role Types with Enhanced Styling */}
+                  {profile.roleTypes && profile.roleTypes.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {profile.roleTypes.map((role, index) => (
+                        <Badge key={index} className="bg-white/20 text-white border-white/30 backdrop-blur-sm px-4 py-1 text-sm font-medium">
+                          {formatRoleType(role)}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Board Metrics Summary */}
+                  {boardMetrics.totalPositions > 0 && (
+                    <div className="flex gap-6 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-white/80" />
+                        <span className="font-semibold">{boardMetrics.totalPositions} Board Positions</span>
+                      </div>
+                      {boardMetrics.ftseCount > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-white/80" />
+                          <span className="font-semibold">{boardMetrics.ftseCount} FTSE Boards</span>
+                        </div>
+                      )}
+                      {boardMetrics.peCount > 0 && (
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5 text-white/80" />
+                          <span className="font-semibold">{boardMetrics.peCount} PE-Backed</span>
+                        </div>
+                      )}
+                      {boardMetrics.totalYears > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-5 w-5 text-white/80" />
+                          <span className="font-semibold">{boardMetrics.totalYears}+ Years Board Experience</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-white/80" />
+                      <span>{profile.location}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-white/80" />
+                      <span>{profile.experience} Experience</span>
+                    </div>
+                    {isUnlocked && profile.email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-white/80" />
+                        <span>{profile.email}</span>
+                      </div>
+                    )}
+                    {isUnlocked && profile.phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-white/80" />
+                        <span>{profile.phone}</span>
+                      </div>
+                    )}
+                    {isUnlocked && profile.linkedinUrl && (
+                      <div className="flex items-center gap-2">
+                        <Linkedin className="h-4 w-4 text-white/80" />
+                        <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                          LinkedIn Profile
+                        </a>
+                      </div>
+                    )}
+                    {profile.activelySeeking && (
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-green-400" />
+                        <span className="text-green-400 font-semibold">Actively Seeking Board Opportunities</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {!isUnlocked && profile.isAnonymized && (
+                  <div className="flex-shrink-0">
+                    <Button
+                      onClick={handleUnlockProfile}
+                      disabled={unlocking}
+                      className="bg-white text-[#1e3a5f] hover:bg-gray-100"
+                    >
+                      {unlocking ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1e3a5f] mr-2"></div>
+                          Unlocking...
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="mr-2 h-4 w-4" />
+                          Unlock Profile (1 Credit)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content with Professional Sections */}
+          <div className="p-10">
+            {/* Executive Summary */}
+            {profile.bio && (
+              <section className="mb-10 print-break-inside-avoid">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                  <div className="w-1 h-8 bg-[#1e3a5f] rounded"></div>
+                  Executive Summary
+                </h3>
+                <p className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
+                  {profile.bio}
+                </p>
+              </section>
+            )}
+
+            {/* Key Achievements (if available) */}
+            {profile.achievements && profile.achievements.length > 0 && (
+              <section className="mb-10 print-break-inside-avoid">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                  <div className="w-1 h-8 bg-[#1e3a5f] rounded"></div>
+                  <BarChart3 className="h-6 w-6 text-[#1e3a5f]" />
+                  Key Achievements
+                </h3>
+                <div className="space-y-3">
+                  {profile.achievements.map((achievement, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-gray-700">{achievement}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Board & Advisory Experience - Prominent Section */}
+            {profile.workExperiences && profile.workExperiences.filter(exp => exp.isBoardPosition || exp.is_board_position).length > 0 && (
+              <section className="mb-10 print-break-inside-avoid">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                  <div className="w-1 h-8 bg-[#1e3a5f] rounded"></div>
+                  <Users className="h-6 w-6 text-[#1e3a5f]" />
+                  Board & Advisory Positions
+                </h3>
                 
-                {profile.skills && profile.skills.length > 0 && (
+                {/* Board Experience Types - Visual Tags */}
+                {profile.boardExperienceTypes && profile.boardExperienceTypes.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {profile.boardExperienceTypes.map((type, index) => (
+                      <Badge key={index} variant="outline" className="border-[#1e3a5f] text-[#1e3a5f] px-4 py-1">
+                        <Shield className="h-3 w-3 mr-1" />
+                        {formatBoardExperienceType(type)}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Board Committee Experience */}
+                {profile.boardCommittees && profile.boardCommittees.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="text-sm font-medium text-gray-600 mb-3">Core Skills</h3>
+                    <h4 className="font-semibold text-gray-900 mb-3">Committee Experience</h4>
                     <div className="flex flex-wrap gap-2">
-                      {profile.skills.map((skill, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="secondary"
-                          className="bg-blue-50 text-blue-700 border-blue-200"
-                        >
+                      {profile.boardCommittees.map((committee, index) => (
+                        <Badge key={index} className="bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/20 px-4 py-1">
+                          {formatCommitteeType(committee)}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="space-y-8">
+                  {profile.workExperiences
+                    .filter(exp => exp.isBoardPosition || exp.is_board_position)
+                    .map((exp, index) => (
+                      <div key={index} className="relative pl-8 border-l-3 border-[#1e3a5f]">
+                        <div className="absolute -left-[11px] top-0 w-5 h-5 bg-[#1e3a5f] rounded-full border-3 border-white"></div>
+                        <div className="mb-2">
+                          <h4 className="text-xl font-semibold text-gray-900">{exp.title || exp.position}</h4>
+                          <div className="flex items-center gap-3 text-[#1e3a5f] font-medium mt-1">
+                            <Building2 className="h-5 w-5" />
+                            <span className="text-lg">{exp.companyName || exp.company_name || exp.company}</span>
+                            {exp.companyType && (
+                              <Badge className="bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/20">
+                                {formatBoardExperienceType(exp.companyType)}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-3 flex items-center gap-4">
+                          {exp.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {exp.location}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDateRange(exp.startDate || exp.start_date, exp.endDate || exp.end_date, exp.isCurrent || exp.is_current)}
+                          </span>
+                        </div>
+                        {exp.description && (
+                          <p className="text-gray-700 leading-relaxed">
+                            {exp.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </section>
+            )}
+
+            {/* Executive Experience */}
+            {profile.workExperiences && profile.workExperiences.filter(exp => !exp.isBoardPosition && !exp.is_board_position).length > 0 && (
+              <section className="mb-10 print-break-before print-break-inside-avoid">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                  <div className="w-1 h-8 bg-gray-600 rounded"></div>
+                  <Briefcase className="h-6 w-6 text-gray-600" />
+                  Executive Experience
+                </h3>
+                <div className="space-y-8">
+                  {profile.workExperiences
+                    .filter(exp => !exp.isBoardPosition && !exp.is_board_position)
+                    .map((exp, index) => (
+                      <div key={index} className="relative pl-8 border-l-3 border-gray-300">
+                        <div className="absolute -left-[11px] top-0 w-5 h-5 bg-gray-400 rounded-full border-3 border-white"></div>
+                        <div className="mb-2">
+                          <h4 className="text-xl font-semibold text-gray-900">{exp.title || exp.position}</h4>
+                          <div className="flex items-center gap-3 text-gray-700 font-medium mt-1">
+                            <Building2 className="h-5 w-5" />
+                            <span className="text-lg">{exp.companyName || exp.company_name || exp.company}</span>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-600 mb-3 flex items-center gap-4">
+                          {exp.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {exp.location}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {formatDateRange(exp.startDate || exp.start_date, exp.endDate || exp.end_date, exp.isCurrent || exp.is_current)}
+                          </span>
+                        </div>
+                        {exp.description && (
+                          <p className="text-gray-700 leading-relaxed">
+                            {exp.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                </div>
+              </section>
+            )}
+
+            {/* Core Competencies - Professional Grid Layout */}
+            <section className="mb-10 print-break-inside-avoid">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                <div className="w-1 h-8 bg-gray-600 rounded"></div>
+                <Award className="h-6 w-6 text-gray-600" />
+                Core Competencies
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Core Skills */}
+                {(profile.keySkills?.length > 0 || profile.skills?.length > 0) && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 text-lg mb-3">Core Skills</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {(profile.keySkills || profile.skills || []).map((skill, index) => (
+                        <Badge key={index} className="bg-blue-50 text-blue-700 border-blue-200 px-3 py-1">
                           {skill}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
-
-                {profile.sectors && profile.sectors.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-3">Functional Expertise</h3>
+                
+                {/* Functional Expertise */}
+                {(profile.functionalExpertise?.length > 0 || profile.sectors?.length > 0) && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 text-lg mb-3">Functional Expertise</h4>
                     <div className="flex flex-wrap gap-2">
-                      {profile.sectors.map((sector, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="outline"
-                          className="border-gray-300"
-                        >
-                          {sector}
+                      {(profile.functionalExpertise || profile.sectors || []).map((expertise, index) => (
+                        <Badge key={index} className="bg-green-50 text-green-700 border-green-200 px-3 py-1">
+                          {expertise}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
-
-                {(!profile.skills || profile.skills.length === 0) && (!profile.sectors || profile.sectors.length === 0) && (
-                  <p className="text-gray-500 italic">No skills or expertise listed</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Board Experience */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span className="text-[#6b93ce]">👥</span>
-                  Board Experience
-                </h2>
-                {profile.workExperiences && profile.workExperiences.length > 0 ? (
-                  <div className="space-y-4">
-                    {profile.workExperiences
-                      .filter(exp => exp.is_board_position === true)
-                      .map((exp, index) => (
-                        <div key={index} className="border-l-2 border-[#6b93ce] pl-4">
-                          <h3 className="font-semibold">{exp.position || exp.title}</h3>
-                          <p className="text-[#6b93ce] font-medium">{exp.company_name || exp.company}</p>
-                          <p className="text-sm text-gray-500">
-                            {new Date(exp.start_date).getFullYear()} - {exp.is_current ? 'Present' : new Date(exp.end_date).getFullYear()}
-                          </p>
-                          {exp.description && (
-                            <p className="text-gray-700 mt-2">{exp.description}</p>
-                          )}
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic">No board positions listed</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Executive Experience */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span className="text-[#6b93ce]">💼</span>
-                  Executive Experience
-                </h2>
-                {profile.workExperiences && profile.workExperiences.length > 0 ? (
-                  <div className="space-y-4">
-                    {profile.workExperiences
-                      .filter(exp => exp.is_board_position !== true)
-                      .map((exp, index) => (
-                        <div key={index} className="border-l-2 border-gray-200 pl-4">
-                          <h3 className="font-semibold">{exp.position || exp.title}</h3>
-                          <p className="text-gray-600">{exp.company_name || exp.company}</p>
-                          <p className="text-sm text-gray-500">
-                            {new Date(exp.start_date).getFullYear()} - {exp.is_current ? 'Present' : exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present'}
-                          </p>
-                          {exp.description && (
-                            <p className="text-gray-700 mt-2">{exp.description}</p>
-                          )}
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic">No executive experience listed</p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column - Contact & Additional Info */}
-          <div className="space-y-8">
-            {/* Contact Information */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
                 
-                {!isUnlocked && profile.isAnonymized ? (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Lock className="h-8 w-8 text-gray-400" />
+                {/* Industry Expertise */}
+                {profile.industryExpertise?.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 text-lg mb-3">Industry Expertise</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.industryExpertise.map((industry, index) => (
+                        <Badge key={index} className="bg-purple-50 text-purple-700 border-purple-200 px-3 py-1">
+                          {industry}
+                        </Badge>
+                      ))}
                     </div>
-                    <p className="text-gray-600 mb-6">
-                      Unlock to view contact details
-                    </p>
-                    <Button
-                      onClick={handleUnlockProfile}
-                      disabled={unlocking}
-                      className="w-full bg-[#6b93ce] hover:bg-[#5a82bd] text-white"
-                    >
-                      {unlocking ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Unlocking...
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="mr-2 h-4 w-4" />
-                          Unlock (1 Credit)
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {profile.email && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Email</p>
-                        <p className="font-medium">{profile.email}</p>
-                      </div>
-                    )}
-                    {profile.linkedinUrl && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">LinkedIn</p>
-                        <a 
-                          href={profile.linkedinUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-[#6b93ce] hover:underline"
-                        >
-                          View Profile
-                        </a>
-                      </div>
-                    )}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </section>
+
+            {/* Value Creation & PE Impact (if board experience exists) */}
+            {boardMetrics.totalPositions > 0 && (profile.achievements?.length > 0 || boardMetrics.peCount > 0) && (
+              <section className="mb-10 print-break-inside-avoid bg-gray-50 -mx-10 px-10 py-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                  <div className="w-1 h-8 bg-[#1e3a5f] rounded"></div>
+                  <TrendingUp className="h-6 w-6 text-[#1e3a5f]" />
+                  Value Creation & Impact
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Building2 className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900">{boardMetrics.totalPositions}</p>
+                        <p className="text-sm text-gray-600">Board Positions</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {boardMetrics.ftseCount > 0 && (
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                          <BarChart3 className="h-6 w-6 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900">{boardMetrics.ftseCount}</p>
+                          <p className="text-sm text-gray-600">FTSE Companies</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {boardMetrics.peCount > 0 && (
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <DollarSign className="h-6 w-6 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900">{boardMetrics.peCount}</p>
+                          <p className="text-sm text-gray-600">PE-Backed Boards</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {boardMetrics.totalYears > 0 && (
+                    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                          <Clock className="h-6 w-6 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900">{boardMetrics.totalYears}+</p>
+                          <p className="text-sm text-gray-600">Years Board Experience</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Value Creation Examples from Achievements */}
+                {profile.achievements && profile.achievements.filter(a => 
+                  a.toLowerCase().includes('million') || 
+                  a.toLowerCase().includes('billion') || 
+                  a.toLowerCase().includes('%') ||
+                  a.toLowerCase().includes('revenue') ||
+                  a.toLowerCase().includes('ebitda') ||
+                  a.toLowerCase().includes('growth')
+                ).length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-gray-900 mb-3">Key Value Creation Examples:</h4>
+                    <div className="space-y-2">
+                      {profile.achievements
+                        .filter(a => 
+                          a.toLowerCase().includes('million') || 
+                          a.toLowerCase().includes('billion') || 
+                          a.toLowerCase().includes('%') ||
+                          a.toLowerCase().includes('revenue') ||
+                          a.toLowerCase().includes('ebitda') ||
+                          a.toLowerCase().includes('growth')
+                        )
+                        .slice(0, 3)
+                        .map((achievement, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <TrendingUp className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-gray-700">{achievement}</p>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Transaction & Deal Experience - For PE Firms */}
+            {profile.dealExperiences && profile.dealExperiences.length > 0 && (
+              <section className="mb-10 print-break-inside-avoid bg-gradient-to-r from-blue-50 to-purple-50 -mx-10 px-10 py-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                  <div className="w-1 h-8 bg-[#1e3a5f] rounded"></div>
+                  <TrendingUp className="h-6 w-6 text-[#1e3a5f]" />
+                  Transaction & Deal Experience
+                </h3>
+                <div className="space-y-6">
+                  {profile.dealExperiences.map((deal: any, index: number) => (
+                    <div key={index} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-xl font-semibold text-gray-900">
+                              {formatDealType(deal.dealType)}
+                            </h4>
+                            {deal.dealValue && (
+                              <Badge className="bg-[#1e3a5f] text-white">
+                                {deal.dealCurrency || '£'} {deal.dealValue}M
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-gray-700">
+                            <span className="font-medium">{deal.companyName}</span>
+                            {deal.sector && (
+                              <>
+                                <span className="text-gray-400">•</span>
+                                <span>{deal.sector}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-[#1e3a5f]">{deal.year}</p>
+                          <Badge variant="outline" className="mt-1">
+                            {formatDealRole(deal.role)}
+                          </Badge>
+                        </div>
+                      </div>
+                      {deal.description && (
+                        <p className="text-gray-700 leading-relaxed mt-4">
+                          {deal.description}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Education & Qualifications */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span className="text-[#6b93ce]">🎓</span>
+            {profile.education && profile.education.length > 0 && (
+              <section className="mb-10 print-break-inside-avoid">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                  <div className="w-1 h-8 bg-gray-600 rounded"></div>
+                  <GraduationCap className="h-6 w-6 text-gray-600" />
                   Education & Qualifications
-                </h2>
-                {profile.education && profile.education.length > 0 ? (
-                  <div className="space-y-3">
-                    {profile.education.map((edu, index) => (
-                      <div key={index}>
-                        <h3 className="font-semibold text-sm">{edu.degree}</h3>
-                        <p className="text-gray-600 text-sm">{edu.institution}</p>
-                        <p className="text-gray-500 text-xs">{edu.end_date ? new Date(edu.end_date).getFullYear() : edu.graduation_year || ''}</p>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {profile.education.map((edu, index) => (
+                    <div key={index} className="border-l-3 border-gray-300 pl-6">
+                      <h4 className="font-semibold text-gray-900 text-lg">{edu.degree}</h4>
+                      <p className="text-gray-700 font-medium">{edu.institution}</p>
+                      {edu.fieldOfStudy && (
+                        <p className="text-gray-600">{edu.fieldOfStudy || edu.field_of_study}</p>
+                      )}
+                      <p className="text-sm text-gray-500 mt-1">
+                        {edu.graduationDate || edu.graduation_date || edu.graduation_year || 
+                         (edu.end_date && new Date(edu.end_date).getFullYear()) || ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Professional Qualifications & Certifications */}
+            <section className="mb-10 print-break-inside-avoid">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3 font-playfair">
+                <div className="w-1 h-8 bg-gray-600 rounded"></div>
+                <Shield className="h-6 w-6 text-gray-600" />
+                Professional Qualifications
+              </h3>
+              <div className="space-y-4">
+                {/* Common Board & Executive Qualifications */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {profile.education?.some(edu => 
+                    edu.degree?.toLowerCase().includes('mba') || 
+                    edu.institution?.toLowerCase().includes('business')
+                  ) && (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Award className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">MBA</p>
+                        <p className="text-sm text-gray-600">Master of Business Administration</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {(profile.keySkills?.some(skill => 
+                    skill.toLowerCase().includes('finance') || 
+                    skill.toLowerCase().includes('cfo')
+                  ) || profile.functionalExpertise?.some(exp => 
+                    exp.toLowerCase().includes('finance') || 
+                    exp.toLowerCase().includes('cfo')
+                  )) && (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Award className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Financial Expertise</p>
+                        <p className="text-sm text-gray-600">Qualified Financial Professional</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {boardMetrics.totalPositions > 2 && (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Shield className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">IoD Member</p>
+                        <p className="text-sm text-gray-600">Institute of Directors (Assumed)</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {profile.keySkills?.some(skill => 
+                    skill.toLowerCase().includes('governance') || 
+                    skill.toLowerCase().includes('risk')
+                  ) && (
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Shield className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">Governance Specialist</p>
+                        <p className="text-sm text-gray-600">Corporate Governance Expertise</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Additional certifications can be parsed from adminNotes in future */}
+                {profile.certifications && profile.certifications.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-gray-900 mb-3">Additional Certifications</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {profile.certifications.map((cert: any, index: number) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span className="text-gray-700">{cert.name || cert}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Additional Information - Professional Footer */}
+            <section className="border-t-2 pt-8 print-break-inside-avoid">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Availability */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-lg">Availability</h4>
+                  <div className="space-y-2">
+                    <p className={cn("font-medium text-lg", getAvailabilityColor(profile.availability))}>
+                      {formatAvailability(profile.availability)}
+                    </p>
+                    {profile.remotePreference && (
+                      <p className="text-gray-600">
+                        Work Preference: <span className="font-medium">{profile.remotePreference === 'flexible' ? 'Flexible' : profile.remotePreference}</span>
+                      </p>
+                    )}
+                    {profile.willingToRelocate && (
+                      <p className="text-green-600 flex items-center gap-1">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Willing to travel internationally
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Languages */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-lg">Languages</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Languages className="h-4 w-4" />
+                      <span>English (Native/Fluent)</span>
+                    </div>
+                    {profile.languages && profile.languages.map((lang, index) => (
+                      <div key={index} className="flex items-center gap-2 text-gray-700">
+                        <Languages className="h-4 w-4" />
+                        <span>{lang}</span>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-gray-500 italic text-sm">No education details listed</p>
-                )}
-              </CardContent>
-            </Card>
+                </div>
 
-            {/* Key Achievements */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span className="text-[#6b93ce]">🏆</span>
-                  Key Achievements
-                </h2>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      {profile.experience} of industry experience
-                    </span>
-                  </li>
-                  {profile.workExperiences && profile.workExperiences.filter(exp => 
-                    exp.is_board_position === true
-                  ).length > 0 && (
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700">
-                        Served on {profile.workExperiences.filter(exp => 
-                          exp.is_board_position === true
-                        ).length} board{profile.workExperiences.filter(exp => 
-                          exp.is_board_position === true
-                        ).length !== 1 ? 's' : ''}
-                      </span>
-                    </li>
-                  )}
-                  {profile.experience === '25+ years' && (
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700">
-                        CFO of the Year - Finance Directors Awards 2019
-                      </span>
-                    </li>
-                  )}
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      Led successful £500m IPO for tech unicorn
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      Board sponsor for diversity initiative increasing female leadership by 50%
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">
-                      Implemented AI-driven financial planning system reducing forecast variance by 60%
-                    </span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Availability */}
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <span className="text-[#6b93ce]">📅</span>
-                  Availability
-                </h2>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Status:</p>
-                    <p className={cn("font-medium", getAvailabilityColor(profile.availability))}>
-                      {formatAvailability(profile.availability)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Travel:</p>
-                    <p className="font-medium capitalize">
-                      {profile.remotePreference === 'flexible' ? 'International' : profile.remotePreference || 'Flexible'}
-                    </p>
+                {/* Profile Status */}
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-3 text-lg">Profile Status</h4>
+                  <div className="space-y-2">
+                    {profile.isAnonymized && (
+                      <Badge variant="outline" className="border-amber-500 text-amber-700">
+                        Anonymized Profile
+                      </Badge>
+                    )}
+                    {profile.profileCompleted && (
+                      <Badge variant="outline" className="border-green-500 text-green-700">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        Verified Professional
+                      </Badge>
+                    )}
+                    {boardMetrics.totalPositions > 0 && (
+                      <Badge variant="outline" className="border-[#1e3a5f] text-[#1e3a5f]">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Experienced Board Member
+                      </Badge>
+                    )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           </div>
         </div>
       </div>
 
-      <Footer />
+      <div className="no-print">
+        <Footer />
+      </div>
     </div>
   )
 }

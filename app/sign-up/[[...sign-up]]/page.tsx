@@ -28,7 +28,7 @@ export default function SignUpPage() {
   // Determine redirect URL based on role
   const getAfterSignUpUrl = () => {
     if (role === "company") {
-      return "/search"; // Companies go to search
+      return "/company-onboarding"; // Companies go to onboarding first
     }
     return "/"; // Default redirect
   };

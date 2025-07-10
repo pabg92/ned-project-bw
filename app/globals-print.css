@@ -1,0 +1,113 @@
+/* Print-specific styles for professional CV output */
+@media print {
+  /* Hide navigation and UI elements */
+  nav,
+  footer,
+  .print\\:hidden,
+  button {
+    display: none !important;
+  }
+
+  /* Reset page margins */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+
+  /* Remove backgrounds for better printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Main container */
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* CV container */
+  .bg-white {
+    box-shadow: none !important;
+  }
+
+  /* Professional header - keep dark background */
+  .bg-gradient-to-r {
+    background: #1e293b !important;
+    color: white !important;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure text is visible */
+  .text-slate-200,
+  .text-slate-300,
+  .text-green-300 {
+    color: white !important;
+  }
+
+  /* Section headers */
+  h3 {
+    page-break-after: avoid;
+    margin-top: 1rem;
+  }
+
+  /* Work experience entries */
+  section > div {
+    page-break-inside: avoid;
+  }
+
+  /* Badges - ensure they print nicely */
+  .bg-blue-50 {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+    border: 1px solid #3b82f6 !important;
+  }
+
+  .bg-green-50 {
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+    border: 1px solid #10b981 !important;
+  }
+
+  .bg-purple-50 {
+    background-color: #e9d5ff !important;
+    color: #4c1d95 !important;
+    border: 1px solid #8b5cf6 !important;
+  }
+
+  .bg-slate-700 {
+    background-color: #334155 !important;
+    color: white !important;
+  }
+
+  /* Timeline dots */
+  .border-l-2 {
+    border-left-width: 1px !important;
+  }
+
+  /* Ensure proper spacing */
+  .p-8 {
+    padding: 1rem !important;
+  }
+
+  .mb-8 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Font sizes for print */
+  .text-4xl {
+    font-size: 2rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.125rem !important;
+  }
+
+  .text-lg {
+    font-size: 1rem !important;
+  }
+}

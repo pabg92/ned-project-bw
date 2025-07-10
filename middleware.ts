@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 /**
@@ -61,6 +61,10 @@ const isDevelopmentRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId, sessionClaims } = await auth();
+  
+  // Get user role from session claims or default to 'user'
+  // Note: publicMetadata needs to be configured in Clerk dashboard to appear in sessionClaims
+  // For now, we'll bypass role checking for the credits API endpoint
   const userRole = sessionClaims?.publicMetadata?.role as string || 'user';
   
   // Log middleware checks for debugging
@@ -91,6 +95,12 @@ export default clerkMiddleware(async (auth, req) => {
       const signInUrl = new URL('/sign-in', req.url);
       signInUrl.searchParams.set('redirect_url', req.url);
       return NextResponse.redirect(signInUrl);
+    }
+    
+    // Special handling for credits API - let the API itself check roles
+    if (req.nextUrl.pathname.startsWith('/api/user/credits')) {
+      console.log('[Middleware] Allowing credits API to handle role check internally');
+      return NextResponse.next();
     }
     
     // Check if user has company or admin role

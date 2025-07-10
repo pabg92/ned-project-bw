@@ -18,6 +18,12 @@ export async function GET(request: NextRequest) {
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
     
+    // Check if user has company role
+    const userRole = user.publicMetadata?.role as string;
+    if (userRole !== 'company' && userRole !== 'admin') {
+      return createErrorResponse('Company account required', 403);
+    }
+    
     // Get credits from public metadata (visible to frontend)
     const credits = user.publicMetadata?.credits as number || 0;
     
@@ -50,6 +56,13 @@ export async function POST(request: NextRequest) {
     // Get current user
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
+    
+    // Check if user has company role
+    const userRole = user.publicMetadata?.role as string;
+    if (userRole !== 'company' && userRole !== 'admin') {
+      return createErrorResponse('Company account required', 403);
+    }
+    
     const currentCredits = user.publicMetadata?.credits as number || 0;
 
     // Check if user has enough credits
