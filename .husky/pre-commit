@@ -1,0 +1,37 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Check for raw hex colors outside tokens.css
+echo "🔍 Checking for hardcoded colors outside tokens.css..."
+
+# Search for hex colors (excluding tokens.css, SVGs, lock files, and generated files)
+if rg --hidden -n '#[0-9a-fA-F]{3,8}\b' \
+  --glob '!styles/tokens.css' \
+  --glob '!**/*.svg' \
+  --glob '!**/*.lock' \
+  --glob '!**/*.map' \
+  --glob '!.next/**' \
+  --glob '!node_modules/**' \
+  --glob '!.git/**' | grep -E '#[0-9a-fA-F]{3,8}'; then
+  echo "❌ Error: Raw hex colors found outside tokens.css!"
+  echo "Please use CSS variables from tokens.css instead."
+  exit 1
+fi
+
+# Check for Tailwind blue utilities
+echo "🔍 Checking for Tailwind blue utilities..."
+
+if rg -n 'bg-blue-|text-blue-|from-blue-|to-blue-|border-blue-' \
+  --glob '!**/*.lock' \
+  --glob '!.next/**' \
+  --glob '!node_modules/**' \
+  --glob '!.git/**'; then
+  echo "❌ Error: Tailwind blue utilities found!"
+  echo "Please use design system tokens instead:"
+  echo "  - Primary CTAs: [background:var(--cta-grad)]"
+  echo "  - Hover state: [background:var(--hover-grad)]"
+  echo "  - Text: text-[var(--ink)] or text-[var(--muted)]"
+  exit 1
+fi
+
+echo "✅ Color token validation passed!"

@@ -1,6 +1,15 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI assistants when working with code in this repository.
+
+## Important Rules
+
+**NEVER include any mentions of Claude, Anthropic, or any AI assistant names in:**
+- Code comments
+- Commit messages  
+- Documentation
+- Variable names
+- Any files in the repository
 
 ## Project Overview
 

@@ -1,0 +1,41 @@
+:root {
+  /* FONTS */
+  --font-display: "BebasNeue-Regular", "Bebas Neue", Impact, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-ui: "AkrivGrotesk-Regular", AkrivGrotesk, Inter, "Helvetica Neue", Arial, system-ui, sans-serif;
+  --lh-display-tight: 1.05;
+  --track-display: 0.02em;
+
+  /* TEXT & NEUTRALS */
+  --ink: #0F172A;
+  --muted: #475569;
+  --border: #E5E7EB;
+  --bg: #FFFFFF;
+  --bg-subtle: #F9FAFB;
+
+  /* DARK GRADIENTS */
+  --nav-grad: linear-gradient(180deg, #4a4a4a 0%, #5a5a5a 100%);
+  --testi-grad-dark: linear-gradient(180deg, #444444 0%, #525252 100%);
+  --footer-grad: linear-gradient(180deg, #4a4a4a 0%, #3a3a3a 100%);
+  --tertiary-grad: linear-gradient(180deg, #454547 0%, #3a3a3c 100%);
+
+  /* LIGHT GRADIENTS */
+  --stats-grad: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+  --textbg-grad: linear-gradient(180deg, #f3f4f6 0%, #f9fafb 100%);
+  --awards-grad: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+
+  /* BLUE FAMILY */
+  --blue-family-a: #7394c7;
+  --blue-family-b: #898bd3;
+  --cta-start: #7394c7;
+  --cta-end: #8595d5;
+  --about-start: #9eb4d8;
+  --about-end: #8ea4c8;
+  --hover-start: #6b93ce;
+  --hover-end: #5a82bd;
+  
+  --cta-grad: linear-gradient(180deg, var(--cta-start) 0%, var(--cta-end) 100%);
+  --hover-grad: linear-gradient(180deg, var(--hover-start) 0%, var(--hover-end) 100%);
+  --about-grad: linear-gradient(180deg, var(--about-start) 0%, var(--about-end) 100%);
+  
+  --process-line: linear-gradient(90deg, rgba(115,148,199,0) 0%, rgba(115,148,199,0.15) 50%, rgba(115,148,199,0) 100%);
+}

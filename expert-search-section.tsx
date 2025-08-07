@@ -90,7 +90,7 @@ export default function ExpertSearchSection() {
           
           {/* Dotted line decoration */}
           <div className="flex justify-center mt-6">
-            <div className="w-full max-w-lg border-b-3 border-dotted border-[#7394c7] opacity-40"></div>
+            <div className="w-full max-w-lg border-b-3 border-dotted border-[var(--cta-start)] opacity-40"></div>
           </div>
         </div>
 
@@ -100,8 +100,8 @@ export default function ExpertSearchSection() {
             onClick={() => setActiveTab("specialism")}
             className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
               activeTab === "specialism"
-                ? "bg-[#7394c7] text-white shadow-lg scale-105"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                ? "[background:var(--cta-grad)] text-white shadow-lg scale-105"
+                : "bg-[var(--bg-subtle)] text-[var(--muted)] hover:bg-[#E2E8F0]"
             }`}
           >
             BY SPECIALISM
@@ -110,8 +110,8 @@ export default function ExpertSearchSection() {
             onClick={() => setActiveTab("sector")}
             className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
               activeTab === "sector"
-                ? "bg-[#7394c7] text-white shadow-lg scale-105"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                ? "[background:var(--cta-grad)] text-white shadow-lg scale-105"
+                : "bg-[var(--bg-subtle)] text-[var(--muted)] hover:bg-[#E2E8F0]"
             }`}
           >
             BY SECTOR
@@ -120,8 +120,8 @@ export default function ExpertSearchSection() {
             onClick={() => setActiveTab("organisation type")}
             className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
               activeTab === "organisation type"
-                ? "bg-[#7394c7] text-white shadow-lg scale-105"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                ? "[background:var(--cta-grad)] text-white shadow-lg scale-105"
+                : "bg-[var(--bg-subtle)] text-[var(--muted)] hover:bg-[#E2E8F0]"
             }`}
           >
             BY ORGANISATION TYPE
@@ -130,8 +130,8 @@ export default function ExpertSearchSection() {
             onClick={() => setActiveTab("role")}
             className={`relative px-5 py-2.5 ${typography.button.base} font-medium transition-all duration-300 rounded-full ${
               activeTab === "role"
-                ? "bg-[#7394c7] text-white shadow-lg scale-105"
-                : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                ? "[background:var(--cta-grad)] text-white shadow-lg scale-105"
+                : "bg-[var(--bg-subtle)] text-[var(--muted)] hover:bg-[#E2E8F0]"
             }`}
           >
             BY ROLE
@@ -162,7 +162,7 @@ export default function ExpertSearchSection() {
             return (
               <Link key={index} href={filterUrl}>
                 <Button
-                  className={cn("bg-gradient-to-r from-[#8595d5] to-[#9595e5] hover:from-[#7585c5] hover:to-[#8585d5] text-white", buttonStyles.size.base, typography.button.base, "rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group min-w-[140px] max-w-[200px] px-4 py-2.5")}
+                  className={cn("[background:var(--cta-grad)] hover:[background:var(--hover-grad)] text-white", buttonStyles.size.base, typography.button.base, "rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group min-w-[140px] max-w-[200px] px-4 py-2.5")}
                 >
                   <span className="truncate">{item.display}</span>
                   <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
@@ -178,7 +178,7 @@ export default function ExpertSearchSection() {
           <div className="text-center">
             <button
               onClick={() => setShowAllFilters(!showAllFilters)}
-              className={`text-[#7394c7] hover:text-[#6284b6] ${typography.body.base} inline-flex items-center gap-1 transition-colors duration-300`}
+              className={`text-[var(--cta-start)] hover:text-[var(--hover-start)] ${typography.body.base} inline-flex items-center gap-1 transition-colors duration-300`}
             >
               {showAllFilters ? "Show Less" : "View All Filters"}
               <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showAllFilters ? "rotate-180" : ""}`} />

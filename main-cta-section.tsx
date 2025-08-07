@@ -48,37 +48,36 @@ export default function MainCTASection() {
   }
 
   return (
-    <section className={`${spacing.section.base} bg-gradient-to-b from-gray-50 to-white`}>
+    <section className={`${spacing.section.base} bg-cta-grad`}>
       <div className={spacing.container}>
-        {/* Main Heading */}
-        <div className="text-center mb-12">
-          <h2 className={`${typography.h1.base} mb-4`}>
-            <span className="text-[#7394c7]">READY TO BUILD A WINNING BOARD?</span>
-          </h2>
-          <p className={`${typography.h3.base} text-gray-700`}>
-            GET A FREE, CONFIDENTIAL CONSULTATION NOW
-          </p>
-        </div>
-
         {/* Enhanced CTA Section with Email Capture */}
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
+          <div className="bg-white text-gray-900 rounded-2xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
+            {/* Main Heading - Inside white card */}
+            <div className="text-center mb-12">
+              <h2 className={`${typography.h1.base} mb-4`}>
+                <span className="text-[#7394c7]">READY TO BUILD A WINNING BOARD?</span>
+              </h2>
+              <p className={`${typography.h3.base} text-gray-700`}>
+                GET A FREE, CONFIDENTIAL CONSULTATION NOW
+              </p>
+            </div>
             {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full transform translate-x-32 -translate-y-32"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full transform -translate-x-24 translate-y-24"></div>
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gray-200 rounded-full transform translate-x-32 -translate-y-32"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gray-200 rounded-full transform -translate-x-24 translate-y-24"></div>
             </div>
             
             <div className="relative z-10">
               {status === "success" ? (
                 // Success State
                 <div className="text-center py-8 animate-fade-in">
-                  <CheckCircle className="h-16 w-16 mx-auto mb-4 text-white" />
-                  <h3 className={`${typography.h2.base} text-white mb-2`}>Thank You!</h3>
-                  <p className="text-white/90 text-lg">
+                  <CheckCircle className="h-16 w-16 mx-auto mb-4 text-green-600" />
+                  <h3 className={`${typography.h2.base} text-gray-900 mb-2`}>Thank You!</h3>
+                  <p className="text-gray-700 text-lg">
                     You're now subscribed to Board Champions insights.
                   </p>
-                  <p className="text-white/80 mt-2">
+                  <p className="text-gray-600 mt-2">
                     Check your email for a welcome message.
                   </p>
                 </div>
@@ -87,37 +86,37 @@ export default function MainCTASection() {
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   {/* Left Column - Value Proposition */}
                   <div className="text-center md:text-left">
-                    <h3 className={`${typography.h2.base} text-white mb-4`}>
+                    <h3 className={`${typography.h2.base} text-gray-900 mb-4`}>
                       Start your journey to <span className="font-bold">exceptional leadership</span>
                     </h3>
-                    <p className="text-white/90 mb-6 text-lg">
+                    <p className="text-gray-700 mb-6 text-lg">
                       Join <span className="font-bold">5,000+</span> executives receiving weekly insights on:
                     </p>
-                    <ul className="space-y-3 text-white/90">
+                    <ul className="space-y-3 text-gray-700">
                       <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-green-600" />
                         <span>Exclusive board member profiles & availability</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-green-600" />
                         <span>Industry trends in executive appointments</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-green-600" />
                         <span>Board governance best practices</span>
                       </li>
                       <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-green-600" />
                         <span>Early access to new expert talent</span>
                       </li>
                     </ul>
                   </div>
                   
                   {/* Right Column - Form */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div>
-                        <label htmlFor="email" className="block text-white/90 text-sm font-medium mb-2">
+                        <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">
                           Your email address
                         </label>
                         <div className="relative">
@@ -139,15 +138,15 @@ export default function MainCTASection() {
                           id="newsletter"
                           checked={isSubscribed}
                           onCheckedChange={(checked) => setIsSubscribed(checked as boolean)}
-                          className="mt-1 border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-[#7394c7]"
+                          className="mt-1 border-gray-400 data-[state=checked]:bg-[#7394c7] data-[state=checked]:text-white"
                         />
-                        <label htmlFor="newsletter" className="text-sm text-white/90 cursor-pointer">
+                        <label htmlFor="newsletter" className="text-sm text-gray-700 cursor-pointer">
                           Yes, I want to receive weekly Board Champions insights and updates
                         </label>
                       </div>
                       
                       {status === "error" && (
-                        <div className="flex items-start gap-2 text-red-200 text-sm">
+                        <div className="flex items-start gap-2 text-red-600 text-sm">
                           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                           <span>{errorMessage}</span>
                         </div>
@@ -157,7 +156,7 @@ export default function MainCTASection() {
                         type="submit"
                         disabled={isLoading}
                         className={cn(
-                          "w-full bg-white text-[#7394c7] hover:bg-gray-100",
+                          "w-full bg-[#7394c7] text-white hover:bg-[#6b93ce]",
                           buttonStyles.size.large,
                           typography.button.large,
                           "shadow-lg hover:shadow-xl font-bold group transition-all duration-300"
@@ -165,7 +164,7 @@ export default function MainCTASection() {
                       >
                         {isLoading ? (
                           <>
-                            <div className="h-5 w-5 border-2 border-[#7394c7] border-t-transparent rounded-full animate-spin mr-2" />
+                            <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                             Processing...
                           </>
                         ) : (
@@ -176,9 +175,9 @@ export default function MainCTASection() {
                         )}
                       </Button>
                       
-                      <p className="text-xs text-white/70 text-center">
+                      <p className="text-xs text-gray-600 text-center">
                         By subscribing, you agree to our{" "}
-                        <Link href="/privacy" className="underline hover:text-white">
+                        <Link href="/privacy" className="underline hover:text-gray-800">
                           Privacy Policy
                         </Link>
                         . Unsubscribe anytime.

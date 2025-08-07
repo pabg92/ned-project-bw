@@ -1,9 +1,11 @@
+@import '../styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @font-face {
-  font-family: 'BebasNeue';
+  font-family: 'BebasNeue-Regular';
   src: url('/fonts/BebasNeue-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
@@ -11,7 +13,15 @@
 }
 
 @font-face {
-  font-family: 'AktivGrotesk';
+  font-family: 'AkrivGrotesk-Regular';
+  src: url('/fonts/AktivGrotesk-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AkrivGrotesk';
   src: url('/fonts/AktivGrotesk-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
@@ -34,6 +44,26 @@ html, body {
 body {
   width: 100%;
   overflow-x: hidden !important;
+}
+
+/* Optional narrow container utility for ultra-wide monitors */
+.container-narrow {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Fluid typography for responsive headings */
+.fluid-h1 {
+  font-size: clamp(36px, 4vw, 44px);
+  line-height: 1.1;
+}
+
+.fluid-h2 {
+  font-size: clamp(28px, 3.5vw, 36px);
+  line-height: 1.2;
 }
 
 /* Ensure dropdown menus don't cause horizontal scroll */

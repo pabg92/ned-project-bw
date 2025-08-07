@@ -9,12 +9,63 @@ const config: Config = {
     "*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
+    container: { 
+      center: true, 
+      padding: "1rem", 
+      screens: { 
+        "2xl": "1140px" 
+      } 
+    },
   	extend: {
   		fontFamily: {
+  			'display': 'var(--font-display)',
+  			'ui': 'var(--font-ui)',
   			'bebas-neue': ['var(--font-bebas-neue)'],
   			'akrive-grotesk': ['var(--font-akrive-grotesk)'],
   		},
+  		lineHeight: {
+  			'display-tight': 'var(--lh-display-tight)',
+  		},
+  		letterSpacing: {
+  			'display': 'var(--track-display)',
+  		},
   		colors: {
+  			// NED Advisor Design System Tokens
+  			'ink': 'var(--ink)',
+  			'muted': 'var(--muted)',
+  			'border': 'var(--border)',
+  			'bg': 'var(--bg)',
+  			'bg-subtle': 'var(--bg-subtle)',
+  			
+  			// Blue Family
+  			'blue-family-a': 'var(--blue-family-a)',
+  			'blue-family-b': 'var(--blue-family-b)',
+  			'cta-start': 'var(--cta-start)',
+  			'cta-end': 'var(--cta-end)',
+  			'about-start': 'var(--about-start)',
+  			'about-end': 'var(--about-end)',
+  			'hover-start': 'var(--hover-start)',
+  			'hover-end': 'var(--hover-end)',
+  			
+  			// Premium B2B color palette (legacy)
+  			'brand': {
+  				bg: '#0B1B2B',
+  				ink: '#0F172A',
+  				muted: '#334155',
+  				border: '#E2E8F0',
+  			},
+  			'surface': {
+  				subtle: '#F8FAFC',
+  				white: '#FFFFFF',
+  			},
+  			'accent': {
+  				DEFAULT: '#3B82F6',
+  				hover: '#2563EB',
+  				light: '#EFF6FF',
+  			},
+  			'support': '#0EA5A7',
+  			'focus': '#1D4ED8',
+  			// Legacy colors (maintain for backward compatibility)
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -36,10 +87,6 @@ const config: Config = {
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
   			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
@@ -66,7 +113,36 @@ const config: Config = {
   				ring: 'hsl(var(--sidebar-ring))'
   			}
   		},
+  		fontSize: {
+  			// Typography scale - NED Advisor Design System
+  			'h1': ['44px', { lineHeight: '48px', letterSpacing: '-0.02em', fontWeight: '700' }],
+  			'h2': ['36px', { lineHeight: '40px', letterSpacing: '-0.01em', fontWeight: '700' }],
+  			'h3': ['24px', { lineHeight: '32px', letterSpacing: '-0.01em', fontWeight: '600' }],
+  			'body': ['17px', { lineHeight: '28px' }],
+  			'caption': ['14px', { lineHeight: '20px' }],
+  			'overline': ['12px', { lineHeight: '16px', letterSpacing: '0.08em', fontWeight: '600' }],
+  		},
+  		spacing: {
+  			'section': '96px',
+  			'section-bottom': '72px',
+  		},
+  		backgroundImage: {
+  			// NED Advisor Design System Gradients
+  			'nav-grad': 'var(--nav-grad)',
+  			'testi-grad-dark': 'var(--testi-grad-dark)',
+  			'footer-grad': 'var(--footer-grad)',
+  			'tertiary-grad': 'var(--tertiary-grad)',
+  			'stats-grad': 'var(--stats-grad)',
+  			'textbg-grad': 'var(--textbg-grad)',
+  			'awards-grad': 'var(--awards-grad)',
+  			'cta-grad': 'var(--cta-grad)',
+  			'hover-grad': 'var(--hover-grad)',
+  			'about-grad': 'var(--about-grad)',
+  			'process-line': 'var(--process-line)',
+  		},
   		borderRadius: {
+  			'btn': '12px',
+  			'card': '12px',
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'

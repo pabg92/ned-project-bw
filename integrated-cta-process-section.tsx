@@ -110,8 +110,8 @@ export default function IntegratedCTAProcessSection() {
   return (
     <section className={`${spacing.section.base} bg-gradient-to-b from-gray-50 to-white`}>
       <div className={spacing.container}>
-        {/* CTA Buttons - Mobile optimized with proper touch targets */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-center items-center mb-12">
+        {/* CTA Buttons - Reduced footprint with base size */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-10">
           <Button 
             onClick={() => {
               if (isSignedIn && userRole === 'company') {
@@ -120,25 +120,25 @@ export default function IntegratedCTAProcessSection() {
                 router.push('/companies')
               }
             }}
-            className={cn("bg-gradient-to-r from-[#454547] to-[#3a3a3c] hover:from-[#3a3a3c] hover:to-[#2f2f31] text-white", buttonStyles.size.large, typography.button.large, "rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto min-w-0 sm:min-w-[280px] group")}
+            className={cn("[background:var(--cta-grad)] hover:[background:var(--hover-grad)] text-white", buttonStyles.size.base, typography.button.base, "rounded-btn shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto min-w-0 sm:min-w-[220px] group focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[rgba(90,130,189,0.9)]")}
           >
             <span>I need an <span className="font-bold">expert</span></span>
-            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
 
           <Link href="/signup" className="w-full sm:w-auto">
-            <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "flex items-center justify-center gap-2 w-full min-w-0 sm:min-w-[280px] group")}>
+            <Button className={cn("bg-white border-2 border-[var(--cta-end)] text-[var(--cta-end)] hover:bg-[#EFF6FF]", buttonStyles.size.base, typography.button.base, "flex items-center justify-center gap-2 w-full min-w-0 sm:min-w-[220px] group rounded-btn shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[rgba(90,130,189,0.9)] focus:ring-offset-2")}>
               <span>I'm <span className="font-bold">available</span> to <span className="font-bold">hire</span></span>
-              <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+              <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
           </Link>
         </div>
 
         {/* Main Heading */}
         <div className="text-center mb-12">
-          <h2 className={`${typography.h1.base} mb-6`}>
-            <span className="text-[#7394c7]">Winning Expert Talent</span>{" "}
-            <span className="text-gray-800">appointments.</span>
+          <h2 className="fluid-h1 font-display mb-6">
+            <span className="text-[var(--cta-start)]">Winning Expert Talent</span>{" "}
+            <span className="text-[var(--ink)]">appointments.</span>
           </h2>
 
           {/* Dotted line decoration */}
@@ -158,24 +158,19 @@ export default function IntegratedCTAProcessSection() {
         </div>
 
         {/* Enhanced CTA Section with Email Capture */}
-        <div className="max-w-6xl mx-auto mb-16">
-          <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white rounded-2xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full transform translate-x-32 -translate-y-32"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full transform -translate-x-24 translate-y-24"></div>
-            </div>
-            
-            <div className="relative z-10">
+        <div className="mb-16">
+          <div className="[background:var(--cta-grad)] py-12">
+            <div className="max-w-6xl mx-auto px-6">
+              <div className="bg-white rounded-card p-8 shadow-card">
               {status === "success" ? (
                 // Success State
                 <div className="text-center py-8 animate-fade-in">
-                  <CheckCircle className="h-16 w-16 mx-auto mb-4 text-white" />
-                  <h3 className={`${typography.h2.base} text-white mb-2`}>Thank You!</h3>
-                  <p className="text-white/90 text-lg">
+                  <CheckCircle className="h-16 w-16 mx-auto mb-4 text-[var(--cta-start)]" />
+                  <h3 className={`${typography.h2.base} text-[var(--ink)] mb-2`}>Thank You!</h3>
+                  <p className="text-[var(--muted)] text-lg">
                     You're now subscribed to Board Champions insights.
                   </p>
-                  <p className="text-white/80 mt-2">
+                  <p className="text-[var(--muted)] mt-2">
                     Check your email for a welcome message.
                   </p>
                 </div>
@@ -236,7 +231,7 @@ export default function IntegratedCTAProcessSection() {
                           id="newsletter"
                           checked={isSubscribed}
                           onCheckedChange={(checked) => setIsSubscribed(checked as boolean)}
-                          className="mt-1 border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-[#7394c7]"
+                          className="mt-1 border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-[var(--cta-start)]"
                         />
                         <label htmlFor="newsletter" className="text-sm text-white/90 cursor-pointer">
                           Yes, I want to receive weekly Board Champions insights and updates
@@ -254,7 +249,7 @@ export default function IntegratedCTAProcessSection() {
                         type="submit"
                         disabled={isLoading}
                         className={cn(
-                          "w-full bg-white text-[#7394c7] hover:bg-gray-100",
+                          "w-full bg-white text-[var(--cta-start)] hover:bg-gray-100",
                           buttonStyles.size.large,
                           typography.button.large,
                           "shadow-lg hover:shadow-xl font-bold group transition-all duration-300"
@@ -262,7 +257,7 @@ export default function IntegratedCTAProcessSection() {
                       >
                         {isLoading ? (
                           <>
-                            <div className="h-5 w-5 border-2 border-[#7394c7] border-t-transparent rounded-full animate-spin mr-2" />
+                            <div className="h-5 w-5 border-2 border-[var(--cta-start)] border-t-transparent rounded-full animate-spin mr-2" />
                             Processing...
                           </>
                         ) : (
@@ -284,6 +279,7 @@ export default function IntegratedCTAProcessSection() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>

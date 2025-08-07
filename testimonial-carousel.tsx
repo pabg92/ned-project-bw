@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { typography, spacing } from "@/lib/typography"
+import Section from "@/components/layout/Section"
 
 const testimonials = [
   {
@@ -20,139 +21,75 @@ const testimonials = [
 
 export default function TestimonialCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
-
-  useEffect(() => {
-    if (!isAutoPlaying) return
-
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % testimonials.length)
-    }, 6000)
-
-    return () => clearInterval(interval)
-  }, [isAutoPlaying])
 
   const goToPrevious = () => {
     setCurrentSlide((prev) => (prev - 1 + testimonials.length) % testimonials.length)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
   }
 
   const goToNext = () => {
     setCurrentSlide((prev) => (prev + 1) % testimonials.length)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
-  }
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
   }
 
   return (
-    <section className="py-12 bg-gradient-to-r from-[#444444] to-[#525252] text-white relative z-0">
+    <Section variant="subtle">
       <div className={spacing.container}>
-        <h2 className={`${typography.h2.base} text-center mb-12 text-white`}>DRIVING TANGIBLE RESULTS FOR OUR PARTNERS</h2>
+        <h2 className="fluid-h2 font-display text-[var(--ink)] text-center mb-12">DRIVING TANGIBLE RESULTS FOR OUR PARTNERS</h2>
 
-        <div className="relative">
-          {/* Carousel Content */}
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-700 ease-in-out"
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-            >
-              {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="w-full flex-shrink-0">
-                  <div className={`grid grid-cols-1 md:grid-cols-2 ${spacing.grid.base} max-w-6xl mx-auto items-center`}>
-                    {/* Image on Left */}
-                    <div className="rounded-xl overflow-hidden shadow-2xl order-1">
-                      <Image
-                        src={testimonial.image || "/placeholder.svg"}
-                        alt="Client testimonial"
-                        width={600}
-                        height={400}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    {/* Testimonial Content on Right */}
-                    <div className="bg-white text-gray-800 p-8 md:p-10 rounded-xl flex flex-col shadow-2xl order-2">
-                      <div className="flex-grow">
-                        {/* Logo at top */}
-                        <div className="mb-8">
-                          <Image
-                            src={testimonial.logo || "/placeholder.svg"}
-                            alt={testimonial.logoAlt}
-                            width={180}
-                            height={60}
-                            className="h-14 w-auto object-contain"
-                          />
-                        </div>
-                        
-                        {/* Highlight */}
-                        {testimonial.highlight && (
-                          <h3 className={`${typography.h3.base} mb-6 text-gray-800 font-bold`}>
-                            {testimonial.highlight}
-                          </h3>
-                        )}
-                        
-                        {/* Quote */}
-                        <p className={`${typography.body.large} mb-8 text-gray-700 italic`}>
-                          "{testimonial.text}"
-                        </p>
-                        
-                        {/* Author */}
-                        {testimonial.author && (
-                          <div>
-                            <p className={`${typography.body.base} font-bold text-gray-800`}>
-                              {testimonial.author}
-                            </p>
-                            <p className={`${typography.body.base} text-gray-600`}>
-                              {testimonial.company}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+        {/* 2 Cards per viewport */}
+        <div className="relative max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Show 2 testimonials at a time */}
+            {testimonials.slice(currentSlide, currentSlide + 2).concat(
+              testimonials.slice(0, Math.max(0, (currentSlide + 2) - testimonials.length))
+            ).map((testimonial) => (
+              <div key={testimonial.id} className="bg-white rounded-card border border-[var(--border)] p-8 shadow-card max-w-[560px] mx-auto">
+                {/* Company Logo */}
+                <div className="mb-6">
+                  <Image
+                    src={testimonial.logo || "/placeholder.svg"}
+                    alt={testimonial.logoAlt}
+                    width={120}
+                    height={40}
+                    className="h-10 w-auto object-contain grayscale opacity-60"
+                  />
                 </div>
-              ))}
-            </div>
+                
+                {/* Quote - 18px text for better readability */}
+                <p className="text-lg text-ink mb-6 leading-relaxed">
+                  "{testimonial.text}"
+                </p>
+                
+                {/* Author */}
+                <div className="border-t border-[var(--border)] pt-4">
+                  <p className="font-semibold text-[var(--ink)]">
+                    {testimonial.author}
+                  </p>
+                  <p className="text-[var(--muted)] text-sm">
+                    {testimonial.company}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows - Outside cards */}
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-3 transition-all duration-300 hover:scale-110 backdrop-blur-sm"
-            aria-label="Previous testimonial"
+            className="absolute -left-12 top-1/2 transform -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)] bg-white hover:bg-[var(--bg-subtle)] rounded-full p-3 shadow-md hover:shadow-lg transition-all duration-200 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[rgba(90,130,189,0.9)]"
+            aria-label="Previous testimonials"
           >
-            <ChevronLeft className="h-8 w-8" />
+            <ChevronLeft className="h-6 w-6" />
           </button>
 
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white bg-black/20 hover:bg-black/40 rounded-full p-3 transition-all duration-300 hover:scale-110 backdrop-blur-sm"
-            aria-label="Next testimonial"
+            className="absolute -right-12 top-1/2 transform -translate-y-1/2 text-[var(--muted)] hover:text-[var(--ink)] bg-white hover:bg-[var(--bg-subtle)] rounded-full p-3 shadow-md hover:shadow-lg transition-all duration-200 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[rgba(90,130,189,0.9)]"
+            aria-label="Next testimonials"
           >
-            <ChevronRight className="h-8 w-8" />
+            <ChevronRight className="h-6 w-6" />
           </button>
         </div>
-
-        {/* Carousel Dots */}
-        <div className="flex justify-center space-x-3 mt-12 pb-4">
-          {testimonials.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 shadow-sm ${
-                index === currentSlide ? "bg-white scale-125 shadow-white/50" : "bg-white/30 hover:bg-white/50"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
       </div>
-    </section>
+    </Section>
   )
 }

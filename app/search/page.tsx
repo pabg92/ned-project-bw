@@ -5,7 +5,6 @@ import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import SearchNavbar from "@/components/search/search-navbar"
 import Footer from "@/footer"
-import SearchFilters from "@/components/search/search-filters"
 import SearchResults from "@/components/search/search-results"
 import EnhancedSearchBar from "@/components/search/enhanced-search-bar"
 import UnifiedSearchBanner from "@/components/search/unified-search-banner"
@@ -13,7 +12,7 @@ import { useShortlist } from "@/hooks/use-shortlist"
 import { useCredits } from "@/hooks/use-credits"
 import { useSavedSearches } from "@/hooks/use-saved-searches"
 import { Button } from "@/components/ui/button"
-import { CreditCard, Info, Bookmark, BookmarkCheck } from "lucide-react"
+import { CreditCard, Info, Bookmark, BookmarkCheck, Filter } from "lucide-react"
 import Link from "next/link"
 import {
   Dialog,
@@ -29,6 +28,16 @@ import { toast } from "sonner"
 import QuickAccessPanel from "@/components/search/quick-access-panel"
 import DemoUserSwitcher from "@/components/demo-user-switcher"
 
+// New unified filter system imports
+import { useSearchFilters } from "@/lib/search/useSearchFilters"
+import { ROLE_TYPES, ORG_TYPES, SECTORS, SPECIALISMS } from "@/lib/search/filter-data"
+import { RolePopover } from "@/components/sections/filters/RolePopover"
+import { OrgTypePopover } from "@/components/sections/filters/OrgTypePopover"
+import { ComboMulti } from "@/components/sections/filters/ComboMulti"
+import { ActiveChips } from "@/components/sections/filters/ActiveChips"
+import type { SearchFilters as NEDSearchFilters } from "@/lib/search/types"
+
+// Legacy SearchFilters interface for backward compatibility
 export interface SearchFilters {
   query: string
   role: string[]
@@ -67,6 +76,9 @@ export default function SearchPage() {
   const router = useRouter()
   const userRole = user?.publicMetadata?.role as string
   const isCompanyUser = userRole === 'company' || userRole === 'admin'
+  
+  // New unified filter system
+  const { filters: nedFilters, update: nedUpdate, hasActive: nedHasActive } = useSearchFilters()
   
   // Parse URL parameters on mount
   useEffect(() => {
@@ -217,6 +229,54 @@ export default function SearchPage() {
             />
           </div>
         )}
+        
+        {/* NED Advisor Filter Bar */}
+        <div className="mb-6 bg-white rounded-card border border-[var(--border)] p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Role Type - Multi-select checkboxes */}
+            <RolePopover
+              value={nedFilters.roles}
+              onChange={(roles) => nedUpdate({ roles })}
+              options={ROLE_TYPES}
+            />
+            
+            {/* Sector - Multi-select combobox with search */}
+            <ComboMulti
+              label="Sector"
+              value={nedFilters.sectors}
+              options={SECTORS.map(s => ({ value: s.slug, label: s.label }))}
+              onChange={(sectors) => nedUpdate({ sectors })}
+              placeholder="Select sectors..."
+              searchPlaceholder="Search sectors..."
+              emptyText="No sectors found."
+            />
+            
+            {/* Organisation Type - Single-select radio */}
+            <OrgTypePopover
+              value={nedFilters.orgType || undefined}
+              onChange={(orgType) => nedUpdate({ orgType: orgType || null })}
+              options={ORG_TYPES}
+            />
+            
+            {/* Specialism - Multi-select combobox */}
+            <ComboMulti
+              label="Specialism"
+              value={nedFilters.specialisms}
+              options={SPECIALISMS.map(s => ({ value: s.slug, label: s.label }))}
+              onChange={(specialisms) => nedUpdate({ specialisms })}
+              placeholder="Select specialisms..."
+              searchPlaceholder="Search specialisms..."
+              emptyText="No specialisms found."
+            />
+          </div>
+          
+          {/* Active Filter Chips */}
+          {nedHasActive && (
+            <div className="mt-3 pt-3 border-t border-[var(--border)]">
+              <ActiveChips />
+            </div>
+          )}
+        </div>
         
         {/* Enhanced Search Bar */}
         <EnhancedSearchBar 
