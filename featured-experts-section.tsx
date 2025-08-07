@@ -75,11 +75,14 @@ export default function FeaturedExpertsSection() {
         <div className="bg-gradient-to-br from-[#9595d5] to-[#8585c5] text-white p-8 md:p-10 relative overflow-hidden">
           {/* Decorative elements */}
           <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          <h2 className={`${typography.h2.base} mb-6 text-center relative z-10`}>THIS MONTH'S FEATURED EXPERTS</h2>
+          <h2 className={`${typography.h2.base} mb-3 text-center relative z-10`}>A GLIMPSE INTO OUR ELITE NETWORK</h2>
+          <p className={`${typography.body.base} mb-6 text-center relative z-10 text-white/90 max-w-2xl mx-auto`}>
+            Our members are seasoned leaders who have navigated complex challenges and delivered exceptional results.
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8 relative z-10">
             {featuredExperts.map((expert) => (
-              <div key={expert.id} className="flex flex-col items-center group bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all duration-300">
+              <div key={expert.id} className="flex flex-col items-center group bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all duration-300 h-full">
                 <div className="mb-3 w-28 h-36 md:w-32 md:h-40 lg:w-36 lg:h-44 overflow-hidden rounded-lg shadow-lg bg-white group-hover:shadow-xl transition-all duration-300 ring-2 ring-white/30">
                   <Image
                     src={expert.image || "/placeholder.svg"}
@@ -93,9 +96,9 @@ export default function FeaturedExpertsSection() {
                 </div>
 
                 <h3 className={`${typography.h3.compact} mb-2 text-center font-bold`}>{expert.name}</h3>
-                <p className={`${typography.body.small} mb-3 text-center px-2 opacity-90 line-clamp-2`}>{expert.title}</p>
+                <p className={`${typography.body.small} mb-3 text-center px-2 opacity-90 line-clamp-2 flex-grow`}>{expert.title}</p>
 
-                <Button className={cn(buttonStyles.secondary, buttonStyles.size.base, typography.button.base, "inline-flex items-center gap-2 min-w-[100px] group/btn mt-auto")}>
+                <Button className={cn(buttonStyles.secondary, buttonStyles.size.base, typography.button.base, "inline-flex items-center gap-2 min-w-[100px] group/btn")}>
                   ENQUIRE
                   <ChevronRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
                 </Button>

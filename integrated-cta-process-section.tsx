@@ -147,10 +147,13 @@ export default function IntegratedCTAProcessSection() {
           </div>
         </div>
 
-        {/* No Fees Statement */}
+        {/* Foundation Partners Section */}
         <div className="text-center mb-16">
-          <p className={`${typography.h2.base} text-gray-800 bg-gradient-to-r from-gray-100 to-gray-50 py-6 px-8 rounded-2xl inline-block shadow-inner`}>
-            <span className="text-[#7394c7]">NO FEES</span> <span className="text-gray-600 font-normal">until you hire your expert.</span>
+          <h3 className={`${typography.h2.base} text-gray-800 mb-4`}>Our Foundation Partners</h3>
+          <p className={`${typography.body.large} text-gray-600 max-w-3xl mx-auto mb-8`}>
+            We are proud to partner with leading institutions and organisations that share our commitment 
+            to excellence in corporate governance and leadership. These partnerships provide our network 
+            with unparalleled insights and opportunities.
           </p>
         </div>
 
@@ -287,9 +290,13 @@ export default function IntegratedCTAProcessSection() {
 
         {/* Process Section - MOVED BELOW THE FORM */}
         <div className="text-center mb-12">
-          <h3 className={`${typography.h2.base} text-gray-700`}>
-            The process of finding the best expert for your needs:
+          <h3 className={`${typography.h2.base} text-gray-700 mb-4`}>
+            Our Bespoke Appointment Process
           </h3>
+          <p className={`${typography.body.large} text-gray-600 max-w-3xl mx-auto`}>
+            A rigorous, confidential, and tailored approach to ensure a perfect alignment 
+            of expertise, culture, and strategic goals.
+          </p>
         </div>
 
         {/* Process Steps - New integrated layout */}

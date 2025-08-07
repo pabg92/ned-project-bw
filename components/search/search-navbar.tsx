@@ -57,8 +57,8 @@ export default function SearchNavbar({
               {/* Logo - Smaller for search context */}
               <Link href="/" className="flex items-center">
                 <Image
-                  src="/logo.svg"
-                  alt="BoardChampions"
+                  src="/logo-tna.svg"
+                  alt="TNA"
                   width={180}
                   height={36}
                   className="h-8 w-auto"

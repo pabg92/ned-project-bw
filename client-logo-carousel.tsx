@@ -131,7 +131,7 @@ export default function ClientLogoCarousel() {
   return (
     <section className="py-8 bg-gradient-to-b from-gray-50 to-white">
       <div className={spacing.container}>
-        <h2 className={`${typography.h2.base} text-center mb-12 text-gray-800`}>WE'VE APPOINTED EXPERTS FOR:</h2>
+        <h2 className={`${typography.h2.base} text-center mb-12 text-gray-800`}>TRUSTED BY INDUSTRY LEADERS AND AMBITIOUS SMES</h2>
 
         <div className="relative">
           {/* Carousel Content */}

@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Logo and About */}
           <div>
             <Link href="/" className="inline-block mb-4">
-              <Image src="/logo.svg" alt="BoardChampions" width={180} height={40} className="h-10 w-auto" />
+              <Image src="/logo-tna.svg" alt="TNA" width={180} height={40} className="h-10 w-auto" />
             </Link>
             <p className="text-sm text-gray-300 mb-8 leading-relaxed">
               BoardChampions connects businesses with expert talent for board, fractional, and project-based roles.
@@ -134,7 +134,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-600/30 mt-16 pt-10 text-sm text-gray-400">
+        <div className="border-t border-gray-600/30 mt-16 pt-10 text-sm text-gray-300">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p>&copy; {new Date().getFullYear()} BoardChampions. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">

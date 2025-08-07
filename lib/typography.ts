@@ -69,9 +69,11 @@ export const spacing = {
 // Standardized button styles
 export const buttonStyles = {
   // Primary button (filled)
-  primary: "bg-[#9eb4d8] hover:bg-[#8ea4c8] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105",
+  primary: "bg-[#7394c7] hover:bg-[#5a82bd] text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300",
   // Secondary button (outlined)
-  secondary: "bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105",
+  secondary: "bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-all duration-300",
+  // Accent button (gradient)
+  accent: "bg-gradient-to-r from-[#7394c7] to-[#8595d5] hover:from-[#5a82bd] hover:to-[#7585c5] text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300",
   // Button sizes with consistent padding
   size: {
     small: "px-4 py-2",

@@ -81,9 +81,12 @@ export default function ExpertSearchSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Enhanced Header */}
         <div className="text-center mb-10">
-          <h2 className={`${typography.h1.base} text-gray-800`}>
-            SEARCH BY <span className="text-[#7394c7]">{activeTab.toUpperCase()}</span>
+          <h2 className={`${typography.h1.base} text-gray-800 mb-4`}>
+            EXPERTISE TO SOLVE YOUR CHALLENGES
           </h2>
+          <p className={`${typography.body.large} text-gray-600 max-w-3xl mx-auto`}>
+            Our network possesses deep functional expertise across every critical area of business leadership.
+          </p>
           
           {/* Dotted line decoration */}
           <div className="flex justify-center mt-6">
@@ -136,7 +139,7 @@ export default function ExpertSearchSection() {
         </div>
 
         {/* Enhanced Filter Pills Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto mb-8 px-4">
+        <div className="flex flex-wrap justify-center gap-3 max-w-5xl mx-auto mb-8 px-4">
           {getActiveContent().map((item, index) => {
             // Create the appropriate filter URL based on active tab
             const filterUrl = (() => {
@@ -159,7 +162,7 @@ export default function ExpertSearchSection() {
             return (
               <Link key={index} href={filterUrl}>
                 <Button
-                  className={cn("bg-gradient-to-r from-[#8595d5] to-[#9595e5] hover:from-[#7585c5] hover:to-[#8585d5] text-white", buttonStyles.size.base, typography.button.base, "rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group min-w-0 px-4 py-2.5 w-full")}
+                  className={cn("bg-gradient-to-r from-[#8595d5] to-[#9595e5] hover:from-[#7585c5] hover:to-[#8585d5] text-white", buttonStyles.size.base, typography.button.base, "rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group min-w-[140px] max-w-[200px] px-4 py-2.5")}
                 >
                   <span className="truncate">{item.display}</span>
                   <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />

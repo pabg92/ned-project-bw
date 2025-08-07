@@ -51,9 +51,9 @@ export default function TestimonialCarousel() {
   }
 
   return (
-    <section className="py-8 bg-gradient-to-r from-[#444444] to-[#525252] text-white">
+    <section className="py-12 bg-gradient-to-r from-[#444444] to-[#525252] text-white relative z-0">
       <div className={spacing.container}>
-        <h2 className={`${typography.h2.base} text-center mb-12 text-white`}>DON'T JUST TAKE OUR WORD FOR IT</h2>
+        <h2 className={`${typography.h2.base} text-center mb-12 text-white`}>DRIVING TANGIBLE RESULTS FOR OUR PARTNERS</h2>
 
         <div className="relative">
           {/* Carousel Content */}
@@ -140,7 +140,7 @@ export default function TestimonialCarousel() {
         </div>
 
         {/* Carousel Dots */}
-        <div className="flex justify-center space-x-3 mt-8">
+        <div className="flex justify-center space-x-3 mt-12 pb-4">
           {testimonials.map((_, index) => (
             <button
               key={index}

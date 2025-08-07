@@ -44,18 +44,18 @@ export default function HeroSection() {
             <div className="text-left">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bebas-neue tracking-wide mb-6"
                   style={{ color: '#374151' }}>
-                AWARD-WINNING EXPERT &<br />
-                BOARD-LEVEL APPOINTMENTS
+                STRATEGIC APPOINTMENTS THAT<br />
+                DRIVE PERFORMANCE & VALUE
               </h1>
               
               <p className="text-lg sm:text-xl mb-8 leading-relaxed"
                  style={{ color: '#374151' }}>
-                We connect ambitious businesses with the world's most transformative board-level talent, 
-                from Non-Executive Directors to fractional leaders.
+                Access our exclusive network of board-level executives, vetted for their 
+                real-world experience in delivering private equity-backed success.
               </p>
 
               {/* Search Functionality */}
-              <div className="space-y-4 mb-6">
+              <div className="space-y-4 mb-6 max-w-lg">
                 {/* Role Dropdown */}
                 <div className="relative">
                   <button
