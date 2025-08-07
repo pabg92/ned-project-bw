@@ -207,19 +207,35 @@ export default function EnhancedSearchBar({ value, onChange, onSaveSearch, onDeb
             
             <div className="h-6 w-px bg-gray-300" />
             
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <Filter className="h-4 w-4 mr-1" />
-              Advanced
-              <ChevronDown className={cn(
-                "h-3 w-3 ml-1 transition-transform",
-                showAdvanced && "rotate-180"
-              )} />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  <Filter className="h-4 w-4 mr-1" />
+                  Advanced
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-80">
+                <DropdownMenuLabel>Search Tips</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-2 text-sm text-gray-600 space-y-2">
+                  <p><strong>Basic Search:</strong> Enter keywords to search across all fields</p>
+                  <p><strong>Multiple Terms:</strong> "CEO London" finds profiles with both CEO AND London</p>
+                  <p><strong>OR Search:</strong> "CEO | CFO" finds profiles with CEO OR CFO</p>
+                  <p><strong>Exact Phrase:</strong> "Chief Executive Officer" searches for exact phrase</p>
+                  <p><strong>Field Search:</strong> Use filters on the left for specific criteria</p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowAdvanced(!showAdvanced)}>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {showAdvanced ? 'Hide' : 'Show'} Search Templates
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <Button
               variant="ghost"

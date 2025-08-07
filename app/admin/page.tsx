@@ -208,7 +208,7 @@ export default function AdminDashboard() {
         {dashboardData && (
           <div className="space-y-8">
             {/* Overview Stats */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
               <div className="bg-white overflow-hidden shadow rounded-lg">
                 <div className="p-5">
                   <div className="flex items-center">
@@ -224,6 +224,28 @@ export default function AdminDashboard() {
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
                           {dashboardData.overview.totalCandidates}
+                        </dd>
+                      </dl>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
+                        <span className="text-white text-sm font-medium">B</span>
+                      </div>
+                    </div>
+                    <div className="ml-5 w-0 flex-1">
+                      <dl>
+                        <dt className="text-sm font-medium text-gray-500 truncate">
+                          Total Companies
+                        </dt>
+                        <dd className="text-lg font-medium text-gray-900">
+                          {dashboardData.overview.totalCompanies}
                         </dd>
                       </dl>
                     </div>
@@ -280,7 +302,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">$</span>
+                        <span className="text-white text-sm font-medium">£</span>
                       </div>
                     </div>
                     <div className="ml-5 w-0 flex-1">
@@ -289,7 +311,7 @@ export default function AdminDashboard() {
                           Total Revenue
                         </dt>
                         <dd className="text-lg font-medium text-gray-900">
-                          ${dashboardData.revenue.totalRevenue.toFixed(2)}
+                          £{dashboardData.revenue.totalRevenue.toFixed(2)}
                         </dd>
                       </dl>
                     </div>
@@ -405,7 +427,7 @@ export default function AdminDashboard() {
                             {activity.type === 'profile_purchase' && (
                               <div>
                                 <p className="text-sm font-medium text-gray-900">
-                                  Profile purchased for ${activity.data.amount || '0.00'}
+                                  Profile purchased for £{activity.data.amount || '0.00'}
                                 </p>
                                 <p className="text-xs text-gray-500">
                                   Candidate: {activity.data.candidateId} • Company: {activity.data.companyId}
@@ -516,6 +538,26 @@ export default function AdminDashboard() {
                       </p>
                       <p className="text-sm text-gray-500">
                         Test all backend endpoints
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => router.push('/admin/companies')}
+                    className="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-medium">Co</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="absolute inset-0" aria-hidden="true" />
+                      <p className="text-sm font-medium text-gray-900">
+                        Company Management
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Manage companies and credits
                       </p>
                     </div>
                   </button>

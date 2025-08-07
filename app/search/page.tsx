@@ -8,7 +8,7 @@ import Footer from "@/footer"
 import SearchFilters from "@/components/search/search-filters"
 import SearchResults from "@/components/search/search-results"
 import EnhancedSearchBar from "@/components/search/enhanced-search-bar"
-import SearchCTABanner from "@/components/search/search-cta-banner"
+import UnifiedSearchBanner from "@/components/search/unified-search-banner"
 import { useShortlist } from "@/hooks/use-shortlist"
 import { useCredits } from "@/hooks/use-credits"
 import { useSavedSearches } from "@/hooks/use-saved-searches"
@@ -26,6 +26,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
+import QuickAccessPanel from "@/components/search/quick-access-panel"
+import DemoUserSwitcher from "@/components/demo-user-switcher"
 
 export interface SearchFilters {
   query: string
@@ -70,6 +72,22 @@ export default function SearchPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
+      
+      // Check if this is a welcome visit or returning user
+      if (params.get('welcome') === 'true') {
+        setShowQuickAccess(true)
+        // Remove the welcome param from URL
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.delete('welcome')
+        window.history.replaceState({}, '', newUrl)
+      } else if (isSignedIn && !params.get('query') && !params.get('saved')) {
+        // Show quick access for returning users without active search
+        const hasVisitedBefore = localStorage.getItem('hasVisitedSearch')
+        if (hasVisitedBefore) {
+          setShowQuickAccess(true)
+        }
+        localStorage.setItem('hasVisitedSearch', 'true')
+      }
       const urlFilters: Partial<SearchFilters> = {}
       
       if (params.get('query')) urlFilters.query = params.get('query')!
@@ -113,6 +131,7 @@ export default function SearchPage() {
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [searchName, setSearchName] = useState("")
   const [totalResults, setTotalResults] = useState(0)
+  const [showQuickAccess, setShowQuickAccess] = useState(false)
   
   // Use real credits from Clerk (only for company users)
   const { credits, loading: creditsLoading } = useCredits()
@@ -180,74 +199,25 @@ export default function SearchPage() {
         savedSearchCount={savedSearchCount}
       />
       
-      {/* Welcome Banners based on user status */}
-      {!isSignedIn && (
-        <div className="bg-gradient-to-r from-[#7394c7] to-[#8595d5] text-white px-4 py-3">
-          <div className="max-w-[1920px] mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Info className="h-5 w-5" />
-              <p className="text-sm font-medium">
-                You're browsing as a guest. Sign up to unlock profiles and save searches.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Link href="/sign-in?redirect_url=/search">
-                <Button size="sm" variant="secondary" className="bg-white text-[#7394c7] hover:bg-gray-100">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/sign-up?role=company">
-                <Button size="sm" className="bg-white/20 text-white border border-white/30 hover:bg-white/30">
-                  Sign Up as Company
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {isSignedIn && !isCompanyUser && (
-        <div className="bg-[#6b93ce] text-white px-4 py-3">
-          <div className="max-w-[1920px] mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Info className="h-5 w-5" />
-              <p className="text-sm">
-                Upgrade to a company account to unlock full profiles and contact candidates.
-              </p>
-            </div>
-            <Link href="/companies">
-              <Button size="sm" variant="secondary" className="bg-white text-[#6b93ce] hover:bg-gray-100">
-                Upgrade Account
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
-      
-      {isCompanyUser && credits === 0 && (
-        <div className="bg-[#6b93ce] text-white px-4 py-3">
-          <div className="max-w-[1920px] mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Info className="h-5 w-5" />
-              <p className="text-sm">
-                Welcome! You can browse profiles for free. Purchase credits to unlock full candidate details.
-              </p>
-            </div>
-            <Link href="/billing">
-              <Button size="sm" variant="secondary" className="bg-white text-[#6b93ce] hover:bg-gray-100">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Buy Credits
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
-      
-      {/* CTA Banner */}
-      <SearchCTABanner credits={credits} />
+      {/* Unified Search Banner */}
+      <UnifiedSearchBanner 
+        isSignedIn={isSignedIn}
+        isCompanyUser={isCompanyUser}
+        credits={credits}
+      />
       
       {/* Main Search Section */}
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Quick Access Panel for returning users */}
+        {showQuickAccess && (
+          <div className="mb-8">
+            <QuickAccessPanel 
+              onClose={() => setShowQuickAccess(false)}
+              isFirstVisit={new URLSearchParams(window.location.search).get('welcome') === 'true'}
+            />
+          </div>
+        )}
+        
         {/* Enhanced Search Bar */}
         <EnhancedSearchBar 
           value={searchQuery}
@@ -338,6 +308,9 @@ export default function SearchPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Demo User Switcher */}
+      <DemoUserSwitcher />
     </div>
   )
 }

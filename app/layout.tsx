@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
 import './globals.css'
 import './globals-print.css'
+import DemoUserSwitcher from '@/components/demo-user-switcher'
 
 export const metadata: Metadata = {
   title: 'Board Champions',
@@ -22,6 +23,7 @@ export default function RootLayout({
             {children}
           </div>
           <Toaster position="top-right" richColors />
+          <DemoUserSwitcher />
         </body>
       </html>
     </ClerkProvider>

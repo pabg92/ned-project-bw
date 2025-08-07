@@ -68,6 +68,19 @@ export default function SearchResults({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Fetch user's unlocked profiles on mount
+  useEffect(() => {
+    const fetchUnlockedProfiles = async () => {
+      if (user?.publicMetadata?.unlockedProfiles) {
+        setUnlockedProfiles(user.publicMetadata.unlockedProfiles as string[] || []);
+      }
+    };
+    
+    if (user) {
+      fetchUnlockedProfiles();
+    }
+  }, [user]);
+
   // Fetch profiles from API
   useEffect(() => {
     const fetchProfiles = async () => {
@@ -93,6 +106,12 @@ export default function SearchResults({
         if (filters.skills && filters.skills.length > 0) {
           params.append('skills', filters.skills.join(','))
         }
+        if (filters.role && filters.role.length > 0) {
+          params.append('role', filters.role.join(','))
+        }
+        if (filters.boardExperience && filters.boardExperience.length > 0) {
+          params.append('boardExperience', filters.boardExperience.join(','))
+        }
 
         // Use the main search endpoint that filters for active and completed profiles
         const response = await fetch(`/api/search/candidates?${params}`)
@@ -103,7 +122,9 @@ export default function SearchResults({
           const transformedProfiles = data.data.profiles.map((profile: any) => ({
             ...profile,
             fullName: profile.name || 'Unknown Executive',
-            initials: profile.name ? profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'XX',
+            initials: profile.isUnlocked && profile.name !== 'Executive Profile' 
+              ? profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase() 
+              : 'EX',
             coreSkills: (profile.skills || []).map((skill: string, index: number) => ({
               id: `skill-${index}`,
               name: skill
@@ -116,7 +137,9 @@ export default function SearchResults({
             tags: [],
             workExperiences: profile.workExperiences || [],
             education: profile.education || [],
-            isUnlocked: unlockedProfiles.includes(profile.id)
+            // Use the isUnlocked status from API, which checks the user's unlocked profiles
+            isUnlocked: profile.isUnlocked || false,
+            isAnonymized: profile.isAnonymized !== false // Default to true if not specified
           }))
           
           setProfiles(transformedProfiles)
@@ -166,7 +189,16 @@ export default function SearchResults({
       
       // Update the profile in the list
       setProfiles(prev => prev.map(p => 
-        p.id === id ? { ...p, isUnlocked: true } : p
+        p.id === id ? { 
+          ...p, 
+          isUnlocked: true,
+          isAnonymized: false,
+          // Update the name to show the real name if available
+          fullName: p.fullName !== 'Executive Profile' ? p.fullName : p.fullName,
+          initials: p.fullName !== 'Executive Profile' 
+            ? p.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+            : 'EX'
+        } : p
       ))
       
       // Show success message

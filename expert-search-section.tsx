@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ChevronRight, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { typography, buttonStyles, cn } from "@/lib/typography"
+import Link from "next/link"
 
 const specialisms = [
   "CFO",
@@ -15,19 +16,19 @@ const specialisms = [
 ]
 
 const sectors = [
-  "Arts & Creative Industries",
-  "Business & Professional Services",
-  "Charity",
-  "Consumer",
-  "Education",
-  "Energy & Renewables",
-  "Financial Services",
-  "Healthcare",
-  "Housing Association",
-  "Industrial & Manufacturing",
-  "NHS Trusts",
-  "Public Sector",
-  "Real Estate"
+  { display: "Arts & Creative Industries", value: "arts-creative-industries" },
+  { display: "Business & Professional Services", value: "business-professional-services" },
+  { display: "Charity", value: "charity" },
+  { display: "Consumer", value: "consumer" },
+  { display: "Education", value: "education" },
+  { display: "Energy & Renewables", value: "energy-renewables" },
+  { display: "Financial Services", value: "financial-services" },
+  { display: "Healthcare", value: "healthcare" },
+  { display: "Housing Association", value: "housing-association" },
+  { display: "Industrial & Manufacturing", value: "industrial-manufacturing" },
+  { display: "NHS Trusts", value: "nhs-trusts" },
+  { display: "Public Sector", value: "public-sector" },
+  { display: "Real Estate", value: "real-estate" }
 ]
 
 const organisationTypes = [
@@ -42,10 +43,10 @@ const organisationTypes = [
 ]
 
 const roles = [
-  "Chair",
-  "Non-Executive Director",
-  "Advisor",
-  "Trustee"
+  { display: "Chair", value: "chair" },
+  { display: "Non-Executive Director", value: "ned" },
+  { display: "Advisor", value: "advisor" },
+  { display: "Trustee", value: "trustee" }
 ]
 
 type TabType = "specialism" | "sector" | "organisation type" | "role"
@@ -58,15 +59,15 @@ export default function ExpertSearchSection() {
     const content = (() => {
       switch (activeTab) {
         case "specialism":
-          return specialisms
+          return specialisms.map(s => ({ display: s, value: s }))
         case "sector":
           return sectors
         case "organisation type":
-          return organisationTypes
+          return organisationTypes.map(o => ({ display: o, value: o }))
         case "role":
           return roles
         default:
-          return specialisms
+          return specialisms.map(s => ({ display: s, value: s }))
       }
     })()
     
@@ -75,7 +76,7 @@ export default function ExpertSearchSection() {
   }
 
   return (
-    <section className="pt-16 pb-16 bg-white relative overflow-hidden">
+    <section className="pt-10 pb-10 bg-white relative overflow-hidden">
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Enhanced Header */}
@@ -136,15 +137,36 @@ export default function ExpertSearchSection() {
 
         {/* Enhanced Filter Pills Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto mb-8 px-4">
-          {getActiveContent().map((item, index) => (
-            <Button
-              key={index}
-              className={cn("bg-gradient-to-r from-[#8595d5] to-[#9595e5] hover:from-[#7585c5] hover:to-[#8585d5] text-white", buttonStyles.size.base, typography.button.base, "rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group min-w-0 px-4 py-2.5")}
-            >
-              <span className="truncate">{item}</span>
-              <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
-            </Button>
-          ))}
+          {getActiveContent().map((item, index) => {
+            // Create the appropriate filter URL based on active tab
+            const filterUrl = (() => {
+              const baseUrl = "/search?"
+              switch (activeTab) {
+                case "specialism":
+                  return `${baseUrl}query=${encodeURIComponent(item.value)}`
+                case "sector":
+                  return `${baseUrl}sectors=${encodeURIComponent(item.value)}`
+                case "organisation type":
+                  // Map organization types to sectors or handle separately
+                  return `${baseUrl}sectors=${encodeURIComponent(item.value)}`
+                case "role":
+                  return `${baseUrl}role=${encodeURIComponent(item.value)}`
+                default:
+                  return "/search"
+              }
+            })()
+
+            return (
+              <Link key={index} href={filterUrl}>
+                <Button
+                  className={cn("bg-gradient-to-r from-[#8595d5] to-[#9595e5] hover:from-[#7585c5] hover:to-[#8585d5] text-white", buttonStyles.size.base, typography.button.base, "rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 group min-w-0 px-4 py-2.5 w-full")}
+                >
+                  <span className="truncate">{item.display}</span>
+                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0" />
+                </Button>
+              </Link>
+            )
+          })}
         </div>
         
         {/* View All Filters Button */}

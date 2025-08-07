@@ -24,6 +24,11 @@ Welcome to the BoardChampions documentation. This directory contains all technic
 - [Profile Enrichment System](./PROFILE_ENRICHMENT_SYSTEM.md) - Complete profile processing documentation
 - [Quick Reference: Profile Flow](./QUICK_REFERENCE_PROFILE_FLOW.md) - Quick reference for profile workflow
 
+### 💳 Credit & Company System
+- [Company Credit System](./company-credit-system.md) - Credit-based profile unlocking system
+- [Admin Company Management](./admin-company-management.md) - Managing companies and their credits
+- [MD Demo Guide](./MD_DEMO_GUIDE.md) - Step-by-step guide for demonstrating the platform
+
 ### 📋 Other Documentation
 - [Update Log](./UPDATE.md) - Recent updates and changes
 - [Merged Project README](./MERGED_PROJECT_README.md) - Combined project documentation

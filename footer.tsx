@@ -113,12 +113,12 @@ export default function Footer() {
             <ul className="space-y-5">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 mr-3 text-[#9eb4d8] flex-shrink-0 mt-0.5" />
-                <span className="text-gray-300 text-sm">123 Business Avenue, London, UK</span>
+                <span className="text-gray-300 text-sm">Barrington House, Leake Rd, Costock, Loughborough LE12 6XA</span>
               </li>
               <li className="flex items-center">
                 <Phone className="h-5 w-5 mr-3 text-[#9eb4d8] flex-shrink-0" />
-                <Link href="tel:+441234567890" className="text-gray-300 hover:text-white transition-colors">
-                  +44 (0) 123 456 7890
+                <Link href="tel:08453313031" className="text-gray-300 hover:text-white transition-colors">
+                  0845 331 3031
                 </Link>
               </li>
               <li className="flex items-center">

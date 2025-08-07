@@ -51,7 +51,7 @@ export default function TestimonialCarousel() {
   }
 
   return (
-    <section className="py-12 bg-gradient-to-r from-[#444444] to-[#525252] text-white">
+    <section className="py-8 bg-gradient-to-r from-[#444444] to-[#525252] text-white">
       <div className={spacing.container}>
         <h2 className={`${typography.h2.base} text-center mb-12 text-white`}>DON'T JUST TAKE OUR WORD FOR IT</h2>
 

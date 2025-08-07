@@ -1,191 +1,201 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ChevronRight, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { typography, buttonStyles, cn } from "@/lib/typography"
-
-const carouselSlides = [
-  {
-    id: 1,
-    type: "video",
-    video: "/CliveWoodward.mp4",
-    poster: "/placeholder.svg?height=600&width=1200",
-    title: "Sir Clive Woodward",
-    subtitle: "Board excellence delivered.",
-    description: "Strategic leadership for your most important decisions.",
-  },
-  {
-    id: 2,
-    type: "video",
-    video: "/Piers-Talk.mp4",
-    poster: "/placeholder.svg?height=600&width=1200",
-    title: "Piers Linney",
-    subtitle: "AI and Technology Expert",
-    description: "Transforming businesses through cutting-edge innovation and digital strategy.",
-  },
-  {
-    id: 3,
-    type: "video",
-    video: "/Matt-Talk.mp4",
-    poster: "/placeholder.svg?height=600&width=1200",
-    title: "Matthew Hayes",
-    subtitle: "Strategic Marketing Leader",
-    description: "Driving brand excellence through innovative marketing strategies and digital transformation.",
-  },
-]
+import { ChevronRight, ChevronDown } from "lucide-react"
+import Link from "next/link"
+import { useState } from "react"
+import Image from "next/image"
 
 export default function HeroSection() {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [selectedRole, setSelectedRole] = useState("")
+  const [selectedIndustry, setSelectedIndustry] = useState("")
 
-  useEffect(() => {
-    if (!isAutoPlaying) return
+  const roles = [
+    "Board Director",
+    "Non-Executive Director",
+    "Independent Director",
+    "Fractional CFO",
+    "Fractional CMO",
+    "Fractional COO",
+    "Advisory Board Member"
+  ]
 
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)
-    }, 8000)
-
-    return () => clearInterval(interval)
-  }, [isAutoPlaying])
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
-  }
-
-  const goToPrevious = () => {
-    setCurrentSlide((prev) => (prev - 1 + carouselSlides.length) % carouselSlides.length)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
-  }
-
-  const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % carouselSlides.length)
-    setIsAutoPlaying(false)
-    setTimeout(() => setIsAutoPlaying(true), 10000)
-  }
+  const industries = [
+    "Technology",
+    "Financial Services",
+    "Healthcare",
+    "Manufacturing",
+    "Retail & E-commerce",
+    "Energy & Utilities",
+    "Real Estate",
+    "Professional Services"
+  ]
 
   return (
-    <section className="relative h-[50vh] sm:h-[55vh] md:h-[60vh] min-h-[350px] max-h-[550px] overflow-hidden">
-      {/* Carousel Background */}
-      <div className="absolute inset-0">
-        {carouselSlides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
-            }`}
-          >
-            {slide.type === "video" ? (
-              <>
-                {/* Blurred Background Video */}
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-70"
-                  key={`video-bg-${slide.id}`}
-                >
-                  <source src={slide.video} type="video/mp4" />
-                </video>
-                
-                {/* Main Video - No Distortion */}
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  poster={slide.poster}
-                  className="absolute inset-0 w-full h-full object-contain"
-                  key={`video-${slide.id}`}
-                >
-                  <source src={slide.video} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-                
-                {/* Enhanced dark overlay for better readability */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              </>
-            ) : (
-              /* Image Background */
-              <div
-                className="w-full h-full bg-cover bg-center bg-no-repeat"
-                style={{
-                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${slide.image}')`,
-                }}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-
-
-      {/* Content */}
-      <div className="relative z-10 flex items-center h-full">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex justify-start items-center h-full">
-            {/* Text box positioned on the left with proper spacing to avoid arrow overlap */}
-            <div className="bg-black/60 backdrop-blur-sm p-6 sm:p-8 md:p-10 lg:p-12 rounded-lg w-full max-w-md lg:max-w-lg shadow-2xl border border-white/20 ml-12 sm:ml-16 lg:ml-20">
-              <h1 className={`${typography.h1.compact} mb-3 text-white uppercase tracking-wide leading-tight`}>
-                {carouselSlides[currentSlide]?.title}
+    <section 
+      className="relative overflow-hidden"
+      style={{ background: 'linear-gradient(to bottom, #f9fafb, #ffffff)' }}
+    >
+      <div className="relative z-10 py-12 sm:py-16 lg:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-[55fr_45fr] gap-8 lg:gap-12 items-center">
+            
+            {/* Left Column: Value Proposition & Action */}
+            <div className="text-left">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bebas-neue tracking-wide mb-6"
+                  style={{ color: '#374151' }}>
+                AWARD-WINNING EXPERT &<br />
+                BOARD-LEVEL APPOINTMENTS
               </h1>
-              <h2 className={`${typography.h2.compact} mb-4 text-white/90 leading-tight`}>
-                {carouselSlides[currentSlide]?.subtitle}
-              </h2>
-              <p className={`${typography.body.large} mb-6 sm:mb-8 text-white/80 leading-relaxed`}>
-                {carouselSlides[currentSlide]?.description}
+              
+              <p className="text-lg sm:text-xl mb-8 leading-relaxed"
+                 style={{ color: '#374151' }}>
+                We connect ambitious businesses with the world's most transformative board-level talent, 
+                from Non-Executive Directors to fractional leaders.
               </p>
 
-              {/* Modernized CTA Button */}
-              <Button className={cn(buttonStyles.primary, buttonStyles.size.large, typography.button.large, "inline-flex items-center gap-3 group whitespace-nowrap")}>
-                SEARCH NOW
-                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </Button>
+              {/* Search Functionality */}
+              <div className="space-y-4 mb-6">
+                {/* Role Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => document.getElementById('role-dropdown')?.classList.toggle('hidden')}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-left flex items-center justify-between hover:border-gray-400 transition-colors"
+                  >
+                    <span className="text-gray-700">
+                      {selectedRole || "Select Your Role"}
+                    </span>
+                    <ChevronDown className="h-5 w-5 text-gray-500" />
+                  </button>
+                  <div id="role-dropdown" className="hidden absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    {roles.map((role) => (
+                      <button
+                        key={role}
+                        onClick={() => {
+                          setSelectedRole(role)
+                          document.getElementById('role-dropdown')?.classList.add('hidden')
+                        }}
+                        className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-700 first:rounded-t-lg last:rounded-b-lg"
+                      >
+                        {role}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Industry Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => document.getElementById('industry-dropdown')?.classList.toggle('hidden')}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-left flex items-center justify-between hover:border-gray-400 transition-colors"
+                  >
+                    <span className="text-gray-700">
+                      {selectedIndustry || "Select Your Industry"}
+                    </span>
+                    <ChevronDown className="h-5 w-5 text-gray-500" />
+                  </button>
+                  <div id="industry-dropdown" className="hidden absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+                    {industries.map((industry) => (
+                      <button
+                        key={industry}
+                        onClick={() => {
+                          setSelectedIndustry(industry)
+                          document.getElementById('industry-dropdown')?.classList.add('hidden')
+                        }}
+                        className="w-full px-4 py-2 text-left hover:bg-gray-50 text-gray-700 first:rounded-t-lg last:rounded-b-lg"
+                      >
+                        {industry}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <Link href={`/search?role=${encodeURIComponent(selectedRole)}&industry=${encodeURIComponent(selectedIndustry)}`}>
+                <Button 
+                  size="lg"
+                  className="w-full sm:w-auto px-8 py-6 text-base font-semibold text-white group transition-all"
+                  style={{ 
+                    background: 'linear-gradient(to right, #7394c7, #8595d5)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(to right, #6b93ce, #5a82bd)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(to right, #7394c7, #8595d5)'
+                  }}
+                >
+                  Find an Expert
+                  <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Right Column: Awards & Accreditations */}
+            <div 
+              className="relative rounded-2xl p-8 lg:p-10"
+              style={{ background: 'linear-gradient(to bottom, #f3f4f6, #f9fafb)' }}
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-600">
+                  Our Awards & Accreditations
+                </h3>
+              </div>
+
+              {/* Award Logos in Trophy Case Style */}
+              <div className="relative">
+                {/* The Sunday Times 100 - Top Center */}
+                <div className="flex justify-center mb-6">
+                  <div className="bg-white rounded-lg shadow-md p-6 transform hover:scale-105 transition-transform">
+                    <div className="text-center">
+                      <div className="mb-2">
+                        <div className="text-2xl font-bold text-gray-800">THE SUNDAY TIMES</div>
+                        <div className="text-5xl font-black text-blue-600">100</div>
+                      </div>
+                      <p className="text-xs text-gray-600 font-medium">FASTEST GROWING COMPANIES</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Row - Side by Side */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* 1000 Companies to Inspire Britain */}
+                  <div className="bg-white rounded-lg shadow-md p-4 transform hover:scale-105 transition-transform">
+                    <div className="text-center">
+                      <div className="text-3xl font-black text-gray-800 mb-1">1000</div>
+                      <p className="text-xs text-gray-600 font-medium leading-tight">
+                        COMPANIES TO<br />
+                        INSPIRE BRITAIN
+                      </p>
+                      <p className="text-xs text-blue-600 font-semibold mt-1">London Stock Exchange</p>
+                    </div>
+                  </div>
+
+                  {/* Accelerate 250 */}
+                  <div className="bg-white rounded-lg shadow-md p-4 transform hover:scale-105 transition-transform">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-blue-600 mb-1">ACCELERATE</div>
+                      <div className="text-3xl font-black text-gray-800">250</div>
+                      <p className="text-xs text-gray-600 font-medium">TOP UK BUSINESSES</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Badges */}
+                <div className="mt-6 flex justify-center space-x-4">
+                  <div className="px-3 py-1 bg-blue-50 rounded-full">
+                    <span className="text-xs font-semibold text-blue-700">FTSE NETWORK</span>
+                  </div>
+                  <div className="px-3 py-1 bg-green-50 rounded-full">
+                    <span className="text-xs font-semibold text-green-700">VERIFIED EXPERTS</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Modern Carousel Navigation */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="flex space-x-3 bg-black/30 backdrop-blur-sm px-4 py-2 rounded-full">
-          {carouselSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`transition-all duration-300 ${
-                index === currentSlide 
-                  ? "w-8 h-2 bg-white rounded-full" 
-                  : "w-2 h-2 bg-white/50 hover:bg-white/70 rounded-full"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Modern Arrow Controls */}
-      <button
-        onClick={goToPrevious}
-        className="absolute left-4 sm:left-8 top-1/2 transform -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-xl border border-white/10"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-      </button>
-
-      <button
-        onClick={goToNext}
-        className="absolute right-4 sm:right-8 top-1/2 transform -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-xl border border-white/10"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
-      </button>
     </section>
   )
 }

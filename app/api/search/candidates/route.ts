@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/server-client';
 import { z } from 'zod';
 import { createErrorResponse, createSuccessResponse } from '@/lib/validations/middleware';
+import { auth } from '@clerk/nextjs/server';
+import { createClerkClient } from '@clerk/backend';
 
 // Validation schema for search parameters
 const searchCandidatesSchema = z.object({
@@ -47,6 +49,22 @@ export async function GET(request: NextRequest) {
 
     // Validate parameters
     const validatedParams = searchCandidatesSchema.parse(params);
+
+    // Get current user's unlocked profiles
+    let unlockedProfiles: string[] = [];
+    const { userId } = await auth();
+    
+    if (userId) {
+      try {
+        const clerkClient = createClerkClient({
+          secretKey: process.env.CLERK_SECRET_KEY!
+        });
+        const user = await clerkClient.users.getUser(userId);
+        unlockedProfiles = (user.publicMetadata?.unlockedProfiles as string[]) || [];
+      } catch (error) {
+        console.error('Error fetching user unlocked profiles:', error);
+      }
+    }
 
     // Get Supabase admin client
     const supabaseAdmin = getSupabaseAdmin();
@@ -165,7 +183,7 @@ export async function GET(request: NextRequest) {
       query = query.lte('salary_max', validatedParams.salaryMax);
     }
 
-    // Apply sorting
+    // Apply initial sorting (may be overridden by relevance sorting later)
     switch (validatedParams.sortBy) {
       case 'experience':
         query = query.order('experience', { ascending: false });
@@ -197,11 +215,18 @@ export async function GET(request: NextRequest) {
       .filter(candidate => candidate.is_active && candidate.profile_completed)
       .map(candidate => {
       try {
+        // Check if this profile is unlocked by the current user
+        const isUnlocked = unlockedProfiles.includes(candidate.id);
+        
         // Get user data
         const user = candidate.users || {};
         const firstName = user.first_name || '';
         const lastName = user.last_name || '';
-        const fullName = `${firstName} ${lastName}`.trim() || 'Executive Profile';
+        
+        // Only show real name if profile is unlocked
+        const fullName = isUnlocked 
+          ? `${firstName} ${lastName}`.trim() || 'Executive Profile'
+          : 'Executive Profile';
 
         // Extract tags by type
         const tags = candidate.candidate_tags?.map(ct => ct.tags).filter(Boolean) || [];
@@ -235,7 +260,8 @@ export async function GET(request: NextRequest) {
           roles: roles, // Added roles
           bio: candidate.summary || 'Profile summary not available.',
           imageUrl: null,
-          isUnlocked: false,
+          isUnlocked: isUnlocked,
+          isAnonymized: !isUnlocked, // In search results, treat all profiles as anonymized unless unlocked
           boardPositions: boardPositions,
           boardExperience: boardExperience,
           availability: candidate.availability || 'Available',
@@ -264,33 +290,114 @@ export async function GET(request: NextRequest) {
     // Post-process filtering for query (including user names), sectors and skills
     let filteredProfiles = profiles;
     
-    // Additional filtering for user names if query is provided
+    // Additional filtering for user names if query is provided with relevance scoring
     if (validatedParams.query) {
       const queryLower = validatedParams.query.toLowerCase();
-      filteredProfiles = filteredProfiles.filter(profile => {
-        // Check if name includes the search query
-        return profile.name.toLowerCase().includes(queryLower) ||
-               profile.title.toLowerCase().includes(queryLower) ||
-               profile.location.toLowerCase().includes(queryLower) ||
-               profile.bio.toLowerCase().includes(queryLower);
-      });
+      
+      // Check if this is an OR query (contains pipe character)
+      const isOrQuery = queryLower.includes('|');
+      let queryTerms: string[];
+      
+      if (isOrQuery) {
+        // Split by pipe for OR queries
+        queryTerms = queryLower.split('|').map(term => term.trim()).filter(Boolean);
+      } else {
+        // Split by whitespace for AND queries (default)
+        queryTerms = queryLower.split(/\s+/).filter(Boolean);
+      }
+      
+      // Score and filter profiles
+      const scoredProfiles = filteredProfiles.map(profile => {
+        let score = 0;
+        
+        // Create searchable text from all relevant fields
+        const titleAndName = `${profile.name} ${profile.title}`.toLowerCase();
+        const bio = profile.bio.toLowerCase();
+        const skills = profile.skills.join(' ').toLowerCase();
+        const sectors = profile.sectors.join(' ').toLowerCase();
+        const workExp = (profile.workExperiences || [])
+          .map(exp => `${exp.company_name} ${exp.position}`.toLowerCase())
+          .join(' ');
+        
+        // Check if query terms match based on AND/OR logic
+        const termsMatch = isOrQuery 
+          ? queryTerms.some(term => { // OR logic - at least one term must match
+              const termFound = checkTermInProfile(term);
+              if (termFound) score += termFound;
+              return termFound > 0;
+            })
+          : queryTerms.every(term => { // AND logic - all terms must match
+              const termFound = checkTermInProfile(term);
+              if (termFound) score += termFound;
+              return termFound > 0;
+            });
+        
+        // Helper function to check if a term exists in profile and return score
+        function checkTermInProfile(term: string): number {
+          let termScore = 0;
+          
+          if (titleAndName.includes(term)) {
+            termScore = 10; // Title/name matches are most important
+            if (profile.title.toLowerCase() === term) termScore += 5; // Exact title match bonus
+            return termScore;
+          }
+          if (bio.includes(term)) {
+            return 5;
+          }
+          if (skills.includes(term)) {
+            return 3;
+          }
+          if (sectors.includes(term)) {
+            return 3;
+          }
+          if (workExp.includes(term)) {
+            return 2;
+          }
+          // Also check other fields
+          const allText = [
+            profile.location,
+            ...profile.roles,
+            ...(profile.education || []).map(edu => `${edu.institution} ${edu.field_of_study} ${edu.degree}`)
+          ].join(' ').toLowerCase();
+          
+          if (allText.includes(term)) {
+            return 1;
+          }
+          
+          return 0;
+        }
+        
+        return termsMatch ? { ...profile, relevanceScore: score } : null;
+      }).filter(Boolean);
+      
+      // Sort by relevance if using relevance sorting
+      if (validatedParams.sortBy === 'relevance') {
+        scoredProfiles.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+      }
+      
+      filteredProfiles = scoredProfiles;
     }
     
     if (validatedParams.sectors && validatedParams.sectors.length > 0) {
       filteredProfiles = filteredProfiles.filter(profile => {
         // Check if profile has any of the requested sectors
-        const profileSectors = profile.sectors.map(s => s.toLowerCase());
-        return validatedParams.sectors.some(sector => 
-          profileSectors.some(ps => ps.includes(sector.toLowerCase()))
-        );
+        const profileSectors = profile.sectors.map(s => s.toLowerCase().replace(/\s+/g, '-'));
+        return validatedParams.sectors.some(sector => {
+          const sectorLower = sector.toLowerCase();
+          return profileSectors.some(ps => {
+            // Check for exact match or if the profile sector contains the search sector
+            return ps === sectorLower || ps.includes(sectorLower);
+          });
+        });
       });
     }
 
     if (validatedParams.skills && validatedParams.skills.length > 0) {
       filteredProfiles = filteredProfiles.filter(profile => {
+        if (!profile) return false;
         // Check if profile has any of the requested skills
         const profileSkills = profile.skills.map(s => s.toLowerCase());
-        return validatedParams.skills.some(skill => 
+        return validatedParams.skills!.some(skill => 
           profileSkills.some(ps => ps.includes(skill.toLowerCase()))
         );
       });

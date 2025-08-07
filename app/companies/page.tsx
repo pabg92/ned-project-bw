@@ -1,14 +1,24 @@
 "use client"
 
+import { useEffect } from 'react'
+import Script from 'next/script'
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Search, CreditCard, Users, Shield, Zap, ArrowRight, Building2, ChevronDown } from "lucide-react"
+import { CheckCircle, Search, CreditCard, Users, Shield, Zap, ArrowRight, Building2, ChevronDown, X } from "lucide-react"
 import Link from "next/link"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import CombinedSignupForm from "@/components/auth/combined-signup-form"
 
 /**
  * Companies Landing Page
@@ -30,6 +40,7 @@ export default function CompaniesPage() {
   const router = useRouter()
   const userRole = user?.publicMetadata?.role as string
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
+  const [showSignupModal, setShowSignupModal] = useState(false)
 
   // Log user state for debugging
   React.useEffect(() => {
@@ -46,19 +57,69 @@ export default function CompaniesPage() {
   const handleGetStarted = () => {
     if (isSignedIn && userRole === 'company') {
       router.push('/search')
-    } else if (isSignedIn) {
-      // Signed in but not a company user
-      router.push('/sign-up?role=company')
     } else {
-      // Not signed in
-      router.push('/sign-up?role=company')
+      // Show the combined signup modal
+      setShowSignupModal(true)
     }
   }
 
+  const handleBrowseFirst = () => {
+    router.push('/search?guest=true')
+  }
+
+  // Schema.org structured data
+  const schemaData = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    name: 'Board Champions',
+    description: 'Executive search and board member recruitment platform',
+    url: 'https://boardchampions.com',
+    logo: 'https://boardchampions.com/logo.png',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '200',
+    },
+    offers: [
+      {
+        '@type': 'Offer',
+        name: 'Starter Package',
+        price: '25',
+        priceCurrency: 'GBP',
+        description: '5 profile unlocks',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Professional Package',
+        price: '45',
+        priceCurrency: 'GBP',
+        description: '10 profile unlocks',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Enterprise Package',
+        price: '80',
+        priceCurrency: 'GBP',
+        description: '20 profile unlocks',
+      },
+    ],
+    areaServed: {
+      '@type': 'Country',
+      name: 'United Kingdom',
+    },
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Hero Section - Using navbar gradient colors */}
-      <section className="relative bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white py-16 px-4">
+    <>
+      <Script
+        id="schema-org"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        strategy="afterInteractive"
+      />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        {/* Hero Section - Using navbar gradient colors */}
+        <section className="relative bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white py-16 px-4">
         <div className="max-w-6xl mx-auto text-center">
           {/* Board Champions Logo */}
           <div className="mb-8">
@@ -442,6 +503,30 @@ export default function CompaniesPage() {
           </div>
         </div>
       </section>
-    </div>
+
+      {/* Signup Modal */}
+      <Dialog open={showSignupModal} onOpenChange={setShowSignupModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="sr-only">Sign up for Board Champions</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSignupModal(false)}
+                className="absolute right-4 top-4"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          <CombinedSignupForm 
+            onComplete={() => setShowSignupModal(false)}
+            onBrowseFirst={handleBrowseFirst}
+          />
+        </DialogContent>
+      </Dialog>
+      </div>
+    </>
   )
 }

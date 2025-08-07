@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronDown, Menu, X, CreditCard, Search, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useUser, UserButton } from "@clerk/nextjs"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 /**
  * Main Navigation Bar
@@ -21,12 +21,22 @@ import { useRouter } from "next/navigation"
 export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { isSignedIn, user } = useUser()
+  const [mounted, setMounted] = useState(false)
+  const { isSignedIn, user, isLoaded } = useUser()
   const router = useRouter()
+  const pathname = usePathname()
   
   // Get user role and credits from metadata
   const userRole = user?.publicMetadata?.role as string
   const userCredits = (user?.publicMetadata?.credits as number) || 0
+  
+  // Check if we're on pages where company nav should be hidden
+  const shouldHideCompanyNav = pathname === '/' || pathname === '/signup'
+  
+  // Ensure component is mounted before rendering to prevent hydration issues
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const navigationItems = [
     { name: "BOARD", hasDropdown: true },
@@ -38,9 +48,12 @@ export default function Navbar() {
     { name: "CONTACT US", hasDropdown: true },
   ]
 
+  // Don't render auth-dependent content until mounted to prevent flicker
+  const showAuthContent = mounted && isLoaded
+
   return (
     <>
-      <nav className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white shadow-lg overflow-hidden">
+      <nav className="text-white shadow-lg overflow-hidden" style={{ background: 'linear-gradient(to bottom, #4a4a4a, #5a5a5a)' }} suppressHydrationWarning>
         <div className="w-full max-w-[100vw] overflow-hidden">
           <div className="px-6 lg:px-8 xl:px-12 2xl:px-16">
             <div className="flex items-center h-20 gap-6 max-w-[1920px] mx-auto">
@@ -58,7 +71,7 @@ export default function Navbar() {
             </div>
 
             {/* Navigation Menu - Desktop Only */}
-            <div className="hidden 2xl:flex items-center flex-1 justify-between min-w-0">
+            <div className="hidden xl:flex items-center flex-1 justify-between min-w-0">
               <div className="flex items-center justify-center flex-1 space-x-1 xl:space-x-2 2xl:space-x-3 min-w-0">
                 {navigationItems.map((item) => (
                   <div key={item.name} className="relative">
@@ -94,46 +107,18 @@ export default function Navbar() {
               </div>
 
               {/* Right Side - Dynamic based on auth state */}
-              <div className="flex items-center space-x-6 ml-auto flex-shrink-0">
-                {/* Social Media Icons - Desktop Only */}
-                <div className="flex items-center space-x-3 flex-shrink-0">
-                  <Link
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#6b93ce] transition-all duration-300 group flex-shrink-0"
-                  >
-                    <svg className="w-5 h-5 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                    </svg>
-                  </Link>
-                  <Link
-                    href="https://x.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#6b93ce] transition-all duration-300 group flex-shrink-0"
-                  >
-                    <svg className="w-5 h-5 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                  </Link>
-                  <Link
-                    href="https://youtube.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#6b93ce] transition-all duration-300 group flex-shrink-0"
-                  >
-                    <svg className="w-5 h-5 text-white flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                    </svg>
-                  </Link>
-                </div>
-                
+              <div className="flex items-center space-x-4 ml-auto flex-shrink-0">
                 {/* Auth buttons with consistent spacing */}
-                {isSignedIn ? (
+                {!showAuthContent ? (
+                  // Show placeholder while loading to prevent flicker
+                  <div className="flex items-center space-x-4">
+                    <div className="w-32 h-10 bg-white/10 rounded-md animate-pulse"></div>
+                    <div className="w-24 h-10 bg-white/10 rounded-md animate-pulse"></div>
+                  </div>
+                ) : isSignedIn ? (
                   <>
-                    {/* Company User: Show Search and Credits */}
-                    {userRole === 'company' && (
+                    {/* Company User: Show Search and Credits (not on homepage or signup) */}
+                    {userRole === 'company' && !shouldHideCompanyNav && (
                       <>
                         <Link href="/search">
                           <Button 
@@ -208,10 +193,47 @@ export default function Navbar() {
                   </>
                 )}
               </div>
+              
+              {/* Divider */}
+              <div className="h-8 w-px bg-white/20 mx-3" />
+              
+              {/* Social Media Icons - Desktop Only */}
+              <div className="flex items-center space-x-2 flex-shrink-0">
+                  <Link
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#6b93ce] transition-all duration-300 group"
+                  >
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    </svg>
+                  </Link>
+                  <Link
+                    href="https://x.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#6b93ce] transition-all duration-300 group"
+                  >
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </Link>
+                  <Link
+                    href="https://youtube.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center hover:bg-[#6b93ce] transition-all duration-300 group"
+                  >
+                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                  </Link>
+                </div>
             </div>
 
             {/* Mobile menu button - Accessible 48x48px touch target */}
-            <div className="2xl:hidden flex-shrink-0 ml-auto">
+            <div className="xl:hidden flex-shrink-0 ml-auto">
               <Button 
                 variant="ghost" 
                 className="text-white hover:bg-white/20 p-3 rounded-lg transition-all duration-300 min-w-[48px] min-h-[48px]" 
@@ -233,7 +255,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 2xl:hidden">
+        <div className="fixed inset-0 z-50 xl:hidden">
           {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black/50" 
@@ -241,7 +263,7 @@ export default function Navbar() {
           />
           
           {/* Menu Panel */}
-          <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-gradient-to-b from-[#4a4a4a] to-[#5a5a5a] shadow-xl">
+          <div className="fixed right-0 top-0 h-full w-full max-w-sm shadow-xl" style={{ background: 'linear-gradient(to bottom, #4a4a4a, #5a5a5a)' }}>
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <Image
@@ -284,9 +306,15 @@ export default function Navbar() {
               
               {/* Auth-specific mobile menu items */}
               <div className="border-t border-white/10 mt-6 pt-6">
-                {isSignedIn ? (
+                {!showAuthContent ? (
+                  // Show loading state
+                  <div className="space-y-3">
+                    <div className="w-full h-12 bg-white/10 rounded-md animate-pulse"></div>
+                    <div className="w-full h-12 bg-white/10 rounded-md animate-pulse"></div>
+                  </div>
+                ) : isSignedIn ? (
                   <>
-                    {userRole === 'company' && (
+                    {userRole === 'company' && !shouldHideCompanyNav && (
                       <>
                         <Link href="/search" onClick={() => setIsMobileMenuOpen(false)}>
                           <Button className="w-full text-left text-white hover:bg-white/10 px-4 py-3 justify-start gap-3">

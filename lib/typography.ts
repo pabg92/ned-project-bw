@@ -49,11 +49,11 @@ export const typography = {
 
 // Consistent spacing system
 export const spacing = {
-  // Section padding - consistent 60px (py-16) top/bottom
+  // Section padding - reduced by 35% for more compact layout
   section: {
-    base: "py-16",
-    compact: "py-12",
-    large: "py-20"
+    base: "py-10",     // 40px total (was 64px with py-16)
+    compact: "py-8",   // 32px total (was 48px with py-12)
+    large: "py-[52px]" // 52px total (was 80px with py-20)
   },
   // Container padding
   container: "max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8",
