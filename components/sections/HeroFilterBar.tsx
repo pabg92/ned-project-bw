@@ -4,9 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSearchFilters } from "@/lib/search/useSearchFilters";
 import { ROLE_TYPES, ORG_TYPES, SECTORS, SPECIALISMS } from "@/lib/search/filter-data";
-import { RolePopover } from "./filters/RolePopover";
-import { OrgTypePopover } from "./filters/OrgTypePopover";
-import { ComboMulti } from "./filters/ComboMulti";
+import { SimpleDropdown } from "./filters/SimpleDropdown";
 import { ActiveChips } from "./filters/ActiveChips";
 import { cn } from "@/lib/utils";
 
@@ -27,41 +25,49 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
       {/* Filter Controls */}
       <div id="hero-filters" className="rounded-lg border border-[var(--border)] p-4 md:p-5 bg-white">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Role Type - Multi-select checkboxes */}
-          <RolePopover
+          {/* Role Type - Multi-select */}
+          <SimpleDropdown
+            label="Role"
             value={filters.roles}
-            onChange={(roles) => update({ roles })}
-            options={ROLE_TYPES}
+            options={ROLE_TYPES.map(r => ({ value: r.slug, label: r.label }))}
+            onChange={(roles) => update({ roles: roles as string[] })}
+            multiSelect={true}
+            searchPlaceholder="Search roles..."
+            emptyText="No roles found."
             className="min-w-[140px]"
           />
           
-          {/* Sector - Multi-select combobox with search */}
-          <ComboMulti
+          {/* Sector - Multi-select with search */}
+          <SimpleDropdown
             label="Sector"
             value={filters.sectors}
             options={SECTORS.map(s => ({ value: s.slug, label: s.label }))}
-            onChange={(sectors) => update({ sectors })}
-            placeholder="Select sectors..."
+            onChange={(sectors) => update({ sectors: sectors as string[] })}
+            multiSelect={true}
             searchPlaceholder="Search sectors..."
             emptyText="No sectors found."
             className="min-w-[140px]"
           />
           
-          {/* Organisation Type - Single-select radio */}
-          <OrgTypePopover
+          {/* Organisation Type - Single-select */}
+          <SimpleDropdown
+            label="Organisation Type"
             value={filters.orgType || undefined}
-            onChange={(orgType) => update({ orgType: orgType || null })}
-            options={ORG_TYPES}
+            options={ORG_TYPES.map(o => ({ value: o.slug, label: o.label }))}
+            onChange={(orgType) => update({ orgType: (orgType as string) || null })}
+            multiSelect={false}
+            searchPlaceholder="Search organisation types..."
+            emptyText="No organisation types found."
             className="min-w-[140px]"
           />
           
-          {/* Specialism - Multi-select combobox */}
-          <ComboMulti
+          {/* Specialism - Multi-select with search */}
+          <SimpleDropdown
             label="Specialism"
             value={filters.specialisms}
             options={SPECIALISMS.map(s => ({ value: s.slug, label: s.label }))}
-            onChange={(specialisms) => update({ specialisms })}
-            placeholder="Select specialisms..."
+            onChange={(specialisms) => update({ specialisms: specialisms as string[] })}
+            multiSelect={true}
             searchPlaceholder="Search specialisms..."
             emptyText="No specialisms found."
             className="min-w-[140px]"
