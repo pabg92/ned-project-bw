@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Facebook, Twitter, Linkedin, Youtube, Mail, Phone, MapPin } from "lucide-react"
+import { buildSignupUrl } from "@/lib/search/signup"
 
 export default function Footer() {
   return (
@@ -102,6 +103,14 @@ export default function Footer() {
               <li>
                 <Link href="#" className="text-[#E5E7EB] hover:text-white transition-all duration-300 hover:translate-x-2 inline-block text-sm">
                   FAQ
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href={buildSignupUrl({ roles: [], sectors: [], specialisms: [], orgType: null }, "footer")}
+                  className="text-[#E5E7EB] hover:text-white transition-all duration-300 hover:translate-x-2 inline-block text-sm"
+                >
+                  Join as Expert
                 </Link>
               </li>
             </ul>

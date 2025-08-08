@@ -32,17 +32,17 @@ export default function TestimonialCarousel() {
 
   return (
     <Section variant="subtle">
-      <div className={spacing.container}>
-        <h2 className="fluid-h2 font-display text-[var(--ink)] text-center mb-12">DRIVING TANGIBLE RESULTS FOR OUR PARTNERS</h2>
+      <div className="container container-narrow">
+        <h2 className="fluid-h2 font-display text-[var(--ink)] text-center mb-10">DRIVING TANGIBLE RESULTS</h2>
 
         {/* 2 Cards per viewport */}
-        <div className="relative max-w-6xl mx-auto">
+        <div className="relative">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Show 2 testimonials at a time */}
             {testimonials.slice(currentSlide, currentSlide + 2).concat(
               testimonials.slice(0, Math.max(0, (currentSlide + 2) - testimonials.length))
-            ).map((testimonial) => (
-              <div key={testimonial.id} className="bg-white rounded-card border border-[var(--border)] p-8 shadow-card max-w-[560px] mx-auto">
+            ).map((testimonial, index) => (
+              <div key={`${testimonial.id}-${index}`} className="bg-white rounded-card p-6 shadow-sm hover:shadow-md transition-shadow duration-200 max-w-[560px] mx-auto">
                 {/* Company Logo */}
                 <div className="mb-6">
                   <Image
@@ -54,18 +54,15 @@ export default function TestimonialCarousel() {
                   />
                 </div>
                 
-                {/* Quote - 18px text for better readability */}
-                <p className="text-lg text-ink mb-6 leading-relaxed">
+                {/* Quote - Compact text */}
+                <p className="text-base text-[var(--ink)] mb-4 leading-relaxed">
                   "{testimonial.text}"
                 </p>
                 
-                {/* Author */}
-                <div className="border-t border-[var(--border)] pt-4">
-                  <p className="font-semibold text-[var(--ink)]">
-                    {testimonial.author}
-                  </p>
-                  <p className="text-[var(--muted)] text-sm">
-                    {testimonial.company}
+                {/* Author - Simplified */}
+                <div className="mt-3 pt-2">
+                  <p className="text-sm font-semibold text-[var(--ink)]">
+                    {testimonial.author}, {testimonial.company}
                   </p>
                 </div>
               </div>

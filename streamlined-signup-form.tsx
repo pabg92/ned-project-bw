@@ -178,11 +178,30 @@ const CURRENCY_OPTIONS = [
   { value: "EUR", label: "€ EUR" },
 ]
 
-export default function StreamlinedSignUpForm() {
+interface StreamlinedSignUpFormProps {
+  prefillData?: {
+    roles: string[]
+    sectors: string[]
+    specialisms: string[]
+    orgType: string | null
+  }
+}
+
+export default function StreamlinedSignUpForm({ prefillData }: StreamlinedSignUpFormProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  
+  // Map prefill data to form fields
+  const mapRoleToHeadline = (roles: string[]): string => {
+    if (roles.includes('ned')) return 'ned'
+    if (roles.includes('chair')) return 'chair'
+    if (roles.includes('advisor')) return 'advisor'
+    if (roles.includes('trustee')) return 'trustee'
+    if (roles.includes('senior-independent')) return 'senior-independent'
+    return ''
+  }
   
   const [formData, setFormData] = useState<StreamlinedFormData>({
     firstName: "",
@@ -191,10 +210,10 @@ export default function StreamlinedSignUpForm() {
     phone: "",
     currentRole: "",
     company: "",
-    headlineRole: "",
-    specialistArea: "",
-    sectors: [],
-    skills: [],
+    headlineRole: prefillData ? mapRoleToHeadline(prefillData.roles) : "",
+    specialistArea: prefillData?.specialisms[0] || "",
+    sectors: prefillData?.sectors || [],
+    skills: prefillData?.specialisms || [],
     yearsOfExperience: "",
     experienceSummary: "",
     boardExperience: [],

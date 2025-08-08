@@ -1,15 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { controlClass, caretClass } from "@/components/ui/Control";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -60,56 +61,60 @@ export function ComboMulti({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
           role="combobox"
           aria-expanded={open}
           aria-label={`Select ${label}`}
-          className={cn(
-            "h-12 w-full justify-between bg-white border-[var(--border)] text-[var(--ink)] hover:border-[var(--cta-end)] transition-colors",
-            className
-          )}
+          className={cn(controlClass, "w-full justify-between flex items-center", className)}
+          data-state={open ? "open" : "closed"}
         >
           <span className="text-sm truncate">
             {value.length > 0 ? (
               <span className="flex items-center gap-1">
-                <span>{label}</span>
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                  {value.length}
-                </Badge>
+                <span className="text-[var(--ink)]">{label}</span>
+                <span className="ml-1 text-xs text-[var(--accent-strong)]">({value.length})</span>
               </span>
             ) : (
-              <span className="text-[var(--muted)]">{label}</span>
+              <span className="text-[var(--control-placeholder)]">{label}</span>
             )}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+          <ChevronDown className={caretClass} data-state={open ? "open" : "closed"} />
+        </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent 
+        className="w-[var(--radix-popover-trigger-width)] bg-white border border-[var(--control-border)] rounded-lg shadow-[var(--elevation-menu)] p-0" 
+        align="start"
+        sideOffset={4}
+      >
         <Command>
           <CommandInput 
             placeholder={searchPlaceholder}
-            className="h-9"
+            className="h-10 border-b border-[var(--control-border)]"
           />
-          <CommandEmpty>{emptyText}</CommandEmpty>
-          <CommandGroup className="max-h-[300px] overflow-auto">
-            {options.map((option) => (
-              <CommandItem
-                key={option.value}
-                value={option.label}
-                onSelect={() => handleSelect(option.value)}
-                className="cursor-pointer"
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value.includes(option.value) ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <span className="flex-1">{option.label}</span>
-              </CommandItem>
-            ))}
+          <CommandEmpty className="px-3 py-2 text-[var(--muted)]">{emptyText}</CommandEmpty>
+          <CommandList className="max-h-[280px] overflow-auto">
+          <CommandGroup>
+            {options.map((option) => {
+              const isSelected = value.includes(option.value);
+              return (
+                <CommandItem
+                  key={option.value}
+                  value={option.label}
+                  onSelect={() => handleSelect(option.value)}
+                  className="h-9 px-3 text-[14px] cursor-pointer data-[selected=true]:bg-[var(--accent-soft)] data-[highlighted=true]:bg-[var(--accent-soft)] flex items-center"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 size-4 text-[var(--accent-strong)] flex-shrink-0",
+                      isSelected ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span className="flex-1 text-left">{option.label}</span>
+                </CommandItem>
+              );
+            })}
           </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

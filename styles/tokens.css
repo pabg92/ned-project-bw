@@ -38,4 +38,19 @@
   --about-grad: linear-gradient(180deg, var(--about-start) 0%, var(--about-end) 100%);
   
   --process-line: linear-gradient(90deg, rgba(115,148,199,0) 0%, rgba(115,148,199,0.15) 50%, rgba(115,148,199,0) 100%);
+
+  /* Accent family (already approved) */
+  --accent: #8595d5;                 /* outlines / focus ring */
+  --accent-strong: #6b93ce;          /* caret/icons / numbers */
+  --accent-soft: rgba(133,149,213,.15); /* menu hover/selected wash */
+
+  /* Controls */
+  --control-bg: #ffffff;
+  --control-bg-hover: #f9fafb;
+  --control-border: var(--border);
+  --control-border-focus: var(--accent);
+  --control-placeholder: #64748B; /* slate-500 */
+
+  /* Elevation for menus */
+  --elevation-menu: 0 12px 24px rgba(2,6,23,.10), 0 3px 8px rgba(2,6,23,.06);
 }

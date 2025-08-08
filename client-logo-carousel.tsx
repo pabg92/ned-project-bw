@@ -46,23 +46,25 @@ const clientLogos = [
 
 export default function ClientLogoCarousel() {
   return (
-    <Section variant="subtle" className="border-y border-[var(--border)]">
+    <Section variant="subtle" className="py-16">
       <div className={spacing.container}>
         <h2 className={`${typography.label.base} text-center mb-8`}>TRUSTED BY INDUSTRY LEADERS</h2>
 
-        {/* Single row of logos */}
-        <div className="flex justify-center items-center gap-8 lg:gap-12">
-          {clientLogos.map((logo) => (
-            <div key={logo.id} className="flex-shrink-0 w-32 h-16 flex items-center justify-center">
-              <Image
-                src={logo.image || "/placeholder.svg"}
-                alt={logo.alt}
-                width={128}
-                height={64}
-                className="w-auto h-auto max-h-[36px] object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
-              />
-            </div>
-          ))}
+        {/* Single row of logos with horizontal scroll on mobile */}
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex justify-start lg:justify-center items-center gap-6 lg:gap-12 min-w-fit px-4 lg:px-0">
+            {clientLogos.map((logo) => (
+              <div key={logo.id} className="flex-shrink-0 w-28 lg:w-32 h-14 lg:h-16 flex items-center justify-center">
+                <Image
+                  src={logo.image || "/placeholder.svg"}
+                  alt={logo.alt}
+                  width={128}
+                  height={64}
+                  className="w-auto h-auto max-h-[32px] lg:max-h-[36px] object-contain grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </Section>

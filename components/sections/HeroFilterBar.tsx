@@ -25,13 +25,14 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
   return (
     <div className={cn("space-y-4", className)}>
       {/* Filter Controls */}
-      <div className="rounded-card border border-[var(--border)] p-4 md:p-5 bg-white">
+      <div id="hero-filters" className="rounded-lg border border-[var(--border)] p-4 md:p-5 bg-white">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Role Type - Multi-select checkboxes */}
           <RolePopover
             value={filters.roles}
             onChange={(roles) => update({ roles })}
             options={ROLE_TYPES}
+            className="min-w-[140px]"
           />
           
           {/* Sector - Multi-select combobox with search */}
@@ -43,6 +44,7 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
             placeholder="Select sectors..."
             searchPlaceholder="Search sectors..."
             emptyText="No sectors found."
+            className="min-w-[140px]"
           />
           
           {/* Organisation Type - Single-select radio */}
@@ -50,6 +52,7 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
             value={filters.orgType || undefined}
             onChange={(orgType) => update({ orgType: orgType || null })}
             options={ORG_TYPES}
+            className="min-w-[140px]"
           />
           
           {/* Specialism - Multi-select combobox */}
@@ -61,30 +64,28 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
             placeholder="Select specialisms..."
             searchPlaceholder="Search specialisms..."
             emptyText="No specialisms found."
+            className="min-w-[140px]"
           />
         </div>
         
-        {/* Action Buttons */}
-        <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
-          <button
+        {/* CTA Section */}
+        <div className="mt-4 flex items-center gap-3">
+          <Button
             onClick={handleFindExpert}
-            className="inline-flex items-center justify-center h-11 px-5 rounded-btn text-white shadow-btn [background:var(--cta-grad)] hover:[background:var(--hover-grad)] transition-all duration-200 focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[rgba(90,130,189,0.9)] font-semibold group w-full sm:w-auto"
+            variant="primary"
+            className="h-12 px-6"
             aria-label="Find an expert with selected filters"
           >
             Find an Expert
             <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </button>
-          
-          {hasActive && (
-            <Button
-              variant="outline"
-              onClick={clear}
-              className="h-11 px-5 w-full sm:w-auto border-[var(--cta-end)] text-[var(--cta-end)] hover:bg-[#EFF6FF]"
-              aria-label="Clear all filters"
-            >
-              Clear Filters
-            </Button>
-          )}
+          </Button>
+          <Button
+            onClick={clear}
+            variant="outline"
+            className="h-10 px-4"
+          >
+            Clear
+          </Button>
         </div>
       </div>
       

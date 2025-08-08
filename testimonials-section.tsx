@@ -68,7 +68,7 @@ export default function TestimonialsSection() {
           {awards.map((award) => (
             <div 
               key={award.id} 
-              className="rounded-card border border-[var(--border)] p-6 [background:var(--awards-grad)] shadow-card hover:shadow-lg transition-all duration-300"
+              className="rounded-card p-6 [background:var(--awards-grad)] shadow-sm hover:shadow-md transition-all duration-300"
             >
               <div className="h-20 flex items-center justify-center mb-4">
                 <Image

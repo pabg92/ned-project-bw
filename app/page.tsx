@@ -2,14 +2,12 @@
 
 import Navbar from "../navbar"
 import HeroSection from "../hero-section"
+import StickyChips from "@/components/sections/StickyChips"
 import ClientLogoCarousel from "../client-logo-carousel"
 import FeaturedExpertsSection from "../featured-experts-section"
-import ExpertSearchSection from "../expert-search-section"
-import CTAButtonsSection from "../cta-buttons-section"
 import ProcessSection from "../process-section"
 import TestimonialCarousel from "../testimonial-carousel"
-import MainCTASection from "../main-cta-section"
-import FoundationPartnersSection from "../foundation-partners-section"
+import IntegratedCTAProcessSection from "../integrated-cta-process-section"
 import TestimonialsSection from "../testimonials-section"
 import Footer from "../footer"
 
@@ -18,14 +16,12 @@ export default function Page() {
     <div className="min-h-screen">
       <Navbar />
       <HeroSection />
+      <StickyChips />
       <ClientLogoCarousel />
       <FeaturedExpertsSection />
-      <ExpertSearchSection />
-      <CTAButtonsSection />
       <ProcessSection />
       <TestimonialCarousel />
-      <MainCTASection />
-      <FoundationPartnersSection />
+      <IntegratedCTAProcessSection />
       <TestimonialsSection />
       <Footer />
     </div>

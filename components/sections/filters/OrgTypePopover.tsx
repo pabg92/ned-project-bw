@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { controlClass, caretClass } from "@/components/ui/Control";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -43,27 +43,28 @@ export function OrgTypePopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
+        <button
           role="combobox"
           aria-expanded={open}
           aria-label="Select organisation type"
-          className={cn(
-            "h-12 w-full justify-between bg-white border-[var(--border)] text-[var(--ink)] hover:border-[var(--cta-end)] transition-colors",
-            className
-          )}
+          className={cn(controlClass, "w-full justify-between flex items-center", className)}
+          data-state={open ? "open" : "closed"}
         >
           <span className="text-sm truncate">
             {selectedLabel ? (
               <span className="text-[var(--ink)]">{selectedLabel}</span>
             ) : (
-              <span className="text-[var(--muted)]">Organisation Type</span>
+              <span className="text-[var(--control-placeholder)]">Organisation Type</span>
             )}
           </span>
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+          <ChevronDown className={caretClass} data-state={open ? "open" : "closed"} />
+        </button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-4" align="start">
+      <PopoverContent 
+        className="w-[var(--radix-popover-trigger-width)] p-4 bg-white border border-[var(--control-border)] rounded-lg shadow-[var(--elevation-menu)]" 
+        align="start"
+        sideOffset={4}
+      >
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-[var(--ink)]">Organisation Type</h4>
           <RadioGroup

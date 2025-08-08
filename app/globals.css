@@ -46,6 +46,50 @@ body {
   overflow-x: hidden !important;
 }
 
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Override default focus colors to use project blue */
+button:focus-visible,
+[role="combobox"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #7394c7 !important;
+  outline-offset: 2px;
+}
+
+/* Override Radix UI / shadcn focus styles */
+[data-state="open"] > button[role="combobox"],
+button[role="combobox"]:focus {
+  border-color: #7394c7 !important;
+  box-shadow: 0 0 0 1px #7394c7 !important;
+}
+
+/* Override the bright blue background on active dropdowns */
+[data-state="open"][role="combobox"],
+button[role="combobox"][data-state="open"] {
+  background-color: #EFF6FF !important; /* Light blue tint matching the project */
+  border-color: #7394c7 !important;
+}
+
+/* Override Tailwind's accent color backgrounds */
+.bg-accent {
+  background-color: #EFF6FF !important;
+}
+
+.hover\:bg-accent:hover {
+  background-color: #EFF6FF !important;
+}
+
 /* Optional narrow container utility for ultra-wide monitors */
 .container-narrow {
   max-width: 1080px;
@@ -251,4 +295,42 @@ body {
 /* Smooth transitions for visibility */
 .transition-smooth {
   transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* CmdK search input — remove WebKit blue halo & unify focus */
+input[cmdk-input] {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 12px;
+  border: 1px solid var(--control-border);
+  background: var(--control-bg);
+  height: 40px; /* consistent with item rhythm */
+  padding: 0 10px 0 28px; /* leaves room for the small search icon */
+  color: var(--ink);
+}
+
+input[cmdk-input]::placeholder {
+  color: var(--control-placeholder);
+}
+
+input[cmdk-input]:focus,
+input[cmdk-input]:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(133,149,213,.35);
+  border-color: var(--control-border-focus);
+  background: var(--control-bg);
+}
+
+[cmdk-item] {
+  transition: background-color 0.15s ease;
+}
+
+[cmdk-item][aria-selected="true"] {
+  background-color: var(--accent-soft) !important;
+}
+
+[cmdk-item]:hover {
+  background-color: var(--accent-soft) !important;
 }

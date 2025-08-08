@@ -108,60 +108,17 @@ export default function IntegratedCTAProcessSection() {
   }
 
   return (
-    <section className={`${spacing.section.base} bg-gradient-to-b from-gray-50 to-white`}>
-      <div className={spacing.container}>
-        {/* CTA Buttons - Reduced footprint with base size */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-10">
-          <Button 
-            onClick={() => {
-              if (isSignedIn && userRole === 'company') {
-                router.push('/search')
-              } else {
-                router.push('/companies')
-              }
-            }}
-            className={cn("[background:var(--cta-grad)] hover:[background:var(--hover-grad)] text-white", buttonStyles.size.base, typography.button.base, "rounded-btn shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto min-w-0 sm:min-w-[220px] group focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-[rgba(90,130,189,0.9)]")}
-          >
-            <span>I need an <span className="font-bold">expert</span></span>
-            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-          </Button>
-
-          <Link href="/signup" className="w-full sm:w-auto">
-            <Button className={cn("bg-white border-2 border-[var(--cta-end)] text-[var(--cta-end)] hover:bg-[#EFF6FF]", buttonStyles.size.base, typography.button.base, "flex items-center justify-center gap-2 w-full min-w-0 sm:min-w-[220px] group rounded-btn shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[rgba(90,130,189,0.9)] focus:ring-offset-2")}>
-              <span>I'm <span className="font-bold">available</span> to <span className="font-bold">hire</span></span>
-              <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-            </Button>
-          </Link>
-        </div>
-
-        {/* Main Heading */}
-        <div className="text-center mb-12">
-          <h2 className="fluid-h1 font-display mb-6">
-            <span className="text-[var(--cta-start)]">Winning Expert Talent</span>{" "}
-            <span className="text-[var(--ink)]">appointments.</span>
-          </h2>
-
-          {/* Dotted line decoration */}
-          <div className="flex justify-center mb-10">
-            <div className="w-full max-w-3xl border-b-3 border-dotted border-gray-400 opacity-50"></div>
-          </div>
-        </div>
-
-        {/* Foundation Partners Section */}
-        <div className="text-center mb-16">
-          <h3 className={`${typography.h2.base} text-gray-800 mb-4`}>Our Foundation Partners</h3>
-          <p className={`${typography.body.large} text-gray-600 max-w-3xl mx-auto mb-8`}>
-            We are proud to partner with leading institutions and organisations that share our commitment 
-            to excellence in corporate governance and leadership. These partnerships provide our network 
-            with unparalleled insights and opportunities.
-          </p>
-        </div>
+    <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
+      <div className="container max-w-[1080px]">
 
         {/* Enhanced CTA Section with Email Capture */}
         <div className="mb-16">
-          <div className="[background:var(--cta-grad)] py-12">
+          <h2 className="text-center mb-8 text-[var(--ink)] text-3xl font-semibold">
+            Get a free, confidential consultation
+          </h2>
+          <div className="[background:var(--cta-grad)] py-12 rounded-2xl">
             <div className="max-w-6xl mx-auto px-6">
-              <div className="bg-white rounded-card p-8 shadow-card">
+              <div className="bg-white rounded-card p-8 shadow-card text-[var(--ink)]">
               {status === "success" ? (
                 // Success State
                 <div className="text-center py-8 animate-fade-in">
@@ -179,37 +136,34 @@ export default function IntegratedCTAProcessSection() {
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   {/* Left Column - Value Proposition */}
                   <div className="text-center md:text-left">
-                    <h3 className={`${typography.h2.base} text-white mb-4`}>
-                      Get a <span className="font-bold">FREE</span> consultation now
-                    </h3>
-                    <p className="text-white/90 mb-6 text-lg">
+                    <p className="text-gray-700 mb-6 text-lg">
                       Join <span className="font-bold">5,000+</span> executives receiving weekly insights on:
                     </p>
-                    <ul className="space-y-3 text-white/90">
-                      <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3 text-gray-600">
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
                         <span>Exclusive board member profiles & availability</span>
                       </li>
-                      <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                      <li className="flex items-start gap-3 text-gray-600">
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
                         <span>Industry trends in executive appointments</span>
                       </li>
-                      <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                      <li className="flex items-start gap-3 text-gray-600">
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
                         <span>Board governance best practices</span>
                       </li>
-                      <li className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                      <li className="flex items-start gap-3 text-gray-600">
+                        <CheckCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-500" />
                         <span>Early access to new expert talent</span>
                       </li>
                     </ul>
                   </div>
                   
                   {/* Right Column - Form */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div>
-                        <label htmlFor="email" className="block text-white/90 text-sm font-medium mb-2">
+                        <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-2">
                           Your email address
                         </label>
                         <div className="relative">
@@ -221,7 +175,7 @@ export default function IntegratedCTAProcessSection() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="pl-10 bg-white/95 border-white/20 text-gray-800 placeholder:text-gray-500 h-12"
+                            className="pl-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 h-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
                       </div>
@@ -231,15 +185,15 @@ export default function IntegratedCTAProcessSection() {
                           id="newsletter"
                           checked={isSubscribed}
                           onCheckedChange={(checked) => setIsSubscribed(checked as boolean)}
-                          className="mt-1 border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-[var(--cta-start)]"
+                          className="mt-1 border-[var(--border)] data-[state=checked]:bg-[var(--cta-start)] data-[state=checked]:text-white"
                         />
-                        <label htmlFor="newsletter" className="text-sm text-white/90 cursor-pointer">
+                        <label htmlFor="newsletter" className="text-sm text-gray-600 cursor-pointer">
                           Yes, I want to receive weekly Board Champions insights and updates
                         </label>
                       </div>
                       
                       {status === "error" && (
-                        <div className="flex items-start gap-2 text-red-200 text-sm">
+                        <div className="flex items-start gap-2 text-red-600 text-sm">
                           <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                           <span>{errorMessage}</span>
                         </div>
@@ -248,12 +202,7 @@ export default function IntegratedCTAProcessSection() {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className={cn(
-                          "w-full bg-white text-[var(--cta-start)] hover:bg-gray-100",
-                          buttonStyles.size.large,
-                          typography.button.large,
-                          "shadow-lg hover:shadow-xl font-bold group transition-all duration-300"
-                        )}
+                        className="w-full h-11 [background:var(--cta-grad)] hover:[background:var(--hover-grad)] text-white rounded-btn shadow-btn font-semibold transition-all duration-200 group"
                       >
                         {isLoading ? (
                           <>
@@ -268,9 +217,9 @@ export default function IntegratedCTAProcessSection() {
                         )}
                       </Button>
                       
-                      <p className="text-xs text-white/70 text-center">
+                      <p className="text-xs text-gray-500 text-center">
                         By subscribing, you agree to our{" "}
-                        <Link href="/privacy" className="underline hover:text-white">
+                        <Link href="/privacy" className="underline hover:text-gray-700">
                           Privacy Policy
                         </Link>
                         . Unsubscribe anytime.
@@ -284,161 +233,6 @@ export default function IntegratedCTAProcessSection() {
           </div>
         </div>
 
-        {/* Process Section - MOVED BELOW THE FORM */}
-        <div className="text-center mb-12">
-          <h3 className={`${typography.h2.base} text-gray-700 mb-4`}>
-            Our Bespoke Appointment Process
-          </h3>
-          <p className={`${typography.body.large} text-gray-600 max-w-3xl mx-auto`}>
-            A rigorous, confidential, and tailored approach to ensure a perfect alignment 
-            of expertise, culture, and strategic goals.
-          </p>
-        </div>
-
-        {/* Process Steps - New integrated layout */}
-        <div 
-          ref={processRef}
-          className="max-w-7xl mx-auto"
-        >
-          {/* Desktop layout with integrated arrows */}
-          <div className="hidden md:grid md:grid-cols-9 gap-0 items-center relative">
-            {/* Background connecting line */}
-            <div className={cn(
-              "absolute top-1/2 left-20 right-20 h-px bg-gradient-to-r from-transparent via-[#7394c7]/15 to-transparent -z-10 transition-all duration-2500 ease-out transform -translate-y-1/2",
-              isVisible ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
-            )} 
-            style={{
-              transitionDelay: isVisible ? '200ms' : '0ms'
-            }}
-            />
-            
-            {processSteps.map((step, index) => (
-              <React.Fragment key={step.id}>
-                {/* Step Card */}
-                <div 
-                  className={cn(
-                    "col-span-1 transition-all duration-1000 ease-out",
-                    isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                  )}
-                  style={{
-                    transitionDelay: isVisible ? `${index * 250 + 300}ms` : '0ms'
-                  }}
-                >
-                  <div className="process-step-card bg-gradient-to-br from-white to-gray-50/50 border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-400 group relative w-full h-full">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white px-3 py-3 group-hover:from-[#5a5a5a] group-hover:to-[#6a6a6a] transition-all duration-300 min-h-[52px] flex items-center justify-center">
-                      <h4 className="text-xs sm:text-sm font-semibold tracking-tight text-center text-white leading-tight">{step.title}</h4>
-                    </div>
-
-                    {/* Icon Section */}
-                    <div className="p-5 sm:p-4 flex items-center justify-center">
-                      <div className="w-16 h-16 sm:w-14 sm:h-14 flex items-center justify-center bg-[#7394c7]/5 rounded-full group-hover:bg-[#7394c7]/20 transition-all duration-300 ring-1 ring-[#7394c7]/10 group-hover:ring-[#7394c7]/30">
-                        <Image
-                          src={step.icon || "/placeholder.svg"}
-                          alt={step.iconAlt}
-                          width={35}
-                          height={35}
-                          className="object-contain group-hover:scale-110 transition-transform duration-300"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Arrow Connector - Only between steps */}
-                {index < processSteps.length - 1 && (
-                  <div 
-                    className={cn(
-                      "col-span-1 flex items-center justify-center transition-all duration-1000 ease-out",
-                      isVisible ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
-                    )}
-                    style={{
-                      transitionDelay: isVisible ? `${index * 250 + 500}ms` : '0ms'
-                    }}
-                  >
-                    <div className="relative w-full flex items-center">
-                      {/* Dotted line */}
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t-2 border-dotted border-[#7394c7]/30"></div>
-                      </div>
-                      {/* Arrow */}
-                      <div className="relative bg-gradient-to-r from-white via-gray-50 to-white px-3 py-1 rounded-full">
-                        <Image
-                          src="/board-champions-assets/Arrow Charcoal.svg"
-                          alt="Next step"
-                          width={26}
-                          height={26}
-                          className="arrow-connector"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-          
-          {/* Mobile/Tablet Layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:hidden gap-4 sm:gap-6">
-            {processSteps.map((step, index) => (
-              <div 
-                key={step.id} 
-                className={cn(
-                  "relative transition-all duration-1000 ease-out",
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                )}
-                style={{
-                  transitionDelay: isVisible ? `${index * 200 + 300}ms` : '0ms'
-                }}
-              >
-                {/* Mobile arrows - only show between rows */}
-                {index === 1 && (
-                  <div className="block sm:hidden absolute -bottom-8 left-1/2 transform -translate-x-1/2 rotate-90 z-10">
-                    <Image
-                      src="/board-champions-assets/Arrow Charcoal.svg"
-                      alt="Next step"
-                      width={20}
-                      height={20}
-                      className="opacity-50"
-                    />
-                  </div>
-                )}
-                {index === 3 && (
-                  <div className="block sm:hidden absolute -bottom-8 left-1/2 transform -translate-x-1/2 rotate-90 z-10">
-                    <Image
-                      src="/board-champions-assets/Arrow Charcoal.svg"
-                      alt="Next step"
-                      width={20}
-                      height={20}
-                      className="opacity-50"
-                    />
-                  </div>
-                )}
-                
-                {/* Card */}
-                <div className="process-step-card bg-gradient-to-br from-white to-gray-50/50 border border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-400 group relative w-full h-full">
-                  {/* Header */}
-                  <div className="bg-gradient-to-r from-[#4a4a4a] to-[#5a5a5a] text-white px-3 py-3 group-hover:from-[#5a5a5a] group-hover:to-[#6a6a6a] transition-all duration-300 min-h-[52px] flex items-center justify-center">
-                    <h4 className="text-xs sm:text-sm font-semibold tracking-tight text-center text-white leading-tight">{step.title}</h4>
-                  </div>
-
-                  {/* Icon Section */}
-                  <div className="p-5 sm:p-4 flex items-center justify-center">
-                    <div className="w-16 h-16 sm:w-14 sm:h-14 flex items-center justify-center bg-[#7394c7]/5 rounded-full group-hover:bg-[#7394c7]/20 transition-all duration-300 ring-1 ring-[#7394c7]/10 group-hover:ring-[#7394c7]/30">
-                      <Image
-                        src={step.icon || "/placeholder.svg"}
-                        alt={step.iconAlt}
-                        width={35}
-                        height={35}
-                        className="object-contain group-hover:scale-110 transition-transform duration-300"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   )

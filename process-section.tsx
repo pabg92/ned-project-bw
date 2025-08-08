@@ -38,10 +38,10 @@ const processSteps = [
 
 export default function ProcessSection() {
   return (
-    <Section variant="stats" className="mb-16">
+    <Section variant="stats">
       <div className={spacing.container}>
-        {/* Decorative line at top */}
-        <div className="h-[2px] rounded-full [background:var(--process-line)] mb-8" />
+        {/* Subtle visual separator */}
+        <div className="w-32 h-0.5 mx-auto bg-gradient-to-r from-transparent via-[rgba(115,148,199,0.15)] to-transparent mb-8" />
         
         {/* Process Section Header */}
         <div className="text-center mb-12">
@@ -66,7 +66,7 @@ export default function ProcessSection() {
               </div>
               
               {/* Step card */}
-              <div className="rounded-card border border-[var(--border)] p-4 [background:var(--awards-grad)] shadow-card max-w-[160px]">
+              <div className="rounded-card p-4 [background:var(--awards-grad)] shadow-sm hover:shadow-md transition-shadow duration-200 max-w-[160px]">
                 <h3 className="text-sm font-semibold text-[var(--ink)] mb-1">{step.title}</h3>
                 <p className="text-xs text-[var(--muted)]">{step.description}</p>
               </div>

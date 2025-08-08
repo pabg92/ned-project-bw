@@ -22,9 +22,9 @@ export const typography = {
   
   // Body text - 17px, font-ui (AkrivGrotesk)
   body: {
-    large: "text-body font-ui text-muted",
-    base: "text-body font-ui text-muted",
-    small: "text-caption font-ui text-muted"
+    large: "text-body font-ui text-[var(--muted)]",
+    base: "text-body font-ui text-[var(--muted)]",
+    small: "text-caption font-ui text-[var(--muted)]"
   },
   
   // Button text - Consistent across all buttons
