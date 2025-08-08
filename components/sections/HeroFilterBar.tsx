@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronRight, Users, Building2, Briefcase, Target } from "lucide-react";
 import { useSearchFilters } from "@/lib/search/useSearchFilters";
 import { ROLE_TYPES, ORG_TYPES, SECTORS, SPECIALISMS } from "@/lib/search/filter-data";
 import { SimpleDropdown } from "./filters/SimpleDropdown";
@@ -22,8 +21,8 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Filter Controls */}
-      <div id="hero-filters" className="rounded-lg border border-[var(--border)] p-4 md:p-5 bg-white">
+      {/* Premium Filter Dock */}
+      <div id="hero-filters" className="relative rounded-[16px] bg-white border border-[var(--border)] shadow-[0_8px_28px_rgba(2,6,23,.06)] p-4 md:p-5 before:absolute before:inset-x-4 before:top-0 before:h-[2px] before:rounded-full before:bg-[linear-gradient(90deg,#7394c7_0%,#8595d5_100%)]">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Role Type - Multi-select */}
           <SimpleDropdown
@@ -35,6 +34,7 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
             searchPlaceholder="Search roles..."
             emptyText="No roles found."
             className="min-w-[140px]"
+            icon={<Users className="w-4 h-4" />}
           />
           
           {/* Sector - Multi-select with search */}
@@ -47,6 +47,7 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
             searchPlaceholder="Search sectors..."
             emptyText="No sectors found."
             className="min-w-[140px]"
+            icon={<Briefcase className="w-4 h-4" />}
           />
           
           {/* Organisation Type - Single-select */}
@@ -59,6 +60,7 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
             searchPlaceholder="Search organisation types..."
             emptyText="No organisation types found."
             className="min-w-[140px]"
+            icon={<Building2 className="w-4 h-4" />}
           />
           
           {/* Specialism - Multi-select with search */}
@@ -71,6 +73,7 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
             searchPlaceholder="Search specialisms..."
             emptyText="No specialisms found."
             className="min-w-[140px]"
+            icon={<Target className="w-4 h-4" />}
           />
         </div>
         
@@ -93,9 +96,68 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
         </div>
       </div>
       
+      {/* Quick Filter Pills */}
+      <div className="flex flex-wrap gap-2 mt-3">
+        <button
+          onClick={() => {
+            update({ roles: ['cfo'], orgType: 'pe' });
+            setTimeout(() => {
+              document.getElementById('featured-experts')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          className="px-3 py-1.5 rounded-full bg-[var(--bg-subtle)] hover:bg-[var(--accent-soft)] text-xs font-medium text-[var(--ink)] transition-colors"
+        >
+          CFO · PE-backed
+        </button>
+        <button
+          onClick={() => {
+            update({ roles: ['chair'], orgType: 'public' });
+            setTimeout(() => {
+              document.getElementById('featured-experts')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          className="px-3 py-1.5 rounded-full bg-[var(--bg-subtle)] hover:bg-[var(--accent-soft)] text-xs font-medium text-[var(--ink)] transition-colors"
+        >
+          Chair · Listed
+        </button>
+        <button
+          onClick={() => {
+            update({ roles: ['advisor'], sectors: ['industrial'] });
+            setTimeout(() => {
+              document.getElementById('featured-experts')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          className="px-3 py-1.5 rounded-full bg-[var(--bg-subtle)] hover:bg-[var(--accent-soft)] text-xs font-medium text-[var(--ink)] transition-colors"
+        >
+          COO · Industrial
+        </button>
+        <button
+          onClick={() => {
+            update({ roles: ['ned'], specialisms: ['technology'] });
+            setTimeout(() => {
+              document.getElementById('featured-experts')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          className="px-3 py-1.5 rounded-full bg-[var(--bg-subtle)] hover:bg-[var(--accent-soft)] text-xs font-medium text-[var(--ink)] transition-colors"
+        >
+          NED · Tech
+        </button>
+        <button
+          onClick={() => {
+            update({ roles: ['sid'], sectors: ['financial-services'] });
+            setTimeout(() => {
+              document.getElementById('featured-experts')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          className="px-3 py-1.5 rounded-full bg-[var(--bg-subtle)] hover:bg-[var(--accent-soft)] text-xs font-medium text-[var(--ink)] transition-colors"
+        >
+          SID · Finance
+        </button>
+      </div>
+      
       {/* Active Filter Chips */}
       {hasActive && (
-        <ActiveChips className="px-1" />
+        <ActiveChips className="px-1 mt-3" />
       )}
     </div>
   );

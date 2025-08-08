@@ -18,7 +18,7 @@ export default function Hero() {
               </h1>
               
               <p className={`${typography.body.large} max-w-2xl`}>
-                Access our exclusive network of board-level executives, vetted for their real-world experience in non-executive and advisory roles.
+                Access vetted board-level executives with proven track records in PE-backed and listed companies.
               </p>
             </div>
 

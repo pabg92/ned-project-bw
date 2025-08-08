@@ -53,22 +53,19 @@ export default function FeaturedExpertsSection() {
                 />
               </div>
 
-              {/* Content with flex-grow for consistent card height */}
+              {/* Content with premium vertical rhythm */}
               <div className="flex flex-col flex-grow">
-                <h3 className="mt-3 text-[19px] font-semibold text-[var(--ink)]">{expert.name}</h3>
-                <p className="mt-1 text-[var(--muted)] text-[14px] leading-6 flex-grow">{expert.title}</p>
+                <h3 className="mt-4 font-display text-[22px] tracking-tight text-[var(--ink)] line-clamp-1">{expert.name}</h3>
+                <p className="mt-1 text-[var(--muted)] text-[14px] leading-[22px] line-clamp-2 flex-grow">{expert.title}</p>
                 
-                {/* Action buttons - compact sizing */}
-                <div className="flex gap-2 mt-3">
-                  <Button 
-                    variant="outline" 
-                    className="h-10 px-4 text-[14px] bg-white border border-[#8595d5] hover:bg-[#EFF6FF] text-[#8595d5]"
-                  >
+                {/* Premium CTA row */}
+                <div className="flex items-center gap-3 mt-4">
+                  <button className="h-10 px-4 flex-1 rounded-lg border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-soft)] font-medium text-sm transition-colors">
                     Enquire
-                  </Button>
-                  <Link href="#" className="text-[var(--cta-end)] hover:text-[var(--hover-start)] text-[14px] font-medium flex items-center gap-1">
+                  </button>
+                  <Link href="#" className="text-[var(--accent)] flex items-center hover:underline text-sm group whitespace-nowrap">
                     View profile
-                    <ChevronRight className="h-3 w-3" />
+                    <span className="ml-1 group-hover:translate-x-0.5 transition-transform inline-block">→</span>
                   </Link>
                 </div>
               </div>

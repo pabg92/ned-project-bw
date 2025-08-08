@@ -15,6 +15,7 @@ interface SimpleDropdownProps {
   emptyText?: string;
   className?: string;
   showSearch?: boolean;
+  icon?: React.ReactNode;
 }
 
 export function SimpleDropdown({
@@ -27,6 +28,7 @@ export function SimpleDropdown({
   emptyText = "No results found.",
   className,
   showSearch = true,
+  icon,
 }: SimpleDropdownProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -105,9 +107,10 @@ export function SimpleDropdown({
       const values = normalizedValue as string[];
       if (values.length > 0) {
         return (
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1.5">
+            {icon && <span className="text-[var(--accent-strong)]">{icon}</span>}
             <span className="text-[var(--ink)]">{label}</span>
-            <span className="ml-1 text-xs text-[var(--accent-strong)]">({values.length})</span>
+            <span className="text-xs font-medium text-[var(--accent-strong)]">+{values.length}</span>
           </span>
         );
       }
@@ -116,11 +119,21 @@ export function SimpleDropdown({
       if (singleValue) {
         const selectedOption = options.find(opt => opt.value === singleValue);
         if (selectedOption) {
-          return <span className="text-[var(--ink)]">{selectedOption.label}</span>;
+          return (
+            <span className="flex items-center gap-1.5">
+              {icon && <span className="text-[var(--accent-strong)]">{icon}</span>}
+              <span className="text-[var(--ink)]">{selectedOption.label}</span>
+            </span>
+          );
         }
       }
     }
-    return <span className="text-[var(--control-placeholder)]">{label}</span>;
+    return (
+      <span className="flex items-center gap-1.5 text-[var(--control-placeholder)]">
+        {icon && <span>{icon}</span>}
+        <span>{label}</span>
+      </span>
+    );
   };
 
   const hasValue = multiSelect 
@@ -138,11 +151,32 @@ export function SimpleDropdown({
         aria-expanded={open}
         aria-label={`Select ${label}`}
         onClick={() => setOpen(!open)}
-        className={cn(controlClass, "w-full justify-between flex items-center")}
+        onMouseDown={(e) => {
+          e.currentTarget.style.transform = 'scale(0.99)';
+          setTimeout(() => {
+            e.currentTarget.style.transform = '';
+          }, 80);
+        }}
+        className={cn(controlClass, "w-full justify-between flex items-center group transition-all duration-200")}
         data-state={open ? "open" : "closed"}
       >
-        <span className="text-sm truncate">{getDisplayText()}</span>
-        <ChevronDown className={caretClass} data-state={open ? "open" : "closed"} />
+        <span className="text-sm truncate flex-1">{getDisplayText()}</span>
+        {hasValue && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange(multiSelect ? [] : undefined);
+            }}
+            className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-[var(--accent-soft)] rounded transition-opacity mr-1"
+            aria-label="Clear selection"
+          >
+            <svg className="w-3 h-3 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+        <ChevronDown className={cn(caretClass, "transition-transform duration-200")} data-state={open ? "open" : "closed"} />
       </button>
 
       {open ? (
