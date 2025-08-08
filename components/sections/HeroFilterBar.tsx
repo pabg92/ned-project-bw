@@ -20,9 +20,9 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* Premium Filter Dock */}
-      <div id="hero-filters" className="relative rounded-[16px] bg-white border border-[var(--border)] shadow-[0_8px_28px_rgba(2,6,23,.06)] p-4 md:p-5 before:absolute before:inset-x-4 before:top-0 before:h-[2px] before:rounded-full before:bg-[linear-gradient(90deg,#7394c7_0%,#8595d5_100%)]">
+    <div className={cn("space-y-3", className)}>
+      {/* Filter Controls */}
+      <div id="hero-filters" className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Role Type - Multi-select */}
           <SimpleDropdown
@@ -95,8 +95,6 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
           </button>
         </div>
       </div>
-      
-      {/* Quick Filter Pills */}
       <div className="flex flex-wrap gap-2 mt-3">
         <button
           onClick={() => {
@@ -153,12 +151,6 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
         >
           SID · Finance
         </button>
-      </div>
-      
-      {/* Active Filter Chips */}
-      {hasActive && (
-        <ActiveChips className="px-1 mt-3" />
-      )}
     </div>
   );
 }
