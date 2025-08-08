@@ -76,22 +76,20 @@ export default function HeroFilterBar({ className }: HeroFilterBarProps) {
         
         {/* CTA Section */}
         <div className="mt-4 flex items-center gap-3">
-          <Button
+          <button
             onClick={handleFindExpert}
-            variant="primary"
-            className="h-12 px-6"
+            className="h-12 px-6 rounded-lg bg-gradient-to-b from-[var(--cta-start)] to-[var(--cta-end)] text-white font-semibold hover:from-[var(--hover-start)] hover:to-[var(--hover-end)] transition-all group"
             aria-label="Find an expert with selected filters"
           >
             Find an Expert
-            <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
-          <Button
+            <ChevronRight className="ml-2 h-5 w-5 inline-block group-hover:translate-x-1 transition-transform" />
+          </button>
+          <button
             onClick={clear}
-            variant="outline"
-            className="h-10 px-4"
+            className="h-10 px-4 rounded-lg text-[var(--muted)] hover:text-[var(--ink)] hover:bg-[var(--bg-subtle)] transition-colors"
           >
             Clear
-          </Button>
+          </button>
         </div>
       </div>
       

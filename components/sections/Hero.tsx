@@ -8,7 +8,7 @@ export default function Hero() {
   return (
     <section className="pt-24 pb-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-end">
+        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:items-end">
           {/* Left Column: Value Proposition & Filters */}
           <div className="flex flex-col gap-5">
             <div>
@@ -27,7 +27,7 @@ export default function Hero() {
           </div>
 
           {/* Right Column: Accolades + Expert Teaser - Hidden on mobile, baseline aligned on desktop */}
-          <aside className="hidden lg:block justify-self-end w-full max-w-[420px]">
+          <aside className="hidden lg:block justify-self-end w-full max-w-[400px]">
             <HeroRightRail />
           </aside>
         </div>

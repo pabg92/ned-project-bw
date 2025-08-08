@@ -148,7 +148,7 @@ export function SimpleDropdown({
       {open ? (
         <div
           ref={dropdownRef}
-          className="absolute z-50 mt-1 w-full bg-white border border-[var(--control-border)] rounded-lg shadow-lg"
+          className="absolute z-50 mt-1 w-full bg-white border border-[var(--border)] rounded-lg shadow-[var(--elevation-menu)]"
           style={{ 
             minWidth: buttonRef.current?.offsetWidth || 200,
             maxHeight: '320px'
@@ -185,7 +185,8 @@ export function SimpleDropdown({
                       key={option.value}
                       type="button"
                       onClick={() => handleSelect(option.value)}
-                      className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-[var(--accent-soft)] transition-colors"
+                      className="w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-[var(--accent-soft)] data-[selected=true]:bg-[var(--accent-soft)] transition-colors"
+                      data-selected={isSelected}
                     >
                       <Check
                         className={cn(

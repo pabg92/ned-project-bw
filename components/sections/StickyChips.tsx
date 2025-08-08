@@ -68,7 +68,7 @@ export default function StickyChips({ className }: StickyChipsProps) {
   return (
     <div 
       className={cn(
-        "sticky top-[64px] z-40 bg-white/95 backdrop-blur-sm shadow-sm transition-all duration-300",
+        "sticky top-16 z-10 bg-white border-b border-[var(--border)] transition-all duration-300",
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0",
         className
       )}
@@ -109,26 +109,24 @@ export default function StickyChips({ className }: StickyChipsProps) {
           <div className="flex items-center gap-3 flex-shrink-0">
             <button
               onClick={clear}
-              className="text-xs text-[var(--cta-start)] hover:text-[var(--hover-start)] transition-colors font-medium"
+              className="text-xs text-[var(--muted)] hover:text-[var(--ink)] transition-colors font-medium"
               aria-label="Clear all filters"
             >
-              Clear all
+              Clear
             </button>
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={scrollToHero}
-              className="h-8 px-3 border-[var(--cta-end)] text-[var(--cta-end)] hover:bg-[#EFF6FF]"
+              className="h-8 px-3 rounded-lg border border-[var(--border)] text-[var(--ink)] hover:bg-[var(--bg-subtle)] transition-colors text-sm"
             >
-              <SlidersHorizontal className="h-3 w-3 mr-1" />
+              <SlidersHorizontal className="h-3 w-3 mr-1 inline-block" />
               Refine
-            </Button>
+            </button>
             <a
               href={buildSignupUrl(filters, "chips_tray")}
-              className="text-[#8595d5] text-[12px] hover:underline whitespace-nowrap"
-              aria-label="I'm an expert — join our network"
+              className="text-[var(--accent)] text-sm hover:underline whitespace-nowrap"
+              aria-label="Join as Expert"
             >
-              I'm an expert — join
+              Join as Expert
             </a>
           </div>
         </div>

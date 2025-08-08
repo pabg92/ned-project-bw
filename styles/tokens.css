@@ -50,6 +50,9 @@
   --control-border: var(--border);
   --control-border-focus: var(--accent);
   --control-placeholder: #64748B; /* slate-500 */
+  
+  /* Unified radius */
+  --radius-card: 0.5rem; /* rounded-lg */
 
   /* Elevation for menus */
   --elevation-menu: 0 12px 24px rgba(2,6,23,.10), 0 3px 8px rgba(2,6,23,.06);

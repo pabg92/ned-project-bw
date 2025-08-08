@@ -19,16 +19,19 @@ export default function ExpertTeaserCard() {
       <div className="mt-3 flex items-center gap-3">
         <Link
           href={href}
-          className="inline-flex h-10 px-5 items-center justify-center rounded-btn border border-[#8595d5] text-[#8595d5] hover:bg-[#EFF6FF] text-[14px] font-semibold transition-colors"
+          className="inline-flex h-10 px-5 items-center justify-center rounded-lg border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-soft)] text-[14px] font-semibold transition-colors group"
           data-analytics='{"action":"join_click","source":"home_hero"}'
         >
           Join as Expert
+          <svg className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </Link>
         <Link href="/signup#eligibility" className="text-[12px] text-[#8595d5] hover:underline">
           What we look for
         </Link>
       </div>
-      <div className="mt-2 text-[12px] text-[var(--muted)]">Zero fees for talent · Profiles reviewed by our team</div>
+      <div className="mt-2 text-[12px] text-[var(--muted)]">Zero fees · Profiles reviewed</div>
     </aside>
   );
 }

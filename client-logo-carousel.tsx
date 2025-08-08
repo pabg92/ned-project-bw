@@ -46,9 +46,9 @@ const clientLogos = [
 
 export default function ClientLogoCarousel() {
   return (
-    <Section variant="subtle" className="py-16">
+    <Section variant="subtle" className="pt-20 pb-16">
       <div className={spacing.container}>
-        <h2 className={`${typography.label.base} text-center mb-8`}>TRUSTED BY INDUSTRY LEADERS</h2>
+        <h2 className={`${typography.label.base} text-center mb-10`}>TRUSTED BY INDUSTRY LEADERS</h2>
 
         {/* Single row of logos with horizontal scroll on mobile */}
         <div className="overflow-x-auto scrollbar-hide">
